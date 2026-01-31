@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPH - Chương 29: Hình học</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h1 { margin-top: 40px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        
+        /* Code styling */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #f1f3f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+        
+        /* Syntax highlighting */
+        .cpp-keyword { color: #0000ff; font-weight: bold; }
+        .cpp-type { color: #2b91af; }
+        .cpp-number { color: #098658; }
+        .cpp-func { color: #795e26; }
+        .cpp-comment { color: #008000; font-style: italic; }
+        .cpp-include { color: #a31515; }
+
+        /* Graphics Containers */
+        .graphic-box {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        
+        /* SVG Styling */
+        svg text { font-family: "Segoe UI", sans-serif; font-size: 14px; text-anchor: middle; dominant-baseline: central; font-weight: bold; }
+        .axis { stroke: #ccc; stroke-width: 1; }
+        .vector-line { stroke: #2980b9; stroke-width: 2; marker-end: url(#arrowGeo); }
+        .point-circle { fill: #c0392b; stroke: none; }
+        .polygon-shape { fill: #e8f5e9; stroke: #2e7d32; stroke-width: 2; fill-opacity: 0.6; }
+        .dashed-line { stroke: #7f8c8d; stroke-width: 1.5; stroke-dasharray: 4; }
+        .angle-arc { fill: none; stroke: #e67e22; stroke-width: 2; }
+
+        /* TOC */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc a { text-decoration: none; color: #007bff; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="toc">
+        <h3>Mục lục - Chương 29</h3>
+        <ul>
+            <li><a href="#intro">Hình học</a></li>
+            <li><a href="#sec29.1">29.1 Số phức trong hình học</a></li>
+            <li><a href="#sec29.2">29.2 Điểm và đường thẳng</a></li>
+            <li><a href="#sec29.3">29.3 Diện tích đa giác</a></li>
+            <li><a href="#sec29.4">29.4 Hàm khoảng cách</a></li>
+        </ul>
+    </div>
+
+    <h1 id="intro">Chương 29: Hình học (Geometry)</h1>
+    <p>
+        Các bài toán hình học thường liên quan đến các phép toán trên điểm, đường thẳng và đa giác. Trong lập trình thi đấu, thách thức lớn nhất thường là độ chính xác của số thực và việc xử lý các trường hợp biên (như ba điểm thẳng hàng).
+    </p>
+    <p>
+        Một cách tiếp cận hiện đại và gọn gàng là sử dụng lớp số phức (complex numbers) có sẵn trong C++ để biểu diễn các điểm và vectơ.
+    </p>
+
+    <h2 id="sec29.1">29.1 Số phức trong hình học (Complex numbers)</h2>
+    <p>
+        Một điểm \((x, y)\) trong mặt phẳng tọa độ có thể được biểu diễn bằng số phức \(x + iy\). Trong C++, ta sử dụng <code>std::complex</code>.
+    </p>
+    <ul>
+        <li><code>abs(v)</code>: Độ dài của vectơ (khoảng cách từ gốc tọa độ).</li>
+        <li><code>arg(v)</code>: Góc của vectơ (tính bằng radian).</li>
+        <li><code>conj(v)</code>: Số phức liên hợp (phản xạ qua trục thực).</li>
+    </ul>
+
+    <div class="graphic-box">
+        <svg width="300" height="200" viewBox="0 0 300 200">
+            <defs>
+                <marker id="arrowGeo" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#2980b9" />
+                </marker>
+            </defs>
+
+            <line x1="20" y1="180" x2="280" y2="180" class="axis"/> <line x1="20" y1="180" x2="20" y2="20" class="axis"/>   <line x1="20" y1="180" x2="200" y2="60" class="vector-line"/>
+            
+            <line x1="200" y1="60" x2="200" y2="180" class="dashed-line"/>
+            <line x1="200" y1="60" x2="20" y2="60" class="dashed-line"/>
+
+            <circle cx="200" cy="60" r="4" class="point-circle"/>
+            
+            <text x="210" y="50">P = (x, y)</text>
+            <text x="200" y="195">x (thực)</text>
+            <text x="40" y="55">y (ảo)</text>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 29.1: Biểu diễn điểm bằng số phức</div>
+    </div>
+
+    <h3>Cài đặt cơ bản</h3>
+<pre><code><span class="cpp-include">#include &lt;complex&gt;</span>
+
+<span class="cpp-keyword">typedef</span> <span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> C;
+<span class="cpp-keyword">typedef</span> complex&lt;C&gt; P; <span class="cpp-comment">// P đại diện cho Point (Điểm)</span>
+
+<span class="cpp-keyword">#define</span> X real()
+<span class="cpp-keyword">#define</span> Y imag()
+
+<span class="cpp-comment">// Trong hàm main:</span>
+P p = {<span class="cpp-number">3</span>, <span class="cpp-number">4</span>};
+cout &lt;&lt; p.X &lt;&lt; <span class="cpp-string">" "</span> &lt;&lt; p.Y &lt;&lt; <span class="cpp-string">"\n"</span>; <span class="cpp-comment">// 3 4</span>
+</code></pre>
+
+    <h2 id="sec29.2">29.2 Điểm và đường thẳng (Points and lines)</h2>
+    
+    <h3>Tích có hướng (Cross product)</h3>
+    <p>
+        Tích có hướng của hai vectơ \(a = (x_1, y_1)\) và \(b = (x_2, y_2)\) được định nghĩa là:
+        $$ a \times b = x_1 y_2 - x_2 y_1 $$
+        Trong C++ với số phức, tích có hướng của \(a\) và \(b\) có thể được tính bằng phần ảo của \(conj(a) \cdot b\).
+    </p>
+    <p>
+        Tích có hướng cho biết hướng quay tương đối giữa hai vectơ:
+    </p>
+    <ul>
+        <li>\(a \times b > 0\): \(b\) rẽ trái so với \(a\) (ngược chiều kim đồng hồ).</li>
+        <li>\(a \times b < 0\): \(b\) rẽ phải so với \(a\) (thuận chiều kim đồng hồ).</li>
+        <li>\(a \times b = 0\): \(a\) và \(b\) thẳng hàng (collinear).</li>
+    </ul>
+
+    <div class="graphic-box">
+        <svg width="400" height="200" viewBox="0 0 400 200">
+            <g transform="translate(50, 150)">
+                <line x1="0" y1="0" x2="100" y2="-20" stroke="#555" stroke-width="2" marker-end="url(#arrowGeo)"/>
+                <text x="110" y="-15">a</text>
+                
+                <line x1="0" y1="0" x2="80" y2="-80" stroke="#555" stroke-width="2" marker-end="url(#arrowGeo)"/>
+                <text x="90" y="-85">b</text>
+                
+                <path d="M 40,-8 A 40,40 0 0 0 32,-32" class="angle-arc" marker-end="url(#arrowGeo)"/>
+            </g>
+            
+            <text x="250" y="80">a x b > 0 (Rẽ trái)</text>
+            
+            <g transform="translate(50, 150)">
+                <circle cx="0" cy="0" r="4" class="point-circle"/>
+            </g>
+        </svg>
+    </div>
+
+    <h3>Cài đặt Tích có hướng</h3>
+<pre><code><span class="cpp-type">long</span> <span class="cpp-type">long</span> <span class="cpp-func">cross_product</span>(P a, P b) {
+    <span class="cpp-keyword">return</span> (conj(a) * b).Y;
+}
+
+<span class="cpp-comment">// Kiểm tra hướng đi từ a -> b -> c</span>
+<span class="cpp-comment">// Trả về > 0 nếu rẽ trái, < 0 nếu rẽ phải, 0 nếu thẳng hàng</span>
+<span class="cpp-type">long</span> <span class="cpp-type">long</span> <span class="cpp-func">turn</span>(P a, P b, P c) {
+    <span class="cpp-keyword">return</span> <span class="cpp-func">cross_product</span>(b - a, c - a);
+}</code></pre>
+
+    <h3>Giao điểm hai đoạn thẳng</h3>
+    <p>
+        Để kiểm tra hai đoạn thẳng \(AB\) và \(CD\) có cắt nhau hay không, ta kiểm tra xem \(C\) và \(D\) có nằm khác phía so với đường thẳng \(AB\), VÀ \(A\) và \(B\) có nằm khác phía so với đường thẳng \(CD\) hay không.
+        Điều kiện "khác phía" được kiểm tra bằng dấu của tích có hướng.
+    </p>
+
+    <h2 id="sec29.3">29.3 Diện tích đa giác (Polygon area)</h2>
+    <p>
+        Diện tích của một đa giác với các đỉnh \(p_1, p_2, \dots, p_n\) có thể được tính bằng công thức dây giày (shoelace formula), sử dụng tích có hướng:
+        $$ S = \frac{1}{2} \left| \sum_{i=1}^{n} (p_i \times p_{i+1}) \right| $$
+        (với \(p_{n+1} = p_1\)).
+    </p>
+
+    <div class="graphic-box">
+        <svg width="300" height="200" viewBox="0 0 300 200">
+            <polygon points="50,150 120,50 220,70 250,150 150,180" class="polygon-shape"/>
+            
+            <circle cx="50" cy="150" r="3" class="point-circle"/> <text x="40" y="150">p1</text>
+            <circle cx="120" cy="50" r="3" class="point-circle"/> <text x="120" y="40">p2</text>
+            <circle cx="220" cy="70" r="3" class="point-circle"/> <text x="230" y="65">p3</text>
+            <circle cx="250" cy="150" r="3" class="point-circle"/> <text x="265" y="150">p4</text>
+            <circle cx="150" cy="180" r="3" class="point-circle"/> <text x="150" y="195">p5</text>
+        </svg>
+    </div>
+
+    <h3>Cài đặt</h3>
+<pre><code><span class="cpp-type">long</span> <span class="cpp-type">long</span> area = <span class="cpp-number">0</span>;
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">0</span>; i &lt; n; i++) {
+    area += <span class="cpp-func">cross_product</span>(p[i], p[(i+<span class="cpp-number">1</span>)%n]);
+}
+area = abs(area); <span class="cpp-comment">// Diện tích thực tế là area / 2.0</span></code></pre>
+    <p>
+        Lưu ý: Để tránh số thực, ta thường lưu giữ diện tích gấp đôi (2S) là số nguyên.
+    </p>
+
+    <h2 id="sec29.4">29.4 Hàm khoảng cách (Distance functions)</h2>
+    
+    <h3>Khoảng cách Euclid</h3>
+    <p>Khoảng cách giữa hai điểm \(a\) và \(b\) là độ dài của vectơ \(a-b\).</p>
+    <pre><code><span class="cpp-type">double</span> dist = abs(a - b);</code></pre>
+
+    <h3>Khoảng cách từ điểm đến đường thẳng</h3>
+    <p>
+        Khoảng cách từ điểm \(p\) đến đường thẳng đi qua \(a\) và \(b\) được tính bằng độ lớn tích có hướng (diện tích hình bình hành) chia cho độ dài cạnh đáy.
+        $$ d = \frac{|(a-p) \times (b-p)|}{|a-b|} $$
+    </p>
+
+    <div class="graphic-box">
+        <svg width="300" height="150" viewBox="0 0 300 150">
+            <line x1="50" y1="120" x2="250" y2="120" stroke="#555" stroke-width="2"/>
+            <text x="40" y="125">a</text> <text x="260" y="125">b</text>
+            
+            <circle cx="150" cy="50" r="4" class="point-circle"/>
+            <text x="150" y="40">p</text>
+            
+            <line x1="150" y1="50" x2="150" y2="120" class="dashed-line"/>
+            <text x="160" y="90">d</text>
+            
+            <line x1="50" y1="120" x2="150" y2="50" stroke="#ccc" stroke-dasharray="2"/>
+            <line x1="250" y1="120" x2="150" y2="50" stroke="#ccc" stroke-dasharray="2"/>
+        </svg>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPH - Chương 2: Độ phức tạp thời gian</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h1 { margin-top: 40px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        
+        /* Code styling */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #f1f3f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+        
+        /* Syntax highlighting */
+        .cpp-keyword { color: #0000ff; font-weight: bold; }
+        .cpp-type { color: #2b91af; }
+        .cpp-number { color: #098658; }
+        .cpp-comment { color: #008000; font-style: italic; }
+
+        /* Graphics Containers */
+        .graphic-box {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        /* SVG Styling */
+        svg text { font-family: "Segoe UI", sans-serif; font-size: 12px; }
+        .graph-line { fill: none; stroke-width: 2; }
+        .axis { stroke: #333; stroke-width: 2; }
+        .grid-line { stroke: #eee; stroke-width: 1; }
+        
+        /* Complexity Colors */
+        .c-1 { stroke: #27ae60; } /* O(1) */
+        .c-log { stroke: #2ecc71; } /* O(log n) */
+        .c-n { stroke: #f1c40f; } /* O(n) */
+        .c-nlog { stroke: #e67e22; } /* O(n log n) */
+        .c-n2 { stroke: #e74c3c; } /* O(n^2) */
+        .c-exp { stroke: #8e44ad; } /* O(2^n) */
+
+        /* TOC */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc a { text-decoration: none; color: #007bff; font-weight: 500; }
+        
+        .array-cell { fill: #fff; stroke: #333; stroke-width: 1; }
+        .highlight { fill: #fff9c4; stroke: #fbc02d; stroke-width: 2; }
+    </style>
+</head>
+<body>
+
+    <div class="toc">
+        <h3>Mục lục - Chương 2</h3>
+        <ul>
+            <li><a href="#intro">Độ phức tạp thời gian</a></li>
+            <li><a href="#sec2.1">2.1 Quy tắc tính toán</a></li>
+            <li><a href="#sec2.2">2.2 Các lớp độ phức tạp</a></li>
+            <li><a href="#sec2.3">2.3 Ước lượng hiệu quả</a></li>
+            <li><a href="#sec2.4">2.4 Bài toán Tổng con lớn nhất</a></li>
+        </ul>
+    </div>
+
+    <h1 id="intro">Chương 2: Độ phức tạp thời gian (Time complexity)</h1>
+    <p>
+        Độ phức tạp thời gian của một thuật toán ước lượng thời gian chạy của nó phụ thuộc vào kích thước dữ liệu đầu vào. Bằng cách phân tích độ phức tạp, ta có thể dự đoán liệu thuật toán có xử lý kịp dữ liệu trong giới hạn thời gian cho phép hay không.
+    </p>
+
+    <h2 id="sec2.1">2.1 Quy tắc tính toán</h2>
+    <p>
+        Chúng ta sử dụng ký hiệu <strong>Big O</strong>, ví dụ \(O(n)\), để biểu diễn độ phức tạp. Ký hiệu này mô tả giới hạn trên của số lượng phép toán so với kích thước đầu vào \(n\).
+    </p>
+    
+    <h3>Vòng lặp (Loops)</h3>
+    <p>
+        Một vòng lặp chạy \(n\) lần có độ phức tạp \(O(n)\).
+        Nếu có \(k\) vòng lặp lồng nhau, độ phức tạp là \(O(n^k)\).
+    </p>
+<pre><code><span class="cpp-comment">// O(n)</span>
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">1</span>; i &lt;= n; i++) {
+    <span class="cpp-comment">// code</span>
+}
+
+<span class="cpp-comment">// O(n^2)</span>
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">1</span>; i &lt;= n; i++) {
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> j = <span class="cpp-number">1</span>; j &lt;= n; j++) {
+        <span class="cpp-comment">// code</span>
+    }
+}</code></pre>
+
+    <h3>Thứ tự độ lớn (Order of magnitude)</h3>
+    <p>
+        Độ phức tạp chỉ quan tâm đến số hạng lớn nhất. Các hằng số bị bỏ qua.
+        <ul>
+            <li>\(3n + 5\) \(\rightarrow\) \(O(n)\)</li>
+            <li>\(n^2 + n + 10\) \(\rightarrow\) \(O(n^2)\)</li>
+        </ul>
+    </p>
+
+    <h3>Các giai đoạn (Phases)</h3>
+    <p>
+        Nếu thuật toán gồm nhiều giai đoạn liên tiếp, độ phức tạp tổng là độ phức tạp lớn nhất trong các giai đoạn.
+        Ví dụ: 3 vòng lặp đơn lẻ (\(3n\)) vẫn là \(O(n)\).
+    </p>
+
+    <h2 id="sec2.2">2.2 Các lớp độ phức tạp (Complexity classes)</h2>
+    <p>
+        Dưới đây là các lớp độ phức tạp phổ biến, sắp xếp từ nhanh nhất đến chậm nhất.
+    </p>
+
+    <div class="graphic-box">
+        <svg width="500" height="300" viewBox="0 0 500 300">
+            <defs>
+                <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#eee" stroke-width="1"/>
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+
+            <line x1="20" y1="280" x2="480" y2="280" class="axis"/> <line x1="20" y1="280" x2="20" y2="20" class="axis"/>   <text x="470" y="295">n</text>
+            <text x="10" y="15" style="writing-mode: tb;">Time</text>
+
+            <line x1="20" y1="270" x2="480" y2="270" class="graph-line c-1"/>
+            <text x="400" y="265" fill="#27ae60">O(1)</text>
+
+            <path d="M 20,280 Q 50,260 480,250" fill="none" class="graph-line c-log"/>
+            <text x="400" y="245" fill="#2ecc71">O(log n)</text>
+
+            <line x1="20" y1="280" x2="280" y2="20" class="graph-line c-n"/>
+            <text x="285" y="30" fill="#f1c40f">O(n)</text>
+
+            <path d="M 20,280 Q 150,150 200,20" fill="none" class="graph-line c-nlog"/>
+            <text x="210" y="30" fill="#e67e22">O(n log n)</text>
+
+            <path d="M 20,280 Q 80,250 120,20" fill="none" class="graph-line c-n2"/>
+            <text x="125" y="30" fill="#e74c3c">O(n²)</text>
+            
+            <path d="M 20,280 Q 40,250 50,20" fill="none" class="graph-line c-exp"/>
+            <text x="55" y="30" fill="#8e44ad">O(2ⁿ)</text>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 2.1: So sánh tốc độ tăng trưởng</div>
+    </div>
+
+    <ul>
+        <li><strong>\(O(1)\) (Hằng số):</strong> Không phụ thuộc vào đầu vào. Ví dụ: truy cập phần tử mảng.</li>
+        <li><strong>\(O(\log n)\) (Logarit):</strong> Thường thấy trong tìm kiếm nhị phân hoặc cấu trúc dữ liệu cây.</li>
+        <li><strong>\(O(\sqrt{n})\) (Căn bậc hai):</strong> Kiểm tra số nguyên tố, phân rã căn.</li>
+        <li><strong>\(O(n)\) (Tuyến tính):</strong> Duyệt mảng một lần.</li>
+        <li><strong>\(O(n \log n)\):</strong> Sắp xếp (Sorting), sử dụng map/set.</li>
+        <li><strong>\(O(n^2)\) (Bình phương):</strong> Hai vòng lặp lồng nhau. Thường dùng cho \(n \le 5000\).</li>
+        <li><strong>\(O(2^n)\) (Mũ):</strong> Duyệt tập con. Chỉ dùng cho \(n \le 20\).</li>
+        <li><strong>\(O(n!)\) (Giai thừa):</strong> Duyệt hoán vị. Chỉ dùng cho \(n \le 10\).</li>
+    </ul>
+
+    <h2 id="sec2.3">2.3 Ước lượng hiệu quả (Estimating efficiency)</h2>
+    <p>
+        Trong hầu hết các kỳ thi, giới hạn thời gian là <strong>1 giây</strong>. Một máy tính hiện đại có thể thực hiện khoảng <strong>\(10^8\) phép toán mỗi giây</strong>.
+    </p>
+    <p>
+        Dựa vào giới hạn đầu vào \(n\), ta có thể đoán thuật toán cần thiết:
+    </p>
+    <table border="1" cellpadding="10" cellspacing="0" style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+        <tr style="background-color: #f2f2f2;">
+            <th>Kích thước n</th>
+            <th>Độ phức tạp tối đa cho phép</th>
+        </tr>
+        <tr>
+            <td>\(n \le 10\)</td>
+            <td>\(O(n!)\)</td>
+        </tr>
+        <tr>
+            <td>\(n \le 20\)</td>
+            <td>\(O(2^n)\)</td>
+        </tr>
+        <tr>
+            <td>\(n \le 500\)</td>
+            <td>\(O(n^3)\)</td>
+        </tr>
+        <tr>
+            <td>\(n \le 5000\)</td>
+            <td>\(O(n^2)\)</td>
+        </tr>
+        <tr>
+            <td>\(n \le 10^5\) hoặc \(10^6\)</td>
+            <td>\(O(n \log n)\) hoặc \(O(n)\)</td>
+        </tr>
+        <tr>
+            <td>\(n\) rất lớn</td>
+            <td>\(O(1)\) hoặc \(O(\log n)\)</td>
+        </tr>
+    </table>
+
+    <h2 id="sec2.4">2.4 Bài toán Tổng con lớn nhất (Maximum subarray sum)</h2>
+    <p>
+        Đây là bài toán kinh điển: Cho một mảng \(n\) số nguyên, tìm tổng lớn nhất của một đoạn con liên tiếp (subarray).
+        <br>Ví dụ: Mảng <code>[-1, 2, 4, -3, 5, 2, -5, 2]</code>
+        <br>Tổng con lớn nhất là <code>[2, 4, -3, 5, 2]</code> với tổng là 10.
+    </p>
+
+    <div class="graphic-box">
+        <svg width="400" height="80" viewBox="0 0 400 80">
+            <g transform="translate(10, 10)">
+                <rect x="0" y="0" width="40" height="40" class="array-cell"/> <text x="20" y="25">-1</text>
+                <rect x="40" y="0" width="40" height="40" class="array-cell highlight"/> <text x="60" y="25">2</text>
+                <rect x="80" y="0" width="40" height="40" class="array-cell highlight"/> <text x="100" y="25">4</text>
+                <rect x="120" y="0" width="40" height="40" class="array-cell highlight"/> <text x="140" y="25">-3</text>
+                <rect x="160" y="0" width="40" height="40" class="array-cell highlight"/> <text x="180" y="25">5</text>
+                <rect x="200" y="0" width="40" height="40" class="array-cell highlight"/> <text x="220" y="25">2</text>
+                <rect x="240" y="0" width="40" height="40" class="array-cell"/> <text x="260" y="25">-5</text>
+                <rect x="280" y="0" width="40" height="40" class="array-cell"/> <text x="300" y="25">2</text>
+            </g>
+            <text x="200" y="70" font-weight="bold" fill="#2980b9">Tổng lớn nhất = 10</text>
+        </svg>
+    </div>
+
+    <h3>Thuật toán 1: Vét cạn \(O(n^3)\)</h3>
+    <p>Duyệt qua mọi cặp \((i, j)\) và tính tổng từ \(i\) đến \(j\).</p>
+<pre><code><span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> best = <span class="cpp-number">0</span>;
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> a = <span class="cpp-number">0</span>; a &lt; n; a++) {
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> b = a; b &lt; n; b++) {
+        <span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> sum = <span class="cpp-number">0</span>;
+        <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> k = a; k &lt;= b; k++) {
+            sum += array[k];
+        }
+        best = max(best, sum);
+    }
+}</code></pre>
+
+    <h3>Thuật toán 2: Tối ưu \(O(n^2)\)</h3>
+    <p>Tính tổng của đoạn mới dựa trên đoạn trước đó (không cần vòng lặp thứ 3).</p>
+<pre><code><span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> best = <span class="cpp-number">0</span>;
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> a = <span class="cpp-number">0</span>; a &lt; n; a++) {
+    <span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> sum = <span class="cpp-number">0</span>;
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> b = a; b &lt; n; b++) {
+        sum += array[b];
+        best = max(best, sum);
+    }
+}</code></pre>
+
+    <h3>Thuật toán 3: Thuật toán Kadane \(O(n)\)</h3>
+    <p>
+        Đây là thuật toán tối ưu nhất. Tại mỗi vị trí, chúng ta quyết định: nên bắt đầu một đoạn con mới tại đây, hay nối tiếp vào đoạn con trước đó?
+        <br>Công thức: <code>sum = max(array[k], sum + array[k])</code>.
+    </p>
+<pre><code><span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> best = <span class="cpp-number">0</span>, sum = <span class="cpp-number">0</span>;
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> k = <span class="cpp-number">0</span>; k &lt; n; k++) {
+    <span class="cpp-comment">// Chọn số hiện tại HOẶC cộng số hiện tại vào tổng trước đó</span>
+    sum = max((<span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span>)array[k], sum + array[k]);
+    best = max(best, sum);
+}</code></pre>
+
+</body>
+</html>

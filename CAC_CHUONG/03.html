@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPH - Chương 3: Sắp xếp</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h1 { margin-top: 40px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        
+        /* Code styling */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #f1f3f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+        
+        /* Syntax highlighting */
+        .cpp-keyword { color: #0000ff; font-weight: bold; }
+        .cpp-type { color: #2b91af; }
+        .cpp-number { color: #098658; }
+        .cpp-string { color: #a31515; }
+        .cpp-comment { color: #008000; font-style: italic; }
+        .cpp-struct { color: #267f99; font-weight: bold; }
+
+        /* Graphics Containers */
+        .graphic-box {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        /* SVG Styling */
+        svg text { font-family: "Segoe UI", sans-serif; font-size: 14px; text-anchor: middle; dominant-baseline: central; font-weight: bold; }
+        .array-rect { fill: #fff; stroke: #333; stroke-width: 1; }
+        .highlight-rect { fill: #fff9c4; stroke: #fbc02d; stroke-width: 2; }
+        .arrow-line { stroke: #555; stroke-width: 2; marker-end: url(#arrowSort); }
+        .node-circle { fill: #e3f2fd; stroke: #2196f3; stroke-width: 2; }
+
+        /* TOC */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc a { text-decoration: none; color: #007bff; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="toc">
+        <h3>Mục lục - Chương 3</h3>
+        <ul>
+            <li><a href="#intro">Sắp xếp</a></li>
+            <li><a href="#sec3.1">3.1 Lý thuyết sắp xếp</a></li>
+            <li><a href="#sec3.2">3.2 Sắp xếp trong C++</a></li>
+            <li><a href="#sec3.3">3.3 Tìm kiếm nhị phân</a></li>
+        </ul>
+    </div>
+
+    <h1 id="intro">Chương 3: Sắp xếp (Sorting)</h1>
+    <p>
+        Sắp xếp là một bài toán cơ bản: cho một mảng gồm \(n\) phần tử, hãy sắp xếp các phần tử đó theo thứ tự tăng dần.
+        Ví dụ:
+        <br>Input: <code>[1, 3, 8, 2, 9, 2, 5, 6]</code>
+        <br>Output: <code>[1, 2, 2, 3, 5, 6, 8, 9]</code>
+    </p>
+
+    <h2 id="sec3.1">3.1 Lý thuyết sắp xếp (Sorting theory)</h2>
+    <p>
+        Các thuật toán cơ bản như <strong>Bubble Sort</strong> (Sắp xếp nổi bọt) có độ phức tạp \(O(n^2)\). Chúng quá chậm khi \(n\) lớn (ví dụ \(n=10^5\)).
+    </p>
+    <p>
+        Để hiệu quả, chúng ta cần sử dụng các thuật toán có độ phức tạp \(O(n \log n)\), ví dụ như <strong>Merge Sort</strong> (Sắp xếp trộn) hoặc <strong>Quick Sort</strong>.
+    </p>
+
+    <h3>Merge Sort (Sắp xếp trộn)</h3>
+    <p>
+        Merge Sort hoạt động dựa trên nguyên lý "Chia để trị" (Divide and Conquer):
+        1. Nếu mảng nhỏ (1 phần tử), nó đã được sắp xếp.
+        2. Chia mảng thành hai nửa bằng nhau.
+        3. Sắp xếp đệ quy hai nửa đó.
+        4. Trộn (Merge) hai nửa đã sắp xếp lại thành một mảng hoàn chỉnh.
+    </p>
+
+    <div class="graphic-box">
+        <svg width="500" height="250" viewBox="0 0 500 250">
+            <defs>
+                <marker id="arrowSort" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#555" />
+                </marker>
+            </defs>
+
+            <g transform="translate(180, 20)">
+                <rect x="0" y="0" width="140" height="30" class="array-rect" fill="#ffebee"/>
+                <text x="70" y="20">5, 1, 4, 2</text>
+            </g>
+
+            <line x1="210" y1="50" x2="160" y2="80" class="arrow-line"/>
+            <line x1="290" y1="50" x2="340" y2="80" class="arrow-line"/>
+            <text x="250" y="70" font-size="12">Chia đôi</text>
+
+            <g transform="translate(100, 80)">
+                <rect x="0" y="0" width="70" height="30" class="array-rect"/>
+                <text x="35" y="20">5, 1</text>
+            </g>
+            <g transform="translate(330, 80)">
+                <rect x="0" y="0" width="70" height="30" class="array-rect"/>
+                <text x="35" y="20">4, 2</text>
+            </g>
+
+            <line x1="135" y1="110" x2="110" y2="140" class="arrow-line"/>
+            <line x1="135" y1="110" x2="160" y2="140" class="arrow-line"/>
+            <line x1="365" y1="110" x2="340" y2="140" class="arrow-line"/>
+            <line x1="365" y1="110" x2="390" y2="140" class="arrow-line"/>
+
+            <text x="110" y="155">[5]</text> <text x="160" y="155">[1]</text>
+            <text x="340" y="155">[4]</text> <text x="390" y="155">[2]</text>
+
+            <path d="M 110,165 Q 135,180 135,190" fill="none" stroke="#2e7d32" stroke-width="2" marker-end="url(#arrowSort)"/>
+            <path d="M 160,165 Q 135,180 135,190" fill="none" stroke="#2e7d32" stroke-width="2" marker-end="url(#arrowSort)"/>
+            
+            <path d="M 340,165 Q 365,180 365,190" fill="none" stroke="#2e7d32" stroke-width="2" marker-end="url(#arrowSort)"/>
+            <path d="M 390,165 Q 365,180 365,190" fill="none" stroke="#2e7d32" stroke-width="2" marker-end="url(#arrowSort)"/>
+
+            <g transform="translate(100, 190)">
+                <rect x="0" y="0" width="70" height="30" class="array-rect" fill="#e8f5e9"/>
+                <text x="35" y="20">1, 5</text>
+            </g>
+            <g transform="translate(330, 190)">
+                <rect x="0" y="0" width="70" height="30" class="array-rect" fill="#e8f5e9"/>
+                <text x="35" y="20">2, 4</text>
+            </g>
+            
+            <text x="250" y="210" font-size="12" fill="#2e7d32">Trộn & Sắp xếp</text>
+
+            <path d="M 170,205 Q 250,220 250,230" fill="none" stroke="#2e7d32" stroke-width="2"/>
+            <path d="M 330,205 Q 250,220 250,230" fill="none" stroke="#2e7d32" stroke-width="2"/>
+            
+            <text x="250" y="245" font-weight="bold">1, 2, 4, 5</text>
+        </svg>
+    </div>
+
+    <h2 id="sec3.2">3.2 Sắp xếp trong C++ (Sorting in C++)</h2>
+    <p>
+        Trong thi đấu, ta hầu như không bao giờ tự viết hàm sắp xếp. Thay vào đó, ta dùng hàm <code>sort</code> từ thư viện chuẩn C++.
+    </p>
+
+    <h3>Sử dụng cơ bản</h3>
+<pre><code><span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt; v = {<span class="cpp-number">4</span>, <span class="cpp-number">2</span>, <span class="cpp-number">5</span>, <span class="cpp-number">3</span>, <span class="cpp-number">5</span>, <span class="cpp-number">8</span>, <span class="cpp-number">3</span>};
+
+<span class="cpp-comment">// Sắp xếp tăng dần (Mặc định)</span>
+sort(v.begin(), v.end());
+
+<span class="cpp-comment">// Sắp xếp giảm dần</span>
+sort(v.rbegin(), v.rend());
+
+<span class="cpp-comment">// Sắp xếp mảng thường</span>
+<span class="cpp-keyword">int</span> a[] = {<span class="cpp-number">4</span>, <span class="cpp-number">2</span>, <span class="cpp-number">5</span>, <span class="cpp-number">3</span>};
+<span class="cpp-keyword">int</span> n = <span class="cpp-number">4</span>;
+sort(a, a + n);</code></pre>
+
+    <h3>Hàm so sánh tùy chỉnh (Custom Comparators)</h3>
+    <p>
+        Đôi khi ta cần sắp xếp các đối tượng phức tạp (struct) hoặc theo quy tắc riêng. Ta có thể định nghĩa toán tử <code>operator&lt;</code> hoặc truyền một hàm so sánh vào <code>sort</code>.
+    </p>
+
+<pre><code><span class="cpp-keyword">struct</span> <span class="cpp-struct">Point</span> {
+    <span class="cpp-keyword">int</span> x, y;
+    
+    <span class="cpp-comment">// Định nghĩa toán tử < để sắp xếp</span>
+    <span class="cpp-comment">// Sắp xếp theo x trước, nếu x bằng nhau thì theo y</span>
+    <span class="cpp-keyword">bool</span> <span class="cpp-keyword">operator</span>&lt;(<span class="cpp-keyword">const</span> Point &other) <span class="cpp-keyword">const</span> {
+        <span class="cpp-keyword">if</span> (x != other.x) <span class="cpp-keyword">return</span> x &lt; other.x;
+        <span class="cpp-keyword">return</span> y &lt; other.y;
+    }
+};
+
+<span class="cpp-keyword">int</span> main() {
+    <span class="cpp-type">vector</span>&lt;Point&gt; points = {{<span class="cpp-number">1</span>, <span class="cpp-number">5</span>}, {<span class="cpp-number">2</span>, <span class="cpp-number">3</span>}, {<span class="cpp-number">1</span>, <span class="cpp-number">2</span>}};
+    sort(points.begin(), points.end());
+    <span class="cpp-comment">// Kết quả: {1, 2}, {1, 5}, {2, 3}</span>
+}</code></pre>
+
+    <h2 id="sec3.3">3.3 Tìm kiếm nhị phân (Binary search)</h2>
+    <p>
+        Tìm kiếm nhị phân cho phép tìm một phần tử trong mảng <strong>đã sắp xếp</strong> với độ phức tạp \(O(\log n)\).
+    </p>
+
+    <h3>Các hàm trong C++</h3>
+    <p>Thư viện C++ cung cấp các hàm cực kỳ hữu ích hoạt động trên mảng đã sắp xếp:</p>
+    <ul>
+        <li><code>binary_search</code>: Trả về true nếu tìm thấy phần tử.</li>
+        <li><code>lower_bound</code>: Trả về con trỏ đến phần tử đầu tiên <strong>\(\ge x\)</strong>.</li>
+        <li><code>upper_bound</code>: Trả về con trỏ đến phần tử đầu tiên <strong>\(> x\)</strong>.</li>
+    </ul>
+
+    <div class="graphic-box">
+        <svg width="450" height="150" viewBox="0 0 450 150">
+            <g transform="translate(20, 20)">
+                <text x="25" y="-5" font-size="10">0</text> <text x="75" y="-5" font-size="10">1</text>
+                <text x="125" y="-5" font-size="10">2</text> <text x="175" y="-5" font-size="10">3</text>
+                <text x="225" y="-5" font-size="10">4</text> <text x="275" y="-5" font-size="10">5</text>
+                <text x="325" y="-5" font-size="10">6</text> <text x="375" y="-5" font-size="10">7</text>
+
+                <rect x="0" y="0" width="50" height="40" class="array-rect"/><text x="25" y="25">1</text>
+                <rect x="50" y="0" width="50" height="40" class="array-rect"/><text x="75" y="25">3</text>
+                <rect x="100" y="0" width="50" height="40" class="array-rect"/><text x="125" y="25">3</text>
+                <rect x="150" y="0" width="50" height="40" class="array-rect highlight-rect"/><text x="175" y="25">5</text>
+                <rect x="200" y="0" width="50" height="40" class="array-rect highlight-rect"/><text x="225" y="25">5</text>
+                <rect x="250" y="0" width="50" height="40" class="array-rect highlight-rect"/><text x="275" y="25">5</text>
+                <rect x="300" y="0" width="50" height="40" class="array-rect"/><text x="325" y="25">8</text>
+                <rect x="350" y="0" width="50" height="40" class="array-rect"/><text x="375" y="25">9</text>
+            </g>
+
+            <text x="225" y="80" font-weight="bold">Tìm x = 5</text>
+
+            <line x1="170" y1="110" x2="170" y2="70" stroke="#d35400" stroke-width="2" marker-end="url(#arrowSort)"/>
+            <text x="170" y="125" fill="#d35400" font-size="12">lower_bound (>= 5)</text>
+
+            <line x1="320" y1="110" x2="320" y2="70" stroke="#2980b9" stroke-width="2" marker-end="url(#arrowSort)"/>
+            <text x="320" y="125" fill="#2980b9" font-size="12">upper_bound (> 5)</text>
+            
+            <text x="245" y="145" font-size="12" font-style="italic">Số phần tử = upper - lower = 6 - 3 = 3</text>
+        </svg>
+    </div>
+
+    <h3>Ví dụ code</h3>
+<pre><code><span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt; v = {<span class="cpp-number">1</span>, <span class="cpp-number">3</span>, <span class="cpp-number">3</span>, <span class="cpp-number">5</span>, <span class="cpp-number">5</span>, <span class="cpp-number">5</span>, <span class="cpp-number">8</span>, <span class="cpp-number">9</span>};
+
+<span class="cpp-comment">// Tìm vị trí đầu tiên >= 5</span>
+<span class="cpp-keyword">auto</span> it1 = lower_bound(v.begin(), v.end(), <span class="cpp-number">5</span>);
+<span class="cpp-comment">// *it1 bằng 5, index = 3</span>
+
+<span class="cpp-comment">// Tìm vị trí đầu tiên > 5</span>
+<span class="cpp-keyword">auto</span> it2 = upper_bound(v.begin(), v.end(), <span class="cpp-number">5</span>);
+<span class="cpp-comment">// *it2 bằng 8, index = 6</span>
+
+<span class="cpp-comment">// Đếm số lượng phần tử 5</span>
+<span class="cpp-keyword">int</span> count = it2 - it1; <span class="cpp-comment">// Kết quả: 3</span></code></pre>
+
+</body>
+</html>

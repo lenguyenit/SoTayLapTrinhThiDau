@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPH - Chương 11: Cơ bản về đồ thị</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h1 { margin-top: 40px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        
+        /* Code styling */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #f1f3f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+        
+        /* Syntax highlighting */
+        .cpp-keyword { color: #0000ff; font-weight: bold; }
+        .cpp-type { color: #2b91af; }
+        .cpp-number { color: #098658; }
+        .cpp-string { color: #a31515; }
+        .cpp-comment { color: #008000; font-style: italic; }
+
+        /* Graphic Containers */
+        .graphic-box {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        
+        /* SVG Styling */
+        svg text { font-family: "Segoe UI", sans-serif; font-size: 14px; text-anchor: middle; dominant-baseline: central; }
+        .node-circle { fill: #fff; stroke: #2c3e50; stroke-width: 2; }
+        .node-colored-1 { fill: #e3f2fd; stroke: #2196f3; } /* Màu xanh */
+        .node-colored-2 { fill: #ffebee; stroke: #f44336; } /* Màu đỏ */
+        .edge-line { stroke: #333; stroke-width: 2; }
+        .edge-weight { fill: #e67e22; font-weight: bold; font-size: 12px; background-color: white; }
+        .arrow-head { fill: #333; }
+
+        /* Tables */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        th { background-color: #f2f2f2; font-weight: 600; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+
+        /* TOC */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc a { text-decoration: none; color: #007bff; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="toc">
+        <h3>Mục lục - Chương 11</h3>
+        <ul>
+            <li><a href="#intro">Cơ bản về đồ thị</a></li>
+            <li><a href="#sec11.1">11.1 Thuật ngữ đồ thị</a></li>
+            <li><a href="#sec11.2">11.2 Biểu diễn đồ thị</a></li>
+        </ul>
+    </div>
+
+    <h1 id="intro">Chương 11: Cơ bản về đồ thị (Basics of graphs)</h1>
+    <p>
+        Nhiều bài toán lập trình có thể được giải quyết bằng cách mô hình hóa bài toán dưới dạng bài toán đồ thị và sử dụng thuật toán đồ thị thích hợp. Một ví dụ điển hình của đồ thị là mạng lưới đường xá và thành phố trong một quốc gia. Đôi khi, đồ thị bị ẩn trong bài toán và có thể khó phát hiện ra nó.
+    </p>
+    <p>
+        Phần này của cuốn sách thảo luận về các thuật toán đồ thị, đặc biệt tập trung vào các chủ đề quan trọng trong lập trình thi đấu. Trong chương này, chúng ta sẽ đi qua các khái niệm liên quan đến đồ thị và nghiên cứu các cách khác nhau để biểu diễn đồ thị trong thuật toán.
+    </p>
+
+    <h2 id="sec11.1">11.1 Thuật ngữ đồ thị (Graph terminology)</h2>
+    <p>
+        Một đồ thị bao gồm các <strong>nút</strong> (nodes) và các <strong>cạnh</strong> (edges). Trong cuốn sách này, biến \(n\) biểu thị số lượng nút trong đồ thị, và biến \(m\) biểu thị số lượng cạnh. Các nút được đánh số bằng các số nguyên \(1, 2, \dots, n\).
+    </p>
+    <p>
+        Ví dụ, đồ thị sau bao gồm 5 nút và 7 cạnh:
+    </p>
+
+    <div class="graphic-box">
+        <svg width="300" height="180" viewBox="0 0 300 180">
+            <line x1="50" y1="50" x2="150" y2="50" class="edge-line"/> <line x1="50" y1="50" x2="50" y2="150" class="edge-line"/> <line x1="50" y1="50" x2="150" y2="150" class="edge-line"/> <line x1="150" y1="50" x2="150" y2="150" class="edge-line"/> <line x1="150" y1="50" x2="250" y2="100" class="edge-line"/> <line x1="50" y1="150" x2="150" y2="150" class="edge-line"/> <line x1="150" y1="150" x2="250" y2="100" class="edge-line"/> <circle cx="50" cy="50" r="20" class="node-circle"/> <text x="50" y="50">1</text>
+            <circle cx="150" cy="50" r="20" class="node-circle"/> <text x="150" y="50">2</text>
+            <circle cx="50" cy="150" r="20" class="node-circle"/> <text x="50" y="150">3</text>
+            <circle cx="150" cy="150" r="20" class="node-circle"/> <text x="150" y="150">4</text>
+            <circle cx="250" cy="100" r="20" class="node-circle"/> <text x="250" y="100">5</text>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 11.1: Một đồ thị vô hướng với 5 nút và 7 cạnh</div>
+    </div>
+
+    <p>
+        Một <strong>đường đi</strong> (path) dẫn từ nút \(a\) đến nút \(b\) thông qua các cạnh của đồ thị. <strong>Độ dài</strong> của đường đi là số lượng cạnh trong đó. Ví dụ, đồ thị trên chứa một đường đi \(1 \to 3 \to 4 \to 5\) có độ dài 3 từ nút 1 đến nút 5.
+    </p>
+    <p>
+        Một đường đi là một <strong>chu trình</strong> (cycle) nếu nút đầu và nút cuối giống nhau. Ví dụ, đồ thị trên chứa một chu trình \(1 \to 3 \to 4 \to 1\). Một đường đi là <strong>đơn</strong> (simple) nếu mỗi nút xuất hiện tối đa một lần trong đường đi.
+    </p>
+
+    <h3>Tính liên thông (Connectivity)</h3>
+    <p>
+        Một đồ thị là <strong>liên thông</strong> (connected) nếu có một đường đi giữa hai nút bất kỳ. Ví dụ, đồ thị sau là liên thông:
+    </p>
+    
+    <div class="graphic-box">
+        <svg width="200" height="100" viewBox="0 0 200 100">
+            <line x1="50" y1="50" x2="100" y2="20" class="edge-line"/>
+            <line x1="100" y1="20" x2="150" y2="50" class="edge-line"/>
+            <line x1="150" y1="50" x2="100" y2="80" class="edge-line"/>
+            <line x1="100" y1="80" x2="50" y2="50" class="edge-line"/>
+            
+            <circle cx="50" cy="50" r="15" class="node-circle"/> <text x="50" y="50">1</text>
+            <circle cx="100" cy="20" r="15" class="node-circle"/> <text x="100" y="20">2</text>
+            <circle cx="150" cy="50" r="15" class="node-circle"/> <text x="150" y="50">3</text>
+            <circle cx="100" cy="80" r="15" class="node-circle"/> <text x="100" y="80">4</text>
+        </svg>
+    </div>
+
+    <p>
+        Đồ thị sau không liên thông, vì không thể đi từ nút 4 đến bất kỳ nút nào khác:
+    </p>
+
+    <div class="graphic-box">
+        <svg width="250" height="100" viewBox="0 0 250 100">
+            <line x1="50" y1="50" x2="100" y2="20" class="edge-line"/>
+            <line x1="100" y1="20" x2="150" y2="50" class="edge-line"/>
+            <line x1="150" y1="50" x2="50" y2="50" class="edge-line"/>
+            
+            <circle cx="50" cy="50" r="15" class="node-circle"/> <text x="50" y="50">1</text>
+            <circle cx="100" cy="20" r="15" class="node-circle"/> <text x="100" y="20">2</text>
+            <circle cx="150" cy="50" r="15" class="node-circle"/> <text x="150" y="50">3</text>
+            
+            <circle cx="200" cy="50" r="15" class="node-circle"/> <text x="200" y="50">4</text>
+        </svg>
+    </div>
+
+    <p>
+        Các phần liên thông của một đồ thị được gọi là các <strong>thành phần liên thông</strong> (components) của nó. Ví dụ, đồ thị sau chứa ba thành phần: \(\{1, 2, 3\}\), \(\{4, 5, 6, 7\}\) và \(\{8\}\).
+    </p>
+
+    <div class="graphic-box">
+        <svg width="400" height="150" viewBox="0 0 400 150">
+            <line x1="30" y1="75" x2="60" y2="40" class="edge-line"/>
+            <line x1="60" y1="40" x2="90" y2="75" class="edge-line"/>
+            <circle cx="30" cy="75" r="12" class="node-circle"/> <text x="30" y="75">1</text>
+            <circle cx="60" cy="40" r="12" class="node-circle"/> <text x="60" y="40">2</text>
+            <circle cx="90" cy="75" r="12" class="node-circle"/> <text x="90" y="75">3</text>
+
+            <line x1="150" y1="75" x2="180" y2="40" class="edge-line"/>
+            <line x1="180" y1="40" x2="210" y2="75" class="edge-line"/>
+            <line x1="150" y1="75" x2="180" y2="110" class="edge-line"/>
+            <circle cx="150" cy="75" r="12" class="node-circle"/> <text x="150" y="75">4</text>
+            <circle cx="180" cy="40" r="12" class="node-circle"/> <text x="180" y="40">5</text>
+            <circle cx="210" cy="75" r="12" class="node-circle"/> <text x="210" y="75">6</text>
+            <circle cx="180" cy="110" r="12" class="node-circle"/> <text x="180" y="110">7</text>
+
+            <circle cx="300" cy="75" r="12" class="node-circle"/> <text x="300" y="75">8</text>
+        </svg>
+    </div>
+
+    <p>
+        Một <strong>cây</strong> (tree) là một đồ thị liên thông gồm \(n\) nút và \(n-1\) cạnh. Có một đường đi duy nhất giữa hai nút bất kỳ của một cây.
+    </p>
+
+    <h3>Hướng của cạnh (Edge directions)</h3>
+    <p>
+        Một đồ thị là <strong>có hướng</strong> (directed) nếu các cạnh chỉ có thể được đi qua theo một hướng. Ví dụ, đồ thị sau là có hướng:
+    </p>
+
+    <div class="graphic-box">
+        <svg width="250" height="120" viewBox="0 0 250 120">
+            <defs>
+                <marker id="arrow" markerWidth="10" markerHeight="10" refX="28" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#333" />
+                </marker>
+            </defs>
+            <line x1="50" y1="60" x2="125" y2="30" class="edge-line" marker-end="url(#arrow)"/> <line x1="125" y1="30" x2="200" y2="60" class="edge-line" marker-end="url(#arrow)"/> <line x1="50" y1="60" x2="125" y2="90" class="edge-line" marker-end="url(#arrow)"/> <line x1="125" y1="90" x2="200" y2="60" class="edge-line" marker-end="url(#arrow)"/> <line x1="125" y1="90" x2="50" y2="60" class="edge-line" marker-end="url(#arrow)"/> <circle cx="50" cy="60" r="18" class="node-circle"/> <text x="50" y="60">3</text>
+            <circle cx="125" cy="30" r="18" class="node-circle"/> <text x="125" y="30">1</text>
+            <circle cx="125" cy="90" r="18" class="node-circle"/> <text x="125" y="90">4</text>
+            <circle cx="200" cy="60" r="18" class="node-circle"/> <text x="200" y="60">2</text>
+            </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 11.2: Đồ thị có hướng</div>
+    </div>
+
+    <p>
+        Đồ thị trên chứa đường đi \(3 \to 1 \to 2 \to 5\), nhưng không có đường đi từ nút 5 đến nút 3.
+    </p>
+
+    <h3>Trọng số cạnh (Edge weights)</h3>
+    <p>
+        Trong một <strong>đồ thị có trọng số</strong> (weighted graph), mỗi cạnh được gán một trọng số (weight). Các trọng số thường được hiểu là độ dài cạnh. Ví dụ, đồ thị sau là có trọng số:
+    </p>
+
+    <div class="graphic-box">
+        <svg width="300" height="150" viewBox="0 0 300 150">
+            <line x1="50" y1="75" x2="150" y2="25" class="edge-line"/> <line x1="50" y1="75" x2="150" y2="125" class="edge-line"/> <line x1="150" y1="25" x2="250" y2="75" class="edge-line"/> <line x1="150" y1="125" x2="250" y2="75" class="edge-line"/> <line x1="150" y1="125" x2="250" y2="125" class="edge-line"/> <line x1="250" y1="125" x2="250" y2="75" class="edge-line"/> <rect x="90" y="40" width="15" height="15" fill="white"/> <text x="95" y="50" class="edge-weight">5</text>
+            <rect x="90" y="100" width="15" height="15" fill="white"/> <text x="95" y="110" class="edge-weight">1</text>
+            <rect x="200" y="40" width="15" height="15" fill="white"/> <text x="205" y="50" class="edge-weight">7</text>
+            <rect x="200" y="100" width="15" height="15" fill="white"/> <text x="205" y="110" class="edge-weight">6</text>
+            
+            <circle cx="50" cy="75" r="15" class="node-circle"/> <text x="50" y="75">1</text>
+            <circle cx="150" cy="25" r="15" class="node-circle"/> <text x="150" y="25">2</text>
+            <circle cx="150" cy="125" r="15" class="node-circle"/> <text x="150" y="125">3</text>
+            <circle cx="250" cy="125" r="15" class="node-circle"/> <text x="250" y="125">4</text>
+            <circle cx="250" cy="75" r="15" class="node-circle"/> <text x="250" y="75">5</text>
+        </svg>
+    </div>
+
+    <p>
+        Độ dài của một đường đi trong đồ thị có trọng số là tổng các trọng số cạnh trên đường đi. Ví dụ, trong đồ thị trên, độ dài của đường đi \(1 \to 2 \to 5\) là \(5+7=12\), và độ dài của đường đi \(1 \to 3 \to 4 \to 5\) là \(1+6+3=10\) (giả sử trọng số 3-4 là 6 và 4-5 là 3). Đường đi sau là đường đi ngắn nhất từ nút 1 đến nút 5.
+    </p>
+
+    <h3>Láng giềng và bậc (Neighbors and degrees)</h3>
+    <p>
+        Hai nút là <strong>láng giềng</strong> (neighbors) hoặc kề nhau nếu có một cạnh giữa chúng. <strong>Bậc</strong> (degree) của một nút là số lượng láng giềng của nó. Ví dụ, trong đồ thị dưới đây, các láng giềng của nút 2 là 1, 4 và 5, vì vậy bậc của nó là 3.
+    </p>
+    <p>
+        Tổng các bậc trong một đồ thị luôn là \(2m\), trong đó \(m\) là số lượng cạnh, bởi vì mỗi cạnh làm tăng bậc của chính xác hai nút lên một. Vì lý do này, tổng các bậc luôn là số chẵn.
+    </p>
+    <p>
+        Một đồ thị là <strong>đều</strong> (regular) nếu bậc của mọi nút là hằng số \(d\). Một đồ thị là <strong>đầy đủ</strong> (complete) nếu bậc của mọi nút là \(n-1\), tức là đồ thị chứa tất cả các cạnh có thể giữa các nút.
+    </p>
+    <p>
+        Trong một đồ thị có hướng, <strong>bán bậc vào</strong> (indegree) của một nút là số lượng cạnh kết thúc tại nút đó, và <strong>bán bậc ra</strong> (outdegree) của một nút là số lượng cạnh bắt đầu tại nút đó.
+    </p>
+
+    <h3>Tô màu (Colorings)</h3>
+    <p>
+        Trong một bài toán tô màu đồ thị, mỗi nút được gán một màu sao cho không có hai nút kề nhau nào có cùng màu. Một đồ thị là <strong>hai phía</strong> (bipartite) nếu có thể tô màu nó bằng hai màu. Hóa ra một đồ thị là hai phía khi và chỉ khi nó không chứa chu trình có độ dài lẻ.
+    </p>
+
+    <div class="graphic-box">
+        <svg width="250" height="120" viewBox="0 0 250 120">
+            <line x1="50" y1="60" x2="125" y2="20" class="edge-line"/>
+            <line x1="50" y1="60" x2="125" y2="100" class="edge-line"/>
+            <line x1="200" y1="60" x2="125" y2="20" class="edge-line"/>
+            <line x1="200" y1="60" x2="125" y2="100" class="edge-line"/>
+            
+            <circle cx="50" cy="60" r="18" class="node-circle node-colored-1"/> <text x="50" y="60">2</text>
+            <circle cx="200" cy="60" r="18" class="node-circle node-colored-1"/> <text x="200" y="60">5</text>
+            
+            <circle cx="125" cy="20" r="18" class="node-circle node-colored-2"/> <text x="125" y="20">3</text>
+            <circle cx="125" cy="100" r="18" class="node-circle node-colored-2"/> <text x="125" y="100">6</text>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 11.3: Đồ thị hai phía (Các nút kề nhau có màu khác nhau)</div>
+    </div>
+
+    <h3>Đơn đồ thị (Simplicity)</h3>
+    <p>
+        Một đồ thị là <strong>đơn</strong> (simple) nếu không có cạnh nào bắt đầu và kết thúc tại cùng một nút (khuyên), và không có nhiều cạnh giữa hai nút (đa cạnh). Thường thì chúng ta giả định rằng các đồ thị là đơn.
+    </p>
+
+    <h2 id="sec11.2">11.2 Biểu diễn đồ thị (Graph representation)</h2>
+    <p>
+        Có một số cách để biểu diễn đồ thị trong thuật toán. Việc lựa chọn cấu trúc dữ liệu phụ thuộc vào kích thước của đồ thị và cách thuật toán xử lý nó. Tiếp theo chúng ta sẽ đi qua ba biểu diễn phổ biến.
+    </p>
+
+    <h3>Biểu diễn danh sách kề (Adjacency list representation)</h3>
+    <p>
+        Trong biểu diễn danh sách kề, mỗi nút \(x\) trong đồ thị được gán một danh sách kề bao gồm các nút mà có cạnh từ \(x\) đến chúng. Danh sách kề là cách phổ biến nhất để biểu diễn đồ thị, và hầu hết các thuật toán có thể được cài đặt hiệu quả bằng cách sử dụng chúng.
+    </p>
+    <p>
+        Một cách thuận tiện để lưu trữ các danh sách kề là khai báo một mảng các vector như sau:
+    </p>
+<pre><code><span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt; adj[N];</code></pre>
+    <p>
+        Hằng số \(N\) được chọn sao cho tất cả các danh sách kề có thể được lưu trữ. Ví dụ, đồ thị sau:
+    </p>
+    <div class="graphic-box">
+        <svg width="200" height="100" viewBox="0 0 200 100">
+            <line x1="50" y1="50" x2="100" y2="20" class="edge-line"/> <line x1="100" y1="20" x2="150" y2="50" class="edge-line"/> <line x1="100" y1="20" x2="100" y2="80" class="edge-line"/> <line x1="150" y1="50" x2="100" y2="80" class="edge-line"/> <line x1="100" y1="80" x2="50" y2="50" class="edge-line"/> <circle cx="50" cy="50" r="15" class="node-circle"/> <text x="50" y="50">1</text>
+            <circle cx="100" cy="20" r="15" class="node-circle"/> <text x="100" y="20">2</text>
+            <circle cx="150" cy="50" r="15" class="node-circle"/> <text x="150" y="50">3</text>
+            <circle cx="100" cy="80" r="15" class="node-circle"/> <text x="100" y="80">4</text>
+        </svg>
+    </div>
+    <p>
+        có thể được lưu trữ như sau:
+    </p>
+<pre><code>adj[<span class="cpp-number">1</span>].push_back(<span class="cpp-number">2</span>);
+adj[<span class="cpp-number">2</span>].push_back(<span class="cpp-number">3</span>);
+adj[<span class="cpp-number">2</span>].push_back(<span class="cpp-number">4</span>);
+adj[<span class="cpp-number">3</span>].push_back(<span class="cpp-number">4</span>);
+adj[<span class="cpp-number">4</span>].push_back(<span class="cpp-number">1</span>);</code></pre>
+    <p>
+        Nếu đồ thị là vô hướng, nó có thể được lưu trữ theo cách tương tự, nhưng mỗi cạnh được thêm vào theo cả hai hướng.
+    </p>
+    <p>
+        Đối với đồ thị có trọng số, cấu trúc có thể được mở rộng như sau:
+    </p>
+<pre><code><span class="cpp-type">vector</span>&lt;<span class="cpp-type">pair</span>&lt;<span class="cpp-keyword">int</span>,<span class="cpp-keyword">int</span>&gt;&gt; adj[N];</code></pre>
+    <p>
+        Trong trường hợp này, danh sách kề của nút \(a\) chứa cặp \((b,w)\) luôn khi có một cạnh từ nút \(a\) đến nút \(b\) với trọng số \(w\).
+    </p>
+    <p>
+        Lợi ích của việc sử dụng danh sách kề là chúng ta có thể tìm thấy hiệu quả các nút mà chúng ta có thể di chuyển đến từ một nút cho trước thông qua một cạnh. Ví dụ, vòng lặp sau đi qua tất cả các nút mà chúng ta có thể di chuyển đến từ nút \(s\):
+    </p>
+<pre><code><span class="cpp-keyword">for</span> (<span class="cpp-keyword">auto</span> u : adj[s]) {
+    <span class="cpp-comment">// process node u</span>
+}</code></pre>
+
+    <h3>Biểu diễn ma trận kề (Adjacency matrix representation)</h3>
+    <p>
+        Ma trận kề là một mảng hai chiều chỉ ra các cạnh mà đồ thị chứa. Chúng ta có thể kiểm tra hiệu quả từ ma trận kề xem có cạnh giữa hai nút hay không. Ma trận có thể được lưu trữ dưới dạng mảng <code>int adj[N][N];</code> trong đó mỗi giá trị <code>adj[a][b]</code> chỉ ra liệu đồ thị có chứa cạnh từ nút \(a\) đến nút \(b\) hay không. Nếu cạnh tồn tại, thì <code>adj[a][b] = 1</code>, và ngược lại <code>adj[a][b] = 0</code>.
+    </p>
+    <p>
+        Ví dụ, đồ thị trên có thể được biểu diễn như sau:
+    </p>
+    <table>
+        <tr><th></th><th>1</th><th>2</th><th>3</th><th>4</th></tr>
+        <tr><th>1</th><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+        <tr><th>2</th><td>0</td><td>0</td><td>1</td><td>1</td></tr>
+        <tr><th>3</th><td>0</td><td>0</td><td>0</td><td>1</td></tr>
+        <tr><th>4</th><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+    </table>
+    <p>
+        Nếu đồ thị có trọng số, biểu diễn ma trận kề có thể được mở rộng sao cho ma trận chứa trọng số của cạnh nếu cạnh tồn tại.
+    </p>
+    <p>
+        Nhược điểm của biểu diễn ma trận kề là ma trận chứa \(n^2\) phần tử, và thường thì hầu hết chúng là số không. Vì lý do này, biểu diễn này không thể được sử dụng nếu đồ thị lớn.
+    </p>
+
+    <h3>Biểu diễn danh sách cạnh (Edge list representation)</h3>
+    <p>
+        Danh sách cạnh chứa tất cả các cạnh của đồ thị theo một thứ tự nào đó. Đây là một cách thuận tiện để biểu diễn đồ thị nếu thuật toán xử lý tất cả các cạnh của đồ thị và không cần tìm các cạnh bắt đầu tại một nút nhất định.
+    </p>
+    <p>
+        Danh sách cạnh có thể được lưu trữ trong một vector:
+    </p>
+<pre><code><span class="cpp-type">vector</span>&lt;<span class="cpp-type">pair</span>&lt;<span class="cpp-keyword">int</span>,<span class="cpp-keyword">int</span>&gt;&gt; edges;</code></pre>
+    <p>
+        trong đó mỗi cặp \((a,b)\) biểu thị rằng có một cạnh từ nút \(a\) đến nút \(b\).
+    </p>
+<pre><code>edges.push_back({<span class="cpp-number">1</span>,<span class="cpp-number">2</span>});
+edges.push_back({<span class="cpp-number">2</span>,<span class="cpp-number">3</span>});
+edges.push_back({<span class="cpp-number">2</span>,<span class="cpp-number">4</span>});
+edges.push_back({<span class="cpp-number">3</span>,<span class="cpp-number">4</span>});
+edges.push_back({<span class="cpp-number">4</span>,<span class="cpp-number">1</span>});</code></pre>
+    <p>
+        Nếu đồ thị có trọng số, cấu trúc có thể được mở rộng như sau:
+    </p>
+<pre><code><span class="cpp-type">vector</span>&lt;<span class="cpp-type">tuple</span>&lt;<span class="cpp-keyword">int</span>,<span class="cpp-keyword">int</span>,<span class="cpp-keyword">int</span>&gt;&gt; edges;</code></pre>
+    <p>
+        Mỗi phần tử trong danh sách này có dạng \((a,b,w)\), nghĩa là có một cạnh từ nút \(a\) đến nút \(b\) với trọng số \(w\).
+    </p>
+
+</body>
+</html>

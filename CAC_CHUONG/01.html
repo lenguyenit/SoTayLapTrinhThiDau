@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPH - Chương 1: Giới thiệu</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h1 { margin-top: 40px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        
+        /* Code styling */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #f1f3f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+        
+        /* Syntax highlighting */
+        .cpp-keyword { color: #0000ff; font-weight: bold; }
+        .cpp-type { color: #2b91af; }
+        .cpp-number { color: #098658; }
+        .cpp-string { color: #a31515; }
+        .cpp-comment { color: #008000; font-style: italic; }
+        .cpp-preprocessor { color: #7f0055; }
+
+        /* Graphics Containers */
+        .graphic-box {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        /* SVG Styling */
+        svg text { font-family: "Segoe UI", sans-serif; font-size: 14px; text-anchor: middle; dominant-baseline: central; font-weight: bold; }
+        .io-box { fill: #e3f2fd; stroke: #2196f3; stroke-width: 2; }
+        .arrow-line { stroke: #555; stroke-width: 2; marker-end: url(#arrowIntro); }
+        .range-line { stroke: #333; stroke-width: 2; }
+        .range-mark { stroke: #c0392b; stroke-width: 3; }
+        .venn-circle { fill-opacity: 0.4; stroke-width: 2; }
+
+        /* TOC */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc a { text-decoration: none; color: #007bff; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="toc">
+        <h3>Mục lục - Chương 1</h3>
+        <ul>
+            <li><a href="#intro">Giới thiệu</a></li>
+            <li><a href="#sec1.1">1.1 Ngôn ngữ lập trình C++</a></li>
+            <li><a href="#sec1.2">1.2 Nhập và xuất dữ liệu</a></li>
+            <li><a href="#sec1.3">1.3 Làm việc với các con số</a></li>
+            <li><a href="#sec1.4">1.4 Rút gọn code</a></li>
+            <li><a href="#sec1.5">1.5 Toán học cơ bản</a></li>
+        </ul>
+    </div>
+
+    <h1 id="intro">Chương 1: Giới thiệu (Introduction)</h1>
+    <p>
+        Lập trình thi đấu (Competitive programming) là sự kết hợp giữa hai chủ đề chính:
+    </p>
+    <ul>
+        <li><strong>Thiết kế thuật toán:</strong> Sáng tạo ra các phương pháp giải quyết vấn đề.</li>
+        <li><strong>Cài đặt thuật toán:</strong> Viết mã nguồn (code) để thực thi các phương pháp đó.</li>
+    </ul>
+    <p>
+        Mục tiêu là viết chương trình giải quyết bài toán trong giới hạn thời gian và bộ nhớ cho trước.
+    </p>
+
+    <h2 id="sec1.1">1.1 Ngôn ngữ lập trình C++</h2>
+    <p>
+        Cuốn sách này sử dụng C++, ngôn ngữ phổ biến nhất trong các kỳ thi lập trình nhờ hiệu suất cao và thư viện chuẩn (Standard Template Library - STL) phong phú.
+    </p>
+    
+    <h3>Mẫu code chuẩn (Template)</h3>
+    <p>
+        Một đoạn code C++ cơ bản trong lập trình thi đấu thường có dạng:
+    </p>
+
+<pre><code><span class="cpp-preprocessor">#include</span> &lt;bits/stdc++.h&gt; <span class="cpp-comment">// Thư viện tổng hợp (GCC)</span>
+<span class="cpp-keyword">using</span> <span class="cpp-keyword">namespace</span> std;
+
+<span class="cpp-keyword">int</span> main() {
+    <span class="cpp-comment">// Lời giải được viết ở đây</span>
+    <span class="cpp-keyword">return</span> <span class="cpp-number">0</span>;
+}</code></pre>
+
+    <p>
+        Lưu ý: <code>#include &lt;bits/stdc++.h&gt;</code> không thuộc chuẩn C++ chính thức nhưng được hỗ trợ bởi trình biên dịch <code>g++</code>. Nó tự động bao gồm tất cả các thư viện cần thiết (iostream, vector, algorithm, v.v.).
+    </p>
+
+    <h2 id="sec1.2">1.2 Nhập và xuất dữ liệu (Input and output)</h2>
+    <p>
+        Trong nhiều bài toán, lượng dữ liệu nhập/xuất rất lớn, nên việc tối ưu hóa I/O là rất quan trọng.
+    </p>
+
+    <h3>Luồng C++ (C++ Streams)</h3>
+    <p>
+        Sử dụng <code>cin</code> để nhập và <code>cout</code> để xuất.
+        Mặc định, chúng có thể chậm hơn <code>scanf/printf</code> của C. Để tăng tốc, ta thêm hai dòng này vào đầu hàm <code>main</code>:
+    </p>
+<pre><code><span class="cpp-keyword">ios</span>::sync_with_stdio(<span class="cpp-number">0</span>);
+<span class="cpp-keyword">cin</span>.tie(<span class="cpp-number">0</span>);</code></pre>
+
+    <h3>Dòng mới (Newline)</h3>
+    <p>
+        Ký tự <code>\n</code> nhanh hơn <code>endl</code>.
+        Lý do: <code>endl</code> luôn kích hoạt việc "xả bộ đệm" (flush operation), điều này làm chậm chương trình nếu thực hiện nhiều lần.
+    </p>
+
+    <h3>Nhập xuất file</h3>
+    <p>
+        Một số hệ thống chấm bài yêu cầu đọc/ghi từ file. Ta dùng hàm <code>freopen</code>:
+    </p>
+<pre><code><span class="cpp-func">freopen</span>(<span class="cpp-string">"input.txt"</span>, <span class="cpp-string">"r"</span>, stdin);
+<span class="cpp-func">freopen</span>(<span class="cpp-string">"output.txt"</span>, <span class="cpp-string">"w"</span>, stdout);</code></pre>
+
+    <div class="graphic-box">
+        <svg width="450" height="150" viewBox="0 0 450 150">
+            <defs>
+                <marker id="arrowIntro" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#555" />
+                </marker>
+            </defs>
+            
+            <g transform="translate(20, 20)">
+                <rect x="0" y="20" width="100" height="60" class="io-box" fill="#fff"/>
+                <text x="50" y="55">Input Data</text>
+                
+                <line x1="100" y1="50" x2="160" y2="50" class="arrow-line"/>
+                
+                <rect x="160" y="10" width="130" height="80" rx="10" fill="#fce4ec" stroke="#e91e63" stroke-width="2"/>
+                <text x="225" y="40" font-weight="bold">Chương trình</text>
+                <text x="225" y="60" font-size="12">ios::sync_with_stdio(0)</text>
+                <text x="225" y="75" font-size="12">cin.tie(0)</text>
+                
+                <line x1="290" y1="50" x2="350" y2="50" class="arrow-line"/>
+                
+                <rect x="350" y="20" width="100" height="60" class="io-box" fill="#fff"/>
+                <text x="400" y="55">Output Data</text>
+            </g>
+            <text x="225" y="130" fill="#555" font-style="italic">Tối ưu hóa luồng I/O để tránh TLE</text>
+        </svg>
+    </div>
+
+    <h2 id="sec1.3">1.3 Làm việc với các con số (Working with numbers)</h2>
+    
+    <h3>Số nguyên (Integers)</h3>
+    <p>
+        Lựa chọn kiểu số nguyên phù hợp là rất quan trọng để tránh tràn số (overflow).
+    </p>
+    <ul>
+        <li><code>int</code>: 32-bit. Miền giá trị: \([-2 \cdot 10^9, 2 \cdot 10^9]\).</li>
+        <li><code>long long</code>: 64-bit. Miền giá trị: \([-9 \cdot 10^{18}, 9 \cdot 10^{18}]\).</li>
+        <li><code>__int128_t</code>: 128-bit (chỉ có trong <code>g++</code>). Miền giá trị cực lớn, khoảng \(10^{38}\).</li>
+    </ul>
+    
+    <div class="graphic-box">
+        <svg width="400" height="100" viewBox="0 0 400 100">
+            <line x1="20" y1="50" x2="380" y2="50" class="range-line"/>
+            
+            <line x1="150" y1="40" x2="150" y2="60" class="range-mark"/>
+            <text x="150" y="30" font-size="12">-2*10^9</text>
+            
+            <line x1="250" y1="40" x2="250" y2="60" class="range-mark"/>
+            <text x="250" y="30" font-size="12">2*10^9</text>
+            
+            <rect x="150" y="48" width="100" height="4" fill="#c0392b"/>
+            <text x="200" y="80" font-size="12" fill="#c0392b">int (32-bit)</text>
+
+            <text x="50" y="80" font-size="12" fill="#2980b9">&lt;-- long long --&gt;</text>
+            <text x="350" y="80" font-size="12" fill="#2980b9">&lt;-- long long --&gt;</text>
+        </svg>
+    </div>
+
+    <h3>Số học module (Modular arithmetic)</h3>
+    <p>
+        Ký hiệu \(x \bmod m\) là phần dư của phép chia \(x\) cho \(m\).
+        Các tính chất quan trọng để tránh tràn số khi tính toán:
+        $$ (a + b) \bmod m = (a \bmod m + b \bmod m) \bmod m $$
+        $$ (a - b) \bmod m = (a \bmod m - b \bmod m + m) \bmod m $$
+        $$ (a \cdot b) \bmod m = (a \bmod m \cdot b \bmod m) \bmod m $$
+    </p>
+    <p>
+        <strong>Lưu ý quan trọng:</strong> Trong C++, kết quả của số âm chia lấy dư có thể là số âm (ví dụ: <code>-5 % 3 = -2</code>). Do đó, công thức trừ cần cộng thêm \(m\) trước khi lấy dư lần cuối để đảm bảo kết quả dương.
+    </p>
+
+    <h3>Số thực (Floating point numbers)</h3>
+    <p>
+        Các kiểu dữ liệu:
+        <ul>
+            <li><code>double</code>: 64-bit, độ chính xác khoảng 15 chữ số.</li>
+            <li><code>long double</code>: 80-bit hoặc 128-bit (tùy trình biên dịch), độ chính xác cao hơn.</li>
+        </ul>
+        Để xuất số thực với độ chính xác cố định (ví dụ 9 chữ số thập phân), dùng <code>printf</code>:
+    </p>
+<pre><code><span class="cpp-func">printf</span>(<span class="cpp-string">"%.9f\n"</span>, x);</code></pre>
+    <p>
+        <strong>So sánh số thực:</strong> Không bao giờ dùng <code>==</code> do sai số. Hãy so sánh chênh lệch với một số \(\epsilon\) nhỏ (ví dụ \(10^{-9}\)):
+    </p>
+<pre><code><span class="cpp-keyword">if</span> (abs(a - b) &lt; <span class="cpp-number">1e-9</span>) { <span class="cpp-comment">/* a và b bằng nhau */</span> }</code></pre>
+
+    <h2 id="sec1.4">1.4 Rút gọn code (Shortening code)</h2>
+    <p>
+        Lập trình thi đấu cần tốc độ viết code nhanh. Các kỹ thuật rút gọn thường dùng:
+    </p>
+
+    <h3>Tên kiểu dữ liệu (Typedef)</h3>
+<pre><code><span class="cpp-keyword">typedef</span> <span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> ll;
+<span class="cpp-keyword">typedef</span> <span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt; vi;
+<span class="cpp-keyword">typedef</span> <span class="cpp-type">pair</span>&lt;<span class="cpp-keyword">int</span>,<span class="cpp-keyword">int</span>&gt; pi;</code></pre>
+
+    <h3>Macro</h3>
+<pre><code><span class="cpp-preprocessor">#define</span> F first
+<span class="cpp-preprocessor">#define</span> S second
+<span class="cpp-preprocessor">#define</span> PB push_back
+<span class="cpp-preprocessor">#define</span> MP make_pair
+<span class="cpp-comment">// Duyệt vòng lặp nhanh</span>
+<span class="cpp-preprocessor">#define</span> REP(i,a,b) <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = a; i &lt;= b; i++)</code></pre>
+
+    <h2 id="sec1.5">1.5 Toán học cơ bản (Mathematics)</h2>
+    
+    <h3>Công thức tổng</h3>
+    <p>
+        Tổng cấp số cộng:
+        $$ \sum_{i=1}^n i = \frac{n(n+1)}{2} $$
+        Tổng bình phương:
+        $$ \sum_{i=1}^n i^2 = \frac{n(n+1)(2n+1)}{6} $$
+        Tổng cấp số nhân (với \(k \neq 1\)):
+        $$ \sum_{i=0}^{n-1} a k^i = a \frac{k^n - 1}{k - 1} $$
+    </p>
+
+    <h3>Lý thuyết tập hợp</h3>
+    <ul>
+        <li>Tập con: \(A \subset B\).</li>
+        <li>Giao: \(A \cap B\).</li>
+        <li>Hợp: \(A \cup B\).</li>
+        <li>Phần bù: \(A^c\) (hoặc \(A \setminus B\)).</li>
+    </ul>
+
+    <h3>Logic</h3>
+    <ul>
+        <li>Phủ định: \(\neg A\).</li>
+        <li>Hội (Và): \(A \land B\).</li>
+        <li>Tuyển (Hoặc): \(A \lor B\).</li>
+        <li>Kéo theo: \(A \Rightarrow B\) (tương đương \(\neg A \lor B\)).</li>
+        <li>Tương đương: \(A \Leftrightarrow B\).</li>
+    </ul>
+
+</body>
+</html>

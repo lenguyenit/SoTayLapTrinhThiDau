@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPH - Chương 19: Đường đi và chu trình</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h1 { margin-top: 40px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        
+        /* Code styling */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #f1f3f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+        
+        /* Syntax highlighting */
+        .cpp-keyword { color: #0000ff; font-weight: bold; }
+        .cpp-type { color: #2b91af; }
+        .cpp-number { color: #098658; }
+        .cpp-string { color: #a31515; }
+        .cpp-func { color: #795e26; }
+        .cpp-comment { color: #008000; font-style: italic; }
+
+        /* Graphics Containers */
+        .graphic-box {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        
+        /* SVG Styling */
+        svg text { font-family: "Segoe UI", sans-serif; font-size: 14px; text-anchor: middle; dominant-baseline: central; font-weight: bold; }
+        .node-circle { fill: #fff; stroke: #2c3e50; stroke-width: 2; }
+        .node-highlight { fill: #fff9c4; stroke: #fbc02d; stroke-width: 2; }
+        .edge-line { stroke: #555; stroke-width: 2; }
+        .edge-path { stroke: #e65100; stroke-width: 3; }
+        .arrow-head { fill: #e65100; }
+        
+        /* TOC */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc a { text-decoration: none; color: #007bff; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="toc">
+        <h3>Mục lục - Chương 19</h3>
+        <ul>
+            <li><a href="#intro">Đường đi và chu trình</a></li>
+            <li><a href="#sec19.1">19.1 Đường đi Euler</a></li>
+            <li><a href="#sec19.2">19.2 Đường đi Hamilton</a></li>
+            <li><a href="#sec19.3">19.3 Dãy De Bruijn</a></li>
+            <li><a href="#sec19.4">19.4 Hành trình của quân mã</a></li>
+        </ul>
+    </div>
+
+    <h1 id="intro">Chương 19: Đường đi và chu trình (Paths and circuits)</h1>
+    <p>
+        Chương này tập trung vào hai loại đường đi đặc biệt trong đồ thị:
+    </p>
+    <ul>
+        <li><strong>Đường đi Euler</strong> (Eulerian path): Một đường đi đi qua mỗi cạnh của đồ thị chính xác một lần.</li>
+        <li><strong>Đường đi Hamilton</strong> (Hamiltonian path): Một đường đi đi qua mỗi nút của đồ thị chính xác một lần.</li>
+    </ul>
+    <p>
+        Thoạt nhìn, hai bài toán này có vẻ tương tự nhau, nhưng thực tế chúng rất khác biệt về độ khó tính toán. Việc kiểm tra sự tồn tại của đường đi Euler và tìm ra nó có thể thực hiện hiệu quả trong thời gian đa thức. Ngược lại, bài toán đường đi Hamilton là bài toán NP-khó, và không có thuật toán thời gian đa thức nào được biết đến để giải quyết nó.
+    </p>
+
+    <h2 id="sec19.1">19.1 Đường đi Euler (Eulerian paths)</h2>
+    <p>
+        Một <strong>đường đi Euler</strong> là một đường đi đi qua mọi cạnh của đồ thị đúng một lần. Một <strong>chu trình Euler</strong> (Eulerian circuit) là một đường đi Euler bắt đầu và kết thúc tại cùng một nút.
+    </p>
+
+    <h3>Điều kiện tồn tại</h3>
+    <p>
+        Sự tồn tại của đường đi và chu trình Euler phụ thuộc vào bậc của các nút.
+    </p>
+    <p><strong>Đồ thị vô hướng:</strong></p>
+    <ul>
+        <li>Một đồ thị vô hướng có <strong>chu trình Euler</strong> khi và chỉ khi nó liên thông (ngoại trừ các nút cô lập) và mọi nút đều có <strong>bậc chẵn</strong>.</li>
+        <li>Một đồ thị vô hướng có <strong>đường đi Euler</strong> khi và chỉ khi nó liên thông và số lượng nút có <strong>bậc lẻ</strong> là 0 hoặc 2. (Nếu là 2, đường đi bắt đầu tại một nút bậc lẻ và kết thúc tại nút bậc lẻ còn lại).</li>
+    </ul>
+    <p><strong>Đồ thị có hướng:</strong></p>
+    <ul>
+        <li>Một đồ thị có hướng có <strong>chu trình Euler</strong> khi và chỉ khi nó liên thông mạnh (xét các cạnh có hướng) và với mọi nút, <strong>bán bậc vào bằng bán bậc ra</strong>.</li>
+        <li>Một đồ thị có hướng có <strong>đường đi Euler</strong> khi và chỉ khi nó liên thông và:
+            <ul>
+                <li>Với mỗi nút, bán bậc vào bằng bán bậc ra, NGOẠI TRỪ:</li>
+                <li>Có một nút mà bán bậc ra = bán bậc vào + 1 (nút bắt đầu).</li>
+                <li>Có một nút mà bán bậc vào = bán bậc ra + 1 (nút kết thúc).</li>
+            </ul>
+        </li>
+    </ul>
+
+    <div class="graphic-box">
+        <svg width="350" height="220" viewBox="0 0 350 220">
+            <g id="euler-edges">
+                <line x1="175" y1="110" x2="100" y2="50" class="edge-path"/> <line x1="100" y1="50" x2="100" y2="170" class="edge-path"/> <line x1="100" y1="170" x2="175" y2="110" class="edge-path"/> <line x1="175" y1="110" x2="250" y2="50" class="edge-path"/> <line x1="250" y1="50" x2="250" y2="170" class="edge-path"/> <line x1="250" y1="170" x2="175" y2="110" class="edge-path"/> </g>
+
+            <g id="euler-nodes">
+                <circle cx="100" cy="50" r="18" class="node-circle"/> <text x="100" y="50">1</text>
+                <circle cx="100" cy="170" r="18" class="node-circle"/> <text x="100" y="170">2</text>
+                
+                <circle cx="175" cy="110" r="18" class="node-highlight"/> <text x="175" y="110">3</text>
+                
+                <circle cx="250" cy="50" r="18" class="node-circle"/> <text x="250" y="50">4</text>
+                <circle cx="250" cy="170" r="18" class="node-circle"/> <text x="250" y="170">5</text>
+            </g>
+            
+            <text x="175" y="210" font-size="13" fill="#666" font-style="italic">Bậc: 1(2), 2(2), 3(4), 4(2), 5(2) → Chu trình Euler</text>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 19.1: Đồ thị có chu trình Euler (Tất cả nút đều có bậc chẵn)</div>
+    </div>
+
+    <h3>Thuật toán Hierholzer</h3>
+    <p>
+        Thuật toán Hierholzer là một phương pháp hiệu quả để tìm chu trình Euler. Ý tưởng là xây dựng chu trình bằng cách đi theo các cạnh chưa thăm cho đến khi quay lại nút bắt đầu. Điều này tạo ra một chu trình đơn. Nếu còn cạnh chưa được thăm thuộc về một nút trong chu trình này, chúng ta tiếp tục mở rộng chu trình từ nút đó.
+    </p>
+    <p>
+        Cách cài đặt đơn giản nhất sử dụng ngăn xếp hoặc đệ quy (DFS). Chúng ta thêm nút vào danh sách kết quả <strong>sau khi</strong> đã duyệt xong tất cả các cạnh kề của nó. Kết quả là chu trình Euler theo thứ tự ngược.
+    </p>
+
+    <h4>Cài đặt</h4>
+    <p>
+        Dưới đây là cài đặt cho đồ thị có hướng. Đối với đồ thị vô hướng, ta cần thêm logic để xử lý việc xóa cạnh theo cả hai chiều.
+    </p>
+
+<pre><code><span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt; adj[N];
+<span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt; circuit;
+<span class="cpp-type">unordered_map</span>&lt;<span class="cpp-keyword">int</span>, <span class="cpp-keyword">int</span>&gt; out_degree, in_degree;
+
+<span class="cpp-keyword">void</span> <span class="cpp-func">find_circuit</span>(<span class="cpp-keyword">int</span> s) {
+    <span class="cpp-keyword">while</span> (!adj[s].empty()) {
+        <span class="cpp-keyword">int</span> u = adj[s].back();
+        adj[s].pop_back(); <span class="cpp-comment">// Xóa cạnh s->u</span>
+        <span class="cpp-func">find_circuit</span>(u);
+    }
+    circuit.push_back(s);
+}
+
+<span class="cpp-comment">// Trong hàm main, sau khi gọi find_circuit(start_node):</span>
+<span class="cpp-comment">// reverse(circuit.begin(), circuit.end());</span></code></pre>
+
+    <h2 id="sec19.2">19.2 Đường đi Hamilton (Hamiltonian paths)</h2>
+    <p>
+        Một <strong>đường đi Hamilton</strong> là một đường đi đi qua mỗi nút của đồ thị chính xác một lần. Một <strong>chu trình Hamilton</strong> là một đường đi Hamilton bắt đầu và kết thúc tại cùng một nút.
+    </p>
+    <p>
+        Bài toán kiểm tra sự tồn tại của đường đi Hamilton là NP-đầy đủ. Không có thuật toán hiệu quả nào được biết đến để giải quyết bài toán này cho đồ thị tổng quát. Tuy nhiên, chúng ta có thể sử dụng quy hoạch động để giải quyết nó trong thời gian \(O(n^2 2^n)\), nhanh hơn so với vét cạn \(O(n!)\).
+    </p>
+
+    <div class="graphic-box">
+        <svg width="300" height="200" viewBox="0 0 300 200">
+            <defs>
+                <marker id="arrowHam" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#e65100" />
+                </marker>
+            </defs>
+
+            <g id="ham-edges">
+                <line x1="50" y1="50" x2="150" y2="50" class="edge-path" marker-end="url(#arrowHam)"/>
+                <line x1="150" y1="50" x2="250" y2="150" class="edge-path" marker-end="url(#arrowHam)"/>
+                <line x1="250" y1="150" x2="50" y2="150" class="edge-path" marker-end="url(#arrowHam)"/>
+                
+                <line x1="50" y1="50" x2="50" y2="150" class="edge-line"/>
+                <line x1="150" y1="50" x2="50" y2="150" class="edge-line"/>
+            </g>
+
+            <g id="ham-nodes">
+                <circle cx="50" cy="50" r="15" class="node-circle"/> <text x="50" y="50">1</text>
+                <circle cx="150" cy="50" r="15" class="node-circle"/> <text x="150" y="50">2</text>
+                <circle cx="250" cy="150" r="15" class="node-circle"/> <text x="250" y="150">3</text>
+                <circle cx="50" cy="150" r="15" class="node-circle"/> <text x="50" y="150">4</text>
+            </g>
+            <text x="150" y="185" font-size="12" fill="#e65100" font-weight="bold">Đường đi: 1 -> 2 -> 3 -> 4</text>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 19.2: Đường đi Hamilton đi qua tất cả các nút</div>
+    </div>
+
+    <h3>Quy hoạch động</h3>
+    <p>
+        Ý tưởng là xây dựng đường đi từng bước một. Trạng thái của quy hoạch động là một cặp \((S, x)\), trong đó \(S\) là tập hợp con các nút đã được thăm và \(x\) là nút cuối cùng được thăm (hiện tại).
+    </p>
+    <p>
+        Gọi \(dp[S][x]\) là biến boolean: có tồn tại đường đi Hamilton đi qua các nút trong \(S\) và kết thúc tại \(x\) hay không.
+        $$ dp[S][x] = \bigvee_{p \in S \setminus \{x\}, (p,x) \in E} dp[S \setminus \{x\}][p] $$
+        Nghĩa là, ta có thể đến trạng thái \((S, x)\) nếu trước đó ta ở trạng thái \((S \setminus \{x\}, p)\) và có cạnh nối từ \(p\) đến \(x\).
+    </p>
+
+    <h4>Cài đặt</h4>
+<pre><code><span class="cpp-keyword">bool</span> dp[<span class="cpp-number">1</span>&lt;&lt;N][N]; <span class="cpp-comment">// N là số lượng nút tối đa (ví dụ 20)</span>
+
+<span class="cpp-comment">// Khởi tạo: đường đi chỉ có nút bắt đầu (ví dụ nút 0)</span>
+<span class="cpp-comment">// Nếu muốn tìm đường đi từ bất kỳ đâu, khởi tạo dp[1<<i][i] = true cho mọi i</span>
+dp[<span class="cpp-number">1</span>&lt;&lt;<span class="cpp-number">0</span>][<span class="cpp-number">0</span>] = <span class="cpp-keyword">true</span>;
+
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> s = <span class="cpp-number">0</span>; s &lt; (<span class="cpp-number">1</span>&lt;&lt;n); s++) {
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> u = <span class="cpp-number">0</span>; u &lt; n; u++) {
+        <span class="cpp-keyword">if</span> ((s & (<span class="cpp-number">1</span>&lt;&lt;u)) == <span class="cpp-number">0</span>) <span class="cpp-keyword">continue</span>; <span class="cpp-comment">// u không có trong s</span>
+        
+        <span class="cpp-keyword">int</span> prev = s ^ (<span class="cpp-number">1</span>&lt;&lt;u); <span class="cpp-comment">// Tập hợp trước đó khi chưa có u</span>
+        <span class="cpp-keyword">if</span> (prev == <span class="cpp-number">0</span>) <span class="cpp-keyword">continue</span>;
+
+        <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> v = <span class="cpp-number">0</span>; v &lt; n; v++) {
+            <span class="cpp-keyword">if</span> ((prev & (<span class="cpp-number">1</span>&lt;&lt;v)) && adj[v][u]) { <span class="cpp-comment">// Có cạnh v->u</span>
+                <span class="cpp-keyword">if</span> (dp[prev][v]) {
+                    dp[s][u] = <span class="cpp-keyword">true</span>;
+                    <span class="cpp-keyword">break</span>;
+                }
+            }
+        }
+    }
+}</code></pre>
+
+    <h2 id="sec19.3">19.3 Dãy De Bruijn (De Bruijn sequences)</h2>
+    <p>
+        Một <strong>dãy De Bruijn</strong> \(B(k, n)\) là một chuỗi tuần hoàn chứa mọi chuỗi con có độ dài \(n\) sử dụng \(k\) ký tự trong bảng chữ cái (ví dụ: \(0, 1, \dots, k-1\)) chính xác một lần. Độ dài của dãy là \(k^n\).
+    </p>
+    <p>
+        Ví dụ, với \(k=2\) (ký tự 0 và 1) và \(n=3\), một dãy De Bruijn là <code>00010111</code>. Các chuỗi con độ dài 3 là:
+        <code>000</code>, <code>001</code>, <code>010</code>, <code>101</code>, <code>011</code>, <code>111</code>, <code>110</code>, <code>100</code> (quay vòng lại đầu).
+    </p>
+
+    <h3>Xây dựng đồ thị De Bruijn</h3>
+    <p>
+        Dãy De Bruijn có thể được xây dựng bằng cách tìm <strong>chu trình Euler</strong> trong một đồ thị có hướng đặc biệt gọi là đồ thị De Bruijn.
+    </p>
+    <ul>
+        <li><strong>Nút:</strong> Mỗi nút biểu diễn một chuỗi độ dài \(n-1\). Có tổng cộng \(k^{n-1}\) nút.</li>
+        <li><strong>Cạnh:</strong> Mỗi nút có \(k\) cạnh đi ra, tương ứng với việc thêm một trong \(k\) ký tự vào cuối chuỗi hiện tại và bỏ ký tự đầu tiên. Cạnh đi từ chuỗi \(S\) đến chuỗi \(T\) tồn tại nếu hậu tố độ dài \(n-2\) của \(S\) bằng tiền tố độ dài \(n-2\) của \(T\).</li>
+    </ul>
+    
+    <div class="graphic-box">
+        <svg width="400" height="250" viewBox="0 0 400 250">
+            <defs>
+                <marker id="arrowDB" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#e65100" />
+                </marker>
+            </defs>
+
+            <g>
+                <path d="M90,125 C60,80 60,170 90,125" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#arrowDB)"/>
+                <line x1="100" y1="125" x2="200" y2="50" class="edge-path" marker-end="url(#arrowDB)"/>
+                <line x1="200" y1="50" x2="200" y2="200" class="edge-path" marker-end="url(#arrowDB)"/>
+                <line x1="200" y1="50" x2="300" y2="125" class="edge-path" marker-end="url(#arrowDB)"/>
+                <line x1="200" y1="200" x2="100" y2="125" class="edge-path" marker-end="url(#arrowDB)"/>
+                <path d="M200,200 Q230,125 200,50" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#arrowDB)" stroke-dasharray="4"/>
+                <line x1="300" y1="125" x2="200" y2="200" class="edge-path" marker-end="url(#arrowDB)"/>
+                <path d="M310,125 C340,80 340,170 310,125" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#arrowDB)"/>
+            </g>
+
+            <g>
+                <circle cx="100" cy="125" r="20" class="node-circle"/> <text x="100" y="125">00</text>
+                <circle cx="200" cy="50" r="20" class="node-circle"/> <text x="200" y="50">01</text>
+                <circle cx="200" cy="200" r="20" class="node-circle"/> <text x="200" y="200">10</text>
+                <circle cx="300" cy="125" r="20" class="node-circle"/> <text x="300" y="125">11</text>
+            </g>
+            <text x="200" y="240" font-size="12" fill="#666" font-weight="normal">Đồ thị De Bruijn (n=3, k=2)</text>
+        </svg>
+    </div>
+
+    <p>
+        Trong đồ thị này, mỗi nút có bậc vào là \(k\) và bậc ra là \(k\). Do đó, đồ thị luôn có chu trình Euler. Chu trình này đi qua mỗi cạnh đúng một lần, và mỗi cạnh đại diện cho một ký tự trong dãy De Bruijn.
+    </p>
+
+    <h4>Cài đặt</h4>
+    <p>
+        Đoạn mã sau tạo ra một dãy De Bruijn cho \(k=2\) và một \(n\) cho trước. Chúng ta sử dụng thuật toán Hierholzer để tìm chu trình Euler. Nút bắt đầu là chuỗi gồm \(n-1\) số 0.
+    </p>
+
+<pre><code><span class="cpp-type">string</span> sequence = <span class="cpp-string">""</span>;
+<span class="cpp-keyword">int</span> n = <span class="cpp-number">3</span>; <span class="cpp-comment">// Độ dài chuỗi con</span>
+<span class="cpp-type">set</span>&lt;<span class="cpp-type">string</span>&gt; seen;
+<span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt; edges; <span class="cpp-comment">// Lưu trữ các cạnh (ký tự)</span>
+
+<span class="cpp-keyword">void</span> <span class="cpp-func">dfs</span>(<span class="cpp-type">string</span> u) {
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">0</span>; i &lt; <span class="cpp-number">2</span>; i++) {
+        <span class="cpp-type">string</span> v = u + <span class="cpp-type">to_string</span>(i);
+        <span class="cpp-comment">// Kiểm tra cạnh (trạng thái + ký tự mới) đã đi qua chưa</span>
+        <span class="cpp-keyword">if</span> (seen.count(v)) <span class="cpp-keyword">continue</span>;
+        
+        seen.insert(v);
+        <span class="cpp-func">dfs</span>(v.substr(<span class="cpp-number">1</span>)); <span class="cpp-comment">// Chuyển sang nút tiếp theo (bỏ ký tự đầu)</span>
+        edges.push_back(i);
+    }
+}
+
+<span class="cpp-comment">// Trong hàm main:</span>
+<span class="cpp-type">string</span> start = <span class="cpp-string">""</span>;
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">0</span>; i &lt; n-<span class="cpp-number">1</span>; i++) start += <span class="cpp-string">"0"</span>;
+
+<span class="cpp-func">dfs</span>(start);
+
+<span class="cpp-comment">// Kết quả là chuỗi cạnh cộng với phần đầu (để khớp vòng lặp)</span>
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> x : edges) sequence += <span class="cpp-type">to_string</span>(x);
+sequence += start; </code></pre>
+
+    <h2 id="sec19.4">19.4 Hành trình của quân mã (Knight's tours)</h2>
+    <p>
+        Hành trình của quân mã là bài toán tìm một chuỗi các nước đi của quân mã trên bàn cờ \(n \times n\) sao cho quân mã thăm mỗi ô đúng một lần. Nếu quân mã kết thúc tại ô mà từ đó nó có thể nhảy về ô xuất phát, hành trình đó gọi là <strong>hành trình đóng</strong> (closed tour), ngược lại là <strong>hành trình mở</strong>.
+    </p>
+    <p>
+        Đây là một trường hợp đặc biệt của bài toán tìm đường đi Hamilton trên đồ thị các nước đi của quân mã. Trên bàn cờ lớn (ví dụ \(8 \times 8\)), quay lui đơn thuần rất chậm.
+    </p>
+
+    <h3>Quy tắc Warnsdorff</h3>
+    <p>
+        Để giải quyết bài toán hiệu quả hơn, chúng ta sử dụng một heuristic đơn giản nhưng cực kỳ mạnh mẽ gọi là <strong>quy tắc Warnsdorff</strong>:
+    </p>
+    <blockquote>
+        Tại mỗi bước, luôn di chuyển quân mã đến ô có số lượng nước đi khả thi tiếp theo <strong>ít nhất</strong> (tức là ô có bậc nhỏ nhất trong đồ thị các ô chưa thăm).
+    </blockquote>
+    <p>
+        Logic của quy tắc này là chúng ta nên ưu tiên thăm các ô "khó đến" (các ô ở góc hoặc cạnh bàn cờ, hoặc bị chặn bởi các ô đã thăm) trước, để tránh việc chúng bị cô lập sau này dẫn đến không tìm được đường đi.
+    </p>
+
+    <h4>Cài đặt</h4>
+    <p>
+        Dưới đây là khung sườn cài đặt sử dụng quay lui kết hợp quy tắc Warnsdorff.
+    </p>
+
+<pre><code><span class="cpp-keyword">int</span> board[<span class="cpp-number">8</span>][<span class="cpp-number">8</span>];
+<span class="cpp-keyword">int</span> dx[] = {<span class="cpp-number">1</span>, <span class="cpp-number">2</span>, <span class="cpp-number">2</span>, <span class="cpp-number">1</span>, <span class="cpp-number">-1</span>, <span class="cpp-number">-2</span>, <span class="cpp-number">-2</span>, <span class="cpp-number">-1</span>};
+<span class="cpp-keyword">int</span> dy[] = {<span class="cpp-number">-2</span>, <span class="cpp-number">-1</span>, <span class="cpp-number">1</span>, <span class="cpp-number">2</span>, <span class="cpp-number">2</span>, <span class="cpp-number">1</span>, <span class="cpp-number">-1</span>, <span class="cpp-number">-2</span>};
+
+<span class="cpp-comment">// Đếm số nước đi khả thi tiếp theo từ (x, y)</span>
+<span class="cpp-keyword">int</span> <span class="cpp-func">count_moves</span>(<span class="cpp-keyword">int</span> x, <span class="cpp-keyword">int</span> y) {
+    <span class="cpp-keyword">int</span> c = <span class="cpp-number">0</span>;
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">0</span>; i &lt; <span class="cpp-number">8</span>; i++) {
+        <span class="cpp-keyword">int</span> nx = x + dx[i];
+        <span class="cpp-keyword">int</span> ny = y + dy[i];
+        <span class="cpp-keyword">if</span> (isValid(nx, ny) && board[nx][ny] == <span class="cpp-number">0</span>) c++;
+    }
+    <span class="cpp-keyword">return</span> c;
+}
+
+<span class="cpp-keyword">void</span> <span class="cpp-func">solve</span>(<span class="cpp-keyword">int</span> x, <span class="cpp-keyword">int</span> y, <span class="cpp-keyword">int</span> move_count) {
+    board[x][y] = move_count;
+    <span class="cpp-keyword">if</span> (move_count == <span class="cpp-number">64</span>) {
+        <span class="cpp-comment">// Đã thăm hết 64 ô -> In kết quả và thoát</span>
+        print_board();
+        exit(<span class="cpp-number">0</span>);
+    }
+
+    <span class="cpp-comment">// Tạo danh sách các nước đi tiếp theo</span>
+    <span class="cpp-type">vector</span>&lt;<span class="cpp-type">pair</span>&lt;<span class="cpp-keyword">int</span>,<span class="cpp-keyword">int</span>&gt;&gt; moves;
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">0</span>; i &lt; <span class="cpp-number">8</span>; i++) {
+        <span class="cpp-keyword">int</span> nx = x + dx[i];
+        <span class="cpp-keyword">int</span> ny = y + dy[i];
+        <span class="cpp-keyword">if</span> (isValid(nx, ny) && board[nx][ny] == <span class="cpp-number">0</span>) {
+            <span class="cpp-comment">// Lưu số lượng nước đi tiếp theo (heuristic) và chỉ số hướng đi</span>
+            moves.push_back({count_moves(nx, ny), i});
+        }
+    }
+
+    <span class="cpp-comment">// Sắp xếp theo quy tắc Warnsdorff: ưu tiên ô có ít nước đi tiếp theo nhất</span>
+    sort(moves.begin(), moves.end());
+
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">auto</span> m : moves) {
+        <span class="cpp-keyword">int</span> i = m.second;
+        <span class="cpp-func">solve</span>(x + dx[i], y + dy[i], move_count + <span class="cpp-number">1</span>);
+    }
+
+    board[x][y] = <span class="cpp-number">0</span>; <span class="cpp-comment">// Quay lui (Backtracking)</span>
+}</code></pre>
+
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPH - Chương 17: Tính liên thông mạnh</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h1 { margin-top: 40px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        
+        /* Code styling */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #f1f3f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+        
+        /* Syntax highlighting */
+        .cpp-keyword { color: #0000ff; font-weight: bold; }
+        .cpp-type { color: #2b91af; }
+        .cpp-number { color: #098658; }
+        .cpp-func { color: #795e26; }
+        .cpp-comment { color: #008000; font-style: italic; }
+
+        /* Graphics Containers */
+        .graphic-box {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        
+        /* SVG Styling */
+        svg text { font-family: "Segoe UI", sans-serif; font-size: 14px; text-anchor: middle; dominant-baseline: central; font-weight: bold; }
+        .node-circle { fill: #fff; stroke: #2c3e50; stroke-width: 2; }
+        .node-scc1 { fill: #e3f2fd; stroke: #2196f3; stroke-width: 2; } /* Xanh */
+        .node-scc2 { fill: #ffebee; stroke: #e57373; stroke-width: 2; } /* Đỏ */
+        .node-scc3 { fill: #e8f5e9; stroke: #4caf50; stroke-width: 2; } /* Lục */
+        .edge-line { stroke: #555; stroke-width: 2; }
+        .edge-dashed { stroke: #999; stroke-width: 1.5; stroke-dasharray: 5,5; }
+        .arrow-head { fill: #555; }
+
+        /* TOC */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc a { text-decoration: none; color: #007bff; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="toc">
+        <h3>Mục lục - Chương 17</h3>
+        <ul>
+            <li><a href="#intro">Tính liên thông mạnh</a></li>
+            <li><a href="#sec17.1">17.1 Thuật toán Kosaraju</a></li>
+            <li><a href="#sec17.2">17.2 Bài toán 2-SAT</a></li>
+        </ul>
+    </div>
+
+    <h1 id="intro">Chương 17: Tính liên thông mạnh (Strong connectivity)</h1>
+    <p>
+        Trong một đồ thị có hướng, các cạnh chỉ có thể được đi qua theo một hướng, vì vậy ngay cả khi đồ thị là liên thông (xét theo nghĩa vô hướng), nó vẫn không đảm bảo rằng chúng ta có thể đi từ bất kỳ nút nào đến bất kỳ nút nào khác. Vì lý do này, việc định nghĩa một khái niệm mới là cần thiết.
+    </p>
+    <p>
+        Một đồ thị có hướng là <strong>liên thông mạnh</strong> (strongly connected) nếu có đường đi từ bất kỳ nút nào đến tất cả các nút khác trong đồ thị.
+    </p>
+    <p>
+        Các <strong>thành phần liên thông mạnh</strong> (strongly connected components - SCC) của một đồ thị là các đồ thị con tối đại (maximal) có tính chất liên thông mạnh. Mỗi nút thuộc về chính xác một thành phần liên thông mạnh.
+    </p>
+    
+    <div class="graphic-box">
+        <svg width="450" height="200" viewBox="0 0 450 200">
+            <defs>
+                <marker id="arrowSCC" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#555" />
+                </marker>
+            </defs>
+
+            <g id="scc-edges">
+                <line x1="50" y1="100" x2="150" y2="50" class="edge-line" marker-end="url(#arrowSCC)"/> <line x1="150" y1="50" x2="50" y2="100" class="edge-line" marker-end="url(#arrowSCC)"/> <line x1="200" y1="50" x2="300" y2="50" class="edge-line" marker-end="url(#arrowSCC)"/> <line x1="300" y1="50" x2="250" y2="130" class="edge-line" marker-end="url(#arrowSCC)"/> <line x1="250" y1="130" x2="200" y2="50" class="edge-line" marker-end="url(#arrowSCC)"/> <line x1="150" y1="50" x2="200" y2="50" class="edge-line" marker-end="url(#arrowSCC)"/> <line x1="300" y1="50" x2="400" y2="100" class="edge-line" marker-end="url(#arrowSCC)"/> <line x1="250" y1="130" x2="400" y2="100" class="edge-line" marker-end="url(#arrowSCC)"/> </g>
+
+            <g id="scc-nodes">
+                <circle cx="50" cy="100" r="18" class="node-scc1"/> <text x="50" y="100">1</text>
+                <circle cx="150" cy="50" r="18" class="node-scc1"/> <text x="150" y="50">2</text>
+                
+                <circle cx="200" cy="50" r="18" class="node-scc2"/> <text x="200" y="50">3</text>
+                <circle cx="300" cy="50" r="18" class="node-scc2"/> <text x="300" y="50">4</text>
+                <circle cx="250" cy="130" r="18" class="node-scc2"/> <text x="250" y="130">5</text>
+
+                <circle cx="400" cy="100" r="18" class="node-scc3"/> <text x="400" y="100">6</text>
+            </g>
+            
+            <text x="225" y="180" font-style="italic" font-weight="normal" fill="#666">Các thành phần: {1,2}, {3,4,5}, {6}</text>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 17.1: Đồ thị với 3 thành phần liên thông mạnh</div>
+    </div>
+
+    <p>
+        Trong ví dụ trên, các thành phần là \(\{1, 2\}\), \(\{3, 4, 5\}\) và \(\{6\}\). Một tính chất quan trọng là nếu chúng ta xây dựng một "đồ thị thành phần" trong đó mỗi nút đại diện cho một thành phần liên thông mạnh và có cạnh nối nếu có cạnh nối trong đồ thị gốc, thì đồ thị thành phần kết quả là một <strong>đồ thị có hướng không chu trình (DAG)</strong>.
+    </p>
+
+    <h2 id="sec17.1">17.1 Thuật toán Kosaraju</h2>
+    <p>
+        Thuật toán Kosaraju là một phương pháp hiệu quả để tìm các thành phần liên thông mạnh. Thuật toán sử dụng hai lần tìm kiếm theo chiều sâu (DFS) và chạy trong thời gian \(O(n+m)\).
+    </p>
+
+    <h3>Mô tả thuật toán</h3>
+    <ol>
+        <li>Xây dựng danh sách các nút theo thứ tự mà quá trình duyệt DFS trên chúng <strong>kết thúc</strong> (tương tự như sắp xếp topo).</li>
+        <li>Xây dựng đồ thị chuyển vị \(G^T\) (đồ thị đảo ngược) bằng cách đảo ngược tất cả các cạnh của đồ thị gốc.</li>
+        <li>Duyệt qua danh sách các nút theo thứ tự ngược lại (từ cuối danh sách về đầu). Nếu nút hiện tại chưa thuộc thành phần nào, bắt đầu một đợt DFS mới trên đồ thị \(G^T\) từ nút đó. Tất cả các nút mới được thăm sẽ tạo thành một thành phần liên thông mạnh.</li>
+    </ol>
+
+    <div class="graphic-box">
+        <svg width="600" height="250" viewBox="0 0 600 250">
+            <defs>
+                <marker id="arrowRev" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#e67e22" />
+                </marker>
+            </defs>
+
+            <g transform="translate(0,0)">
+                <text x="100" y="20" font-size="12" font-weight="bold">1. Đồ thị gốc</text>
+                <line x1="50" y1="120" x2="100" y2="70" class="edge-line" marker-end="url(#arrowSCC)"/> <line x1="100" y1="70" x2="50" y2="120" class="edge-line" marker-end="url(#arrowSCC)"/> <line x1="100" y1="70" x2="150" y2="120" class="edge-line" marker-end="url(#arrowSCC)"/> <circle cx="50" cy="120" r="15" class="node-circle"/> <text x="50" y="120">1</text>
+                <circle cx="100" cy="70" r="15" class="node-circle"/> <text x="100" y="70">2</text>
+                <circle cx="150" cy="120" r="15" class="node-circle"/> <text x="150" y="120">3</text>
+            </g>
+
+            <g transform="translate(250, 100)">
+                <text x="0" y="-30" font-size="12" font-weight="bold">2. Danh sách (Thứ tự kết thúc)</text>
+                <text x="0" y="0">DFS(1):</text>
+                <text x="0" y="25">Thăm 1 -> 2 -> 3.</text>
+                <text x="0" y="50">Kết thúc: 3, rồi 2, rồi 1.</text>
+                <text x="0" y="80" fill="#2980b9">List: [3, 2, 1]</text>
+            </g>
+
+            <g transform="translate(400,0)">
+                <text x="100" y="20" font-size="12" font-weight="bold">3. Đồ thị đảo ngược (G^T)</text>
+                <line x1="100" y1="70" x2="50" y2="120" class="edge-line" marker-end="url(#arrowRev)" style="stroke:#e67e22"/> <line x1="50" y1="120" x2="100" y2="70" class="edge-line" marker-end="url(#arrowRev)" style="stroke:#e67e22"/> <line x1="150" y1="120" x2="100" y2="70" class="edge-line" marker-end="url(#arrowRev)" style="stroke:#e67e22"/> <circle cx="50" cy="120" r="15" class="node-circle"/> <text x="50" y="120">1</text>
+                <circle cx="100" cy="70" r="15" class="node-circle"/> <text x="100" y="70">2</text>
+                <circle cx="150" cy="120" r="15" class="node-circle"/> <text x="150" y="120">3</text>
+            </g>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 17.2: Minh họa ý tưởng thuật toán Kosaraju</div>
+    </div>
+
+    <p>
+        Trong bước 3, chúng ta xử lý các nút theo thứ tự ngược lại của danh sách: 1, 2, 3.
+    </p>
+    <ul>
+        <li>Bắt đầu DFS tại 1 trên đồ thị đảo ngược: thăm 1, đến 2. (Thành phần: {1, 2}).</li>
+        <li>Tiếp theo trong danh sách là 2: đã thăm, bỏ qua.</li>
+        <li>Tiếp theo là 3: chưa thăm. Bắt đầu DFS tại 3. Không đi đâu được. (Thành phần: {3}).</li>
+    </ul>
+
+    <h3>Cài đặt</h3>
+    <p>
+        Chúng ta sử dụng <code>adj</code> cho đồ thị gốc và <code>adj_rev</code> cho đồ thị đảo ngược.
+    </p>
+
+<pre><code><span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt; adj[N], adj_rev[N];
+<span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt; order;
+<span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt; component;
+<span class="cpp-keyword">bool</span> visited[N];
+
+<span class="cpp-comment">// Lần DFS 1: Xây dựng thứ tự</span>
+<span class="cpp-keyword">void</span> <span class="cpp-func">dfs1</span>(<span class="cpp-keyword">int</span> s) {
+    visited[s] = <span class="cpp-keyword">true</span>;
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">auto</span> u : adj[s]) {
+        <span class="cpp-keyword">if</span> (!visited[u]) <span class="cpp-func">dfs1</span>(u);
+    }
+    order.push_back(s);
+}
+
+<span class="cpp-comment">// Lần DFS 2: Tìm thành phần trên đồ thị đảo ngược</span>
+<span class="cpp-keyword">void</span> <span class="cpp-func">dfs2</span>(<span class="cpp-keyword">int</span> s) {
+    visited[s] = <span class="cpp-keyword">true</span>;
+    component.push_back(s);
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">auto</span> u : adj_rev[s]) {
+        <span class="cpp-keyword">if</span> (!visited[u]) <span class="cpp-func">dfs2</span>(u);
+    }
+}
+
+<span class="cpp-comment">// Trong hàm main</span>
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">1</span>; i &lt;= n; i++) {
+    <span class="cpp-keyword">if</span> (!visited[i]) <span class="cpp-func">dfs1</span>(i);
+}
+
+reverse(order.begin(), order.end());
+memset(visited, <span class="cpp-keyword">false</span>, <span class="cpp-keyword">sizeof</span>(visited));
+
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">auto</span> v : order) {
+    <span class="cpp-keyword">if</span> (!visited[v]) {
+        <span class="cpp-func">dfs2</span>(v);
+        <span class="cpp-comment">// xử lý thành phần 'component'</span>
+        component.clear();
+    }
+}</code></pre>
+
+    <h2 id="sec17.2">17.2 Bài toán 2-SAT (2-Satisfiability)</h2>
+    <p>
+        Tính liên thông mạnh cũng có thể được sử dụng để giải bài toán 2-SAT. Trong bài toán này, chúng ta được cung cấp một công thức logic dưới dạng:
+        $$ (a_1 \lor b_1) \land (a_2 \lor b_2) \land \dots \land (a_m \lor b_m) $$
+        Mỗi biểu thức con \((a_i \lor b_i)\) là một mệnh đề chứa hai biến (hoặc phủ định của biến). Nhiệm vụ là gán giá trị đúng/sai (true/false) cho các biến sao cho toàn bộ công thức là đúng.
+    </p>
+
+    <h3>Mô hình hóa đồ thị</h3>
+    <p>
+        Chúng ta có thể biểu diễn bài toán 2-SAT dưới dạng đồ thị gọi là <strong>đồ thị kéo theo</strong> (implication graph).
+        Mệnh đề \((a \lor b)\) tương đương với hai phép kéo theo:
+        $$ \neg a \implies b \quad \text{và} \quad \neg b \implies a $$
+        Điều này có nghĩa là nếu \(a\) sai thì \(b\) phải đúng, và ngược lại.
+    </p>
+    <p>
+        Trong đồ thị, mỗi biến \(x\) có hai nút: \(x\) và \(\neg x\). Với mỗi mệnh đề \((a \lor b)\), chúng ta thêm hai cạnh có hướng: \((\neg a, b)\) và \((\neg b, a)\).
+    </p>
+
+    <div class="graphic-box">
+        <svg width="300" height="200" viewBox="0 0 300 200">
+            <defs>
+                <marker id="arrow2SAT" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#555" />
+                </marker>
+            </defs>
+
+            <g id="sat-edges">
+                <line x1="200" y1="50" x2="200" y2="150" class="edge-line" marker-end="url(#arrow2SAT)"/>
+                <line x1="100" y1="150" x2="100" y2="50" class="edge-line" marker-end="url(#arrow2SAT)"/>
+            </g>
+
+            <g id="sat-nodes">
+                <circle cx="100" cy="50" r="20" class="node-circle"/> <text x="100" y="50">x1</text>
+                <circle cx="200" cy="50" r="20" class="node-circle"/> <text x="200" y="50">!x1</text>
+                
+                <circle cx="100" cy="150" r="20" class="node-circle"/> <text x="100" y="150">x2</text>
+                <circle cx="200" cy="150" r="20" class="node-circle"/> <text x="200" y="150">!x2</text>
+            </g>
+            
+            <text x="150" y="190" font-style="italic" fill="#666">Mệnh đề: (x1 v !x2)</text>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 17.3: Đồ thị kéo theo cho mệnh đề (x1 hoặc !x2)</div>
+    </div>
+
+    <h3>Giải thuật</h3>
+    <p>
+        Cấu trúc của đồ thị kéo theo cho chúng ta biết về tính khả thi của bài toán:
+        <strong>Bài toán 2-SAT có nghiệm khi và chỉ khi với mọi biến \(x\), các nút \(x\) và \(\neg x\) không thuộc cùng một thành phần liên thông mạnh.</strong>
+    </p>
+    <p>
+        Nếu \(x\) và \(\neg x\) nằm trong cùng một thành phần, điều đó có nghĩa là \(x \implies \dots \implies \neg x\) và \(\neg x \implies \dots \implies x\), dẫn đến mâu thuẫn (\(x\) phải vừa đúng vừa sai).
+    </p>
+    <p>
+        Nếu điều kiện trên thỏa mãn, chúng ta có thể tìm nghiệm bằng cách gán giá trị như sau:
+        Với mỗi biến \(x\), gọi \(comp[x]\) là chỉ số thành phần liên thông mạnh của \(x\) trong thứ tự topo đảo ngược (giá trị được gán bởi thuật toán Kosaraju hoặc Tarjan).
+    </p>
+    <ul>
+        <li>Nếu \(comp[x] > comp[\neg x]\), gán \(x = \text{true}\).</li>
+        <li>Nếu \(comp[x] < comp[\neg x]\), gán \(x = \text{false}\).</li>
+    </ul>
+
+    <h3>Cài đặt</h3>
+    <p>
+        Giả sử các biến được đánh số \(1 \dots n\). Chúng ta có thể gán chỉ số \(2k\) cho \(x_k\) và \(2k+1\) cho \(\neg x_k\).
+        Sau khi chạy Kosaraju để tìm các thành phần (lưu trong mảng <code>comp</code>):
+    </p>
+
+<pre><code><span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">1</span>; i &lt;= n; i++) {
+    <span class="cpp-keyword">if</span> (comp[<span class="cpp-number">2</span>*i] == comp[<span class="cpp-number">2</span>*i+<span class="cpp-number">1</span>]) {
+        <span class="cpp-type">cout</span> &lt;&lt; <span class="cpp-string">"IMPOSSIBLE"</span> &lt;&lt; <span class="cpp-string">"\n"</span>;
+        <span class="cpp-keyword">return</span> <span class="cpp-number">0</span>;
+    }
+    assignment[i] = (comp[<span class="cpp-number">2</span>*i] &gt; comp[<span class="cpp-number">2</span>*i+<span class="cpp-number">1</span>]);
+}</code></pre>
+
+</body>
+</html>

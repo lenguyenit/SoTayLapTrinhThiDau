@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPH - Chương 10: Thao tác bit</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h1 { margin-top: 40px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        
+        /* Code styling */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #f1f3f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+        
+        /* Syntax highlighting */
+        .cpp-keyword { color: #0000ff; font-weight: bold; }
+        .cpp-type { color: #2b91af; }
+        .cpp-number { color: #098658; }
+        .cpp-func { color: #795e26; }
+        .cpp-comment { color: #008000; font-style: italic; }
+
+        /* Graphics */
+        .graphic-box {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        
+        /* SVG Text Styling */
+        svg text { font-family: "Segoe UI", sans-serif; font-size: 14px; }
+        .bit-box { fill: #fff; stroke: #333; stroke-width: 1; }
+        .bit-one { fill: #e3f2fd; }
+        .bit-zero { fill: #fff; }
+        .op-text { font-weight: bold; fill: #2c3e50; font-size: 16px; }
+
+        /* Tables */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        th { background-color: #f2f2f2; font-weight: 600; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+
+        /* TOC */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc a { text-decoration: none; color: #007bff; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="toc">
+        <h3>Mục lục - Chương 10</h3>
+        <ul>
+            <li><a href="#intro">Thao tác bit</a></li>
+            <li><a href="#sec10.1">10.1 Biểu diễn bit</a></li>
+            <li><a href="#sec10.2">10.2 Các phép toán bit</a></li>
+            <li><a href="#sec10.3">10.3 Biểu diễn tập hợp</a></li>
+            <li><a href="#sec10.4">10.4 Tối ưu hóa bit</a></li>
+            <li><a href="#sec10.5">10.5 Quy hoạch động</a></li>
+        </ul>
+    </div>
+
+    <h1 id="intro">Chương 10: Thao tác bit (Bit manipulation)</h1>
+    <p>
+        Tất cả dữ liệu trong các chương trình máy tính đều được lưu trữ nội bộ dưới dạng các bit, tức là các số 0 và 1. Chương này thảo luận về biểu diễn bit của các số nguyên và đưa ra các ví dụ về cách sử dụng các phép toán bit. Hóa ra có rất nhiều ứng dụng cho thao tác bit trong lập trình thuật toán.
+    </p>
+
+    <h2 id="sec10.1">10.1 Biểu diễn bit (Bit representation)</h2>
+    <p>
+        Trong lập trình, một số nguyên \(n\) bit được lưu trữ nội bộ dưới dạng một số nhị phân bao gồm \(n\) bit. Ví dụ, kiểu <code>int</code> của C++ là kiểu 32-bit, nghĩa là mọi số <code>int</code> đều bao gồm 32 bit.
+    </p>
+    <p>
+        Dưới đây là biểu diễn bit của số <code>int</code> 43:
+    </p>
+    <pre><code>00000000000000000000000000101011</code></pre>
+    <p>
+        Các bit trong biểu diễn được đánh số từ phải sang trái. Để chuyển đổi một biểu diễn bit \(b_k \dots b_2 b_1 b_0\) thành một số, chúng ta có thể sử dụng công thức:
+        $$ b_k 2^k + \dots + b_2 2^2 + b_1 2^1 + b_0 2^0 $$
+        Ví dụ: \(1 \cdot 2^5 + 1 \cdot 2^3 + 1 \cdot 2^1 + 1 \cdot 2^0 = 32 + 8 + 2 + 1 = 43\).
+    </p>
+    <p>
+        Biểu diễn bit của một số có thể là <strong>có dấu</strong> (signed) hoặc <strong>không dấu</strong> (unsigned). Thông thường, biểu diễn có dấu được sử dụng, nghĩa là cả số âm và số dương đều có thể được biểu diễn. Một biến có dấu \(n\) bit có thể chứa bất kỳ số nguyên nào trong khoảng \(-2^{n-1} \dots 2^{n-1}-1\).
+    </p>
+    <p>
+        Ví dụ, kiểu <code>int</code> trong C++ là kiểu có dấu, vì vậy một biến <code>int</code> có thể chứa bất kỳ số nguyên nào trong khoảng \(-2^{31} \dots 2^{31}-1\).
+    </p>
+    <p>
+        Bit đầu tiên trong biểu diễn có dấu là dấu của số (0 cho số không âm và 1 cho số âm), và \(n-1\) bit còn lại chứa độ lớn của số. Phương pháp <strong>bù hai</strong> (two's complement) được sử dụng, nghĩa là số đối của một số được tính bằng cách đảo ngược tất cả các bit trong số đó, rồi cộng thêm một vào kết quả.
+    </p>
+    <p>
+        Ví dụ, biểu diễn bit của số <code>int</code> -43 là:
+    </p>
+    <pre><code>11111111111111111111111111010101</code></pre>
+    <p>
+        Trong biểu diễn không dấu, chỉ các số không âm mới có thể được sử dụng, nhưng giới hạn trên của giá trị lớn hơn. Một biến không dấu \(n\) bit có thể chứa bất kỳ số nguyên nào trong khoảng \(0 \dots 2^n - 1\). Ví dụ, trong C++, biến <code>unsigned int</code> có thể chứa các số từ \(0 \dots 2^{32}-1\).
+    </p>
+    <p>
+        Có một mối liên hệ giữa các biểu diễn: một số có dấu \(-x\) bằng một số không dấu \(2^n - x\). Ví dụ, đoạn mã sau cho thấy số có dấu \(x = -43\) bằng số không dấu \(y = 2^{32} - 43\):
+    </p>
+<pre><code><span class="cpp-keyword">int</span> x = <span class="cpp-number">-43</span>;
+<span class="cpp-keyword">unsigned</span> <span class="cpp-keyword">int</span> y = x;
+<span class="cpp-type">cout</span> &lt;&lt; x &lt;&lt; <span class="cpp-string">"\n"</span>; <span class="cpp-comment">// -43</span>
+<span class="cpp-type">cout</span> &lt;&lt; y &lt;&lt; <span class="cpp-string">"\n"</span>; <span class="cpp-comment">// 4294967253</span></code></pre>
+    <p>
+        Nếu một số lớn hơn giới hạn trên của biểu diễn bit, số đó sẽ bị tràn (overflow). Trong biểu diễn có dấu, số tiếp theo sau \(2^{n-1}-1\) là \(-2^{n-1}\), và trong biểu diễn không dấu, số tiếp theo sau \(2^n-1\) là 0.
+    </p>
+
+    <h2 id="sec10.2">10.2 Các phép toán bit (Bit operations)</h2>
+    
+    <h3>Phép toán AND</h3>
+    <p>
+        Phép toán AND <code>x & y</code> tạo ra một số có các bit 1 ở những vị trí mà cả <code>x</code> và <code>y</code> đều có bit 1.
+        Ví dụ, \(22 \& 26 = 18\), bởi vì \(10110 (22) \& 11010 (26) = 10010 (18)\).
+    </p>
+    <p>
+        Sử dụng phép toán AND, chúng ta có thể kiểm tra xem một số \(x\) là chẵn hay lẻ, vì \(x \& 1 = 0\) nếu \(x\) chẵn, và \(x \& 1 = 1\) nếu \(x\) lẻ. Tổng quát hơn, \(x\) chia hết cho \(2^k\) khi và chỉ khi \(x \& (2^k - 1) = 0\).
+    </p>
+
+    <h3>Phép toán OR</h3>
+    <p>
+        Phép toán OR <code>x | y</code> tạo ra một số có các bit 1 ở những vị trí mà ít nhất một trong hai số <code>x</code> hoặc <code>y</code> có bit 1.
+        Ví dụ, \(22 | 26 = 30\), bởi vì \(10110 (22) | 11010 (26) = 11110 (30)\).
+    </p>
+
+    <h3>Phép toán XOR</h3>
+    <p>
+        Phép toán XOR <code>x ^ y</code> tạo ra một số có các bit 1 ở những vị trí mà chính xác một trong hai số <code>x</code> hoặc <code>y</code> có bit 1.
+        Ví dụ, \(22 \wedge 26 = 12\), bởi vì \(10110 (22) \wedge 11010 (26) = 01100 (12)\).
+    </p>
+
+    <h3>Phép toán NOT</h3>
+    <p>
+        Phép toán NOT <code>~x</code> tạo ra một số mà tất cả các bit của <code>x</code> đều bị đảo ngược. Công thức \(\sim x = -x-1\) luôn đúng, ví dụ \(\sim 29 = -30\).
+        Kết quả của phép toán NOT ở cấp độ bit phụ thuộc vào độ dài của biểu diễn bit, vì phép toán đảo ngược tất cả các bit. Ví dụ, nếu các số là số nguyên 32-bit:
+    </p>
+    <pre><code>x  = 29  : 00000000000000000000000000011101
+~x = -30 : 11111111111111111111111111100010</code></pre>
+
+    <h3>Phép dịch bit (Bit shifts)</h3>
+    <p>
+        Phép dịch trái <code>x &lt;&lt; k</code> thêm \(k\) bit 0 vào cuối số, và phép dịch phải <code>x &gt;&gt; k</code> xóa \(k\) bit cuối cùng của số.
+        Ví dụ, \(14 \ll 2 = 56\), vì \(14\) là \(1110\) và \(56\) là \(111000\). Tương tự, \(49 \gg 3 = 6\), vì \(49\) là \(110001\) và \(6\) là \(110\).
+    </p>
+    
+    <div class="graphic-box">
+        <svg width="600" height="220" viewBox="0 0 600 220">
+            <text x="50" y="30" font-weight="bold">A (22)</text>
+            <text x="50" y="60" font-weight="bold">B (26)</text>
+            
+            <g transform="translate(100, 15)">
+                <rect x="0" y="0" width="30" height="30" class="bit-box bit-one"/><text x="15" y="20" text-anchor="middle">1</text>
+                <rect x="30" y="0" width="30" height="30" class="bit-box bit-zero"/><text x="45" y="20" text-anchor="middle">0</text>
+                <rect x="60" y="0" width="30" height="30" class="bit-box bit-one"/><text x="75" y="20" text-anchor="middle">1</text>
+                <rect x="90" y="0" width="30" height="30" class="bit-box bit-one"/><text x="105" y="20" text-anchor="middle">1</text>
+                <rect x="120" y="0" width="30" height="30" class="bit-box bit-zero"/><text x="135" y="20" text-anchor="middle">0</text>
+            </g>
+
+            <g transform="translate(100, 45)">
+                <rect x="0" y="0" width="30" height="30" class="bit-box bit-one"/><text x="15" y="20" text-anchor="middle">1</text>
+                <rect x="30" y="0" width="30" height="30" class="bit-box bit-one"/><text x="45" y="20" text-anchor="middle">1</text>
+                <rect x="60" y="0" width="30" height="30" class="bit-box bit-zero"/><text x="75" y="20" text-anchor="middle">0</text>
+                <rect x="90" y="0" width="30" height="30" class="bit-box bit-one"/><text x="105" y="20" text-anchor="middle">1</text>
+                <rect x="120" y="0" width="30" height="30" class="bit-box bit-zero"/><text x="135" y="20" text-anchor="middle">0</text>
+            </g>
+
+            <g transform="translate(30, 100)">
+                <text x="60" y="0" class="op-text" text-anchor="middle">AND (&amp;)</text>
+                <text x="60" y="25" text-anchor="middle">10010 (18)</text>
+            </g>
+            
+            <g transform="translate(180, 100)">
+                <text x="60" y="0" class="op-text" text-anchor="middle">OR (|)</text>
+                <text x="60" y="25" text-anchor="middle">11110 (30)</text>
+            </g>
+
+            <g transform="translate(330, 100)">
+                <text x="60" y="0" class="op-text" text-anchor="middle">XOR (^)</text>
+                <text x="60" y="25" text-anchor="middle">01100 (12)</text>
+            </g>
+
+            <g transform="translate(30, 160)">
+                <text x="0" y="20" font-weight="bold">Dịch trái (x &lt;&lt; k):</text>
+                <text x="150" y="20">Thêm k bit 0 vào cuối</text>
+                <text x="0" y="45" font-weight="bold">Dịch phải (x &gt;&gt; k):</text>
+                <text x="150" y="45">Xóa k bit cuối cùng</text>
+            </g>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 10.1: Minh họa các phép toán bit cơ bản</div>
+    </div>
+
+    <p>
+        Lưu ý rằng <code>x &lt;&lt; k</code> tương ứng với nhân \(x\) với \(2^k\), và <code>x &gt;&gt; k</code> tương ứng với chia \(x\) cho \(2^k\) (làm tròn xuống số nguyên).
+    </p>
+
+    <h3>Một số thủ thuật hữu ích</h3>
+    <ul>
+        <li>Công thức <code>x &amp; (x-1)</code> đặt bit 1 cuối cùng của \(x\) thành 0.</li>
+        <li>Công thức <code>x &amp; -x</code> đặt tất cả các bit 1 thành 0, ngoại trừ bit 1 cuối cùng.</li>
+        <li>Công thức <code>x | (x-1)</code> đảo ngược tất cả các bit sau bit 1 cuối cùng.</li>
+        <li>Một số dương \(x\) là lũy thừa của hai khi và chỉ khi <code>x &amp; (x-1) == 0</code>.</li>
+    </ul>
+
+    <h3>Các hàm bổ sung của GCC</h3>
+    <p>Trình biên dịch <code>g++</code> cung cấp các hàm hữu ích để đếm bit:</p>
+    <ul>
+        <li><code>__builtin_clz(x)</code>: số lượng bit 0 ở đầu (leading zeros).</li>
+        <li><code>__builtin_ctz(x)</code>: số lượng bit 0 ở cuối (trailing zeros).</li>
+        <li><code>__builtin_popcount(x)</code>: số lượng bit 1 trong số.</li>
+        <li><code>__builtin_parity(x)</code>: tính chẵn lẻ của số lượng bit 1.</li>
+    </ul>
+
+<pre><code><span class="cpp-keyword">int</span> x = <span class="cpp-number">5328</span>; <span class="cpp-comment">// 00000000000000000001010011010000</span>
+<span class="cpp-type">cout</span> &lt;&lt; __builtin_clz(x) &lt;&lt; <span class="cpp-string">"\n"</span>; <span class="cpp-comment">// 19</span>
+<span class="cpp-type">cout</span> &lt;&lt; __builtin_ctz(x) &lt;&lt; <span class="cpp-string">"\n"</span>; <span class="cpp-comment">// 4</span>
+<span class="cpp-type">cout</span> &lt;&lt; __builtin_popcount(x) &lt;&lt; <span class="cpp-string">"\n"</span>; <span class="cpp-comment">// 5</span>
+<span class="cpp-type">cout</span> &lt;&lt; __builtin_parity(x) &lt;&lt; <span class="cpp-string">"\n"</span>; <span class="cpp-comment">// 1</span></code></pre>
+
+    <h2 id="sec10.3">10.3 Biểu diễn tập hợp (Representing sets)</h2>
+    <p>
+        Mọi tập con của một tập hợp \(\{0, 1, 2, \dots, n-1\}\) đều có thể được biểu diễn dưới dạng một số nguyên \(n\) bit, trong đó các bit 1 chỉ ra phần tử nào thuộc về tập con. Đây là một cách hiệu quả để biểu diễn tập hợp vì mỗi phần tử chỉ tốn 1 bit bộ nhớ.
+    </p>
+    <p>
+        Ví dụ, biểu diễn bit của tập hợp \(\{1, 3, 4, 8\}\) là:
+    </p>
+    <pre><code>00000000000000000000000100011010</code></pre>
+    <p>
+        tương ứng với số \(2^8 + 2^4 + 2^3 + 2^1 = 282\).
+    </p>
+
+    <h3>Cài đặt tập hợp</h3>
+    <p>Đoạn code sau khai báo biến <code>x</code>, thêm các phần tử vào tập hợp và in ra kích thước của tập hợp:</p>
+
+<pre><code><span class="cpp-keyword">int</span> x = <span class="cpp-number">0</span>;
+x |= (<span class="cpp-number">1</span>&lt;&lt;<span class="cpp-number">1</span>);
+x |= (<span class="cpp-number">1</span>&lt;&lt;<span class="cpp-number">3</span>);
+x |= (<span class="cpp-number">1</span>&lt;&lt;<span class="cpp-number">4</span>);
+x |= (<span class="cpp-number">1</span>&lt;&lt;<span class="cpp-number">8</span>);
+<span class="cpp-type">cout</span> &lt;&lt; __builtin_popcount(x) &lt;&lt; <span class="cpp-string">"\n"</span>; <span class="cpp-comment">// 4</span></code></pre>
+
+    <p>Sau đó, đoạn code sau in ra tất cả các phần tử thuộc tập hợp:</p>
+
+<pre><code><span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">0</span>; i &lt; <span class="cpp-number">32</span>; i++) {
+    <span class="cpp-keyword">if</span> (x&amp;(<span class="cpp-number">1</span>&lt;&lt;i)) <span class="cpp-type">cout</span> &lt;&lt; i &lt;&lt; <span class="cpp-string">" "</span>;
+}
+<span class="cpp-comment">// output: 1 3 4 8</span></code></pre>
+
+    <h3>Các phép toán tập hợp</h3>
+    <p>Các phép toán tập hợp có thể được triển khai bằng các phép toán bit:</p>
+    <table>
+        <thead>
+            <tr><th>Phép toán</th><th>Ký hiệu tập hợp</th><th>Ký hiệu bit</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Giao (Intersection)</td><td>\(a \cap b\)</td><td><code>a &amp; b</code></td></tr>
+            <tr><td>Hợp (Union)</td><td>\(a \cup b\)</td><td><code>a | b</code></td></tr>
+            <tr><td>Phần bù (Complement)</td><td>\(\bar{a}\)</td><td><code>~a</code></td></tr>
+            <tr><td>Hiệu (Difference)</td><td>\(a \setminus b\)</td><td><code>a &amp; (~b)</code></td></tr>
+        </tbody>
+    </table>
+
+    <h2 id="sec10.4">10.4 Tối ưu hóa bit (Bit optimizations)</h2>
+    <p>
+        Nhiều thuật toán có thể được tối ưu hóa bằng cách sử dụng các phép toán bit. Những tối ưu hóa này không thay đổi độ phức tạp thời gian nhưng có thể cải thiện đáng kể thời gian chạy thực tế.
+    </p>
+
+    <h3>Khoảng cách Hamming</h3>
+    <p>
+        Khoảng cách Hamming giữa hai chuỗi bit cùng độ dài là số lượng vị trí mà tại đó các bit khác nhau. Ví dụ, <code>hamming(01101, 11001) = 2</code>.
+    </p>
+    <p>
+        Nếu \(k\) nhỏ (ví dụ \(k \le 32\)), chúng ta có thể lưu trữ các chuỗi bit dưới dạng số nguyên và tính khoảng cách Hamming cực nhanh bằng hàm sau:
+    </p>
+
+<pre><code><span class="cpp-keyword">int</span> <span class="cpp-func">hamming</span>(<span class="cpp-keyword">int</span> a, <span class="cpp-keyword">int</span> b) {
+    <span class="cpp-keyword">return</span> __builtin_popcount(a^b);
+}</code></pre>
+
+    <p>
+        Phép toán XOR (<code>^</code>) sẽ tạo ra các bit 1 tại những vị trí mà \(a\) và \(b\) khác nhau, và hàm <code>popcount</code> sẽ đếm số lượng các bit đó.
+    </p>
+
+    <h3>Đếm lưới con (Counting subgrids)</h3>
+    <p>
+        Cho một lưới \(n \times n\) gồm các ô màu đen (1) hoặc trắng (0). Tính số lượng hình chữ nhật con mà cả 4 góc đều là màu đen.
+    </p>
+    <p>
+        Thuật toán chuẩn có độ phức tạp \(O(n^3)\). Bằng cách sử dụng <code>bitset</code> hoặc các số nguyên 64-bit để lưu trữ các hàng của lưới, chúng ta có thể xử lý nhiều cột cùng một lúc bằng các phép toán bit. Thuật toán tối ưu hóa này hoạt động trong thời gian \(O(n^3 / N)\), với \(N\) là số bit (ví dụ 32 hoặc 64). Trong thực tế, điều này có thể làm chương trình nhanh hơn hàng chục lần.
+    </p>
+
+<pre><code><span class="cpp-keyword">int</span> count = <span class="cpp-number">0</span>;
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">0</span>; i &lt;= n/N; i++) {
+    count += __builtin_popcount(color[a][i] &amp; color[b][i]);
+}</code></pre>
+
+    <h2 id="sec10.5">10.5 Quy hoạch động (Dynamic programming)</h2>
+    <p>
+        Các phép toán bit cung cấp một cách hiệu quả để cài đặt các thuật toán quy hoạch động mà trạng thái chứa các tập con của các phần tử.
+    </p>
+
+    <h3>Lựa chọn tối ưu (Optimal selection)</h3>
+    <p>
+        Giả sử chúng ta có giá của \(k\) sản phẩm trong \(n\) ngày, và chúng ta muốn mua mỗi sản phẩm đúng một lần. Mỗi ngày chỉ được mua tối đa một sản phẩm. Tổng chi phí tối thiểu là bao nhiêu?
+    </p>
+    <p>
+        Gọi \(total(S, d)\) là tổng chi phí tối thiểu để mua tập hợp sản phẩm \(S\) tính đến ngày \(d\).
+        $$ total(S, d) = \min(total(S, d-1), \min_{x \in S} (total(S \setminus \{x\}, d-1) + price[x][d])) $$
+        Để cài đặt, chúng ta sử dụng một mảng <code>total[1&lt;&lt;K][N]</code>, trong đó chiều đầu tiên tương ứng với biểu diễn bit của tập hợp \(S\).
+    </p>
+
+    <h3>Từ hoán vị đến tập con (From permutations to subsets)</h3>
+    <p>
+        Một kỹ thuật quan trọng là chuyển việc duyệt qua các hoán vị thành duyệt qua các tập con. Ví dụ: bài toán thang máy. Có \(n\) người với trọng lượng đã biết muốn đi thang máy có tải trọng tối đa \(x\). Tìm số chuyến đi tối thiểu.
+    </p>
+    <p>
+        Thay vì thử \(n!\) hoán vị, chúng ta có thể sử dụng quy hoạch động trên tập con \(O(2^n n)\).
+        Trạng thái là \(best[S] = \{rides, last\}\), trong đó \(rides\) là số chuyến cần thiết cho tập hợp người \(S\), và \(last\) là trọng lượng của chuyến cuối cùng.
+    </p>
+
+<pre><code>pair&lt;<span class="cpp-keyword">int</span>,<span class="cpp-keyword">int</span>&gt; best[<span class="cpp-number">1</span>&lt;&lt;N];
+best[<span class="cpp-number">0</span>] = {<span class="cpp-number">1</span>, <span class="cpp-number">0</span>};
+
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> s = <span class="cpp-number">1</span>; s &lt; (<span class="cpp-number">1</span>&lt;&lt;n); s++) {
+    best[s] = {n+<span class="cpp-number">1</span>, <span class="cpp-number">0</span>};
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> p = <span class="cpp-number">0</span>; p &lt; n; p++) {
+        <span class="cpp-keyword">if</span> (s&amp;(<span class="cpp-number">1</span>&lt;&lt;p)) {
+            <span class="cpp-keyword">auto</span> option = best[s^(<span class="cpp-number">1</span>&lt;&lt;p)];
+            <span class="cpp-keyword">if</span> (option.second + weight[p] &lt;= x) {
+                option.second += weight[p];
+            } <span class="cpp-keyword">else</span> {
+                option.first++;
+                option.second = weight[p];
+            }
+            best[s] = min(best[s], option);
+        }
+    }
+}</code></pre>
+
+    <h3>Đếm tập con (Counting subsets)</h3>
+    <p>
+        Một bài toán thú vị khác là tính tổng các giá trị của tập con. Cho giá trị <code>value[S]</code> cho mỗi tập con \(S\), tính:
+        $$ sum(S) = \sum_{A \subset S} value[A] $$
+        Thay vì duyệt qua tất cả cặp tập con \(O(3^n)\), chúng ta có thể sử dụng quy hoạch động để giải quyết trong \(O(2^n n)\) bằng cách xử lý từng bit một (SOS DP - Sum Over Subsets).
+    </p>
+
+<pre><code><span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> k = <span class="cpp-number">0</span>; k &lt; n; k++) {
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> s = <span class="cpp-number">0</span>; s &lt; (<span class="cpp-number">1</span>&lt;&lt;n); s++) {
+        <span class="cpp-keyword">if</span> (s&amp;(<span class="cpp-number">1</span>&lt;&lt;k)) sum[s] += sum[s^(<span class="cpp-number">1</span>&lt;&lt;k)];
+    }
+}</code></pre>
+
+</body>
+</html>

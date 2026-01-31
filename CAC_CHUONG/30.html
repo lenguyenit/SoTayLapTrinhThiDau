@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPH - Chương 30: Thuật toán quét đường</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h1 { margin-top: 40px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        
+        /* Code styling */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #f1f3f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+        
+        /* Syntax highlighting */
+        .cpp-keyword { color: #0000ff; font-weight: bold; }
+        .cpp-type { color: #2b91af; }
+        .cpp-number { color: #098658; }
+        .cpp-func { color: #795e26; }
+        .cpp-comment { color: #008000; font-style: italic; }
+        .cpp-struct { color: #267f99; font-weight: bold; }
+
+        /* Graphics Containers */
+        .graphic-box {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        
+        /* SVG Styling */
+        svg text { font-family: "Segoe UI", sans-serif; font-size: 14px; text-anchor: middle; dominant-baseline: central; font-weight: bold; }
+        .point-circle { fill: #c0392b; stroke: none; }
+        .hull-line { stroke: #2980b9; stroke-width: 2; fill: none; }
+        .sweep-line { stroke: #d35400; stroke-width: 2; stroke-dasharray: 5,5; }
+        .active-region { fill: #fff3e0; stroke: none; opacity: 0.5; }
+        .axis { stroke: #ccc; stroke-width: 1; }
+
+        /* TOC */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc a { text-decoration: none; color: #007bff; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="toc">
+        <h3>Mục lục - Chương 30</h3>
+        <ul>
+            <li><a href="#intro">Thuật toán quét đường</a></li>
+            <li><a href="#sec30.1">30.1 Giao điểm đoạn thẳng</a></li>
+            <li><a href="#sec30.2">30.2 Cặp điểm gần nhất</a></li>
+            <li><a href="#sec30.3">30.3 Bài toán bao lồi</a></li>
+        </ul>
+    </div>
+
+    <h1 id="intro">Chương 30: Thuật toán quét đường (Sweep Line Algorithms)</h1>
+    <p>
+        Nhiều bài toán hình học có thể được giải quyết bằng kỹ thuật <strong>quét đường</strong> (sweep-line algorithm). Ý tưởng chính là mô phỏng một đường thẳng đứng di chuyển từ trái sang phải qua mặt phẳng. Khi đường quét đi qua các đối tượng hình học, nó dừng lại tại một số điểm sự kiện (event points) để cập nhật trạng thái của một cấu trúc dữ liệu.
+    </p>
+    <p>
+        Bằng cách này, chúng ta chuyển một bài toán 2D tĩnh thành một bài toán 1D động, thường giúp giảm độ phức tạp thời gian.
+    </p>
+
+    <h2 id="sec30.1">30.1 Giao điểm đoạn thẳng (Intersection points)</h2>
+    <p>
+        Bài toán: Cho \(n\) đoạn thẳng nằm ngang hoặc thẳng đứng. Hãy tìm số lượng giao điểm của chúng.
+    </p>
+    <p>
+        Chúng ta tạo ra các sự kiện dựa trên tọa độ \(x\):
+        1. <strong>Bắt đầu đoạn nằm ngang:</strong> Thêm tọa độ \(y\) của đoạn đó vào cấu trúc dữ liệu.
+        2. <strong>Kết thúc đoạn nằm ngang:</strong> Xóa tọa độ \(y\) khỏi cấu trúc dữ liệu.
+        3. <strong>Đoạn thẳng đứng:</strong> Truy vấn số lượng đoạn nằm ngang đang hoạt động (active) trong khoảng \(y\) của đoạn thẳng đứng đó.
+    </p>
+    <p>
+        Cấu trúc dữ liệu cần hỗ trợ: Thêm, Xóa, và Truy vấn tổng trong khoảng. <strong>Fenwick Tree</strong> hoặc <strong>Segment Tree</strong> là lựa chọn phù hợp, giúp giải quyết bài toán trong \(O(n \log n)\).
+    </p>
+
+    <div class="graphic-box">
+        <svg width="400" height="200" viewBox="0 0 400 200">
+            <line x1="20" y1="180" x2="380" y2="180" class="axis"/>
+            <line x1="20" y1="180" x2="20" y2="20" class="axis"/>
+
+            <line x1="50" y1="50" x2="150" y2="50" stroke="#2980b9" stroke-width="2"/> <line x1="80" y1="100" x2="200" y2="100" stroke="#2980b9" stroke-width="2"/> <line x1="250" y1="80" x2="350" y2="80" stroke="#2980b9" stroke-width="2"/> <line x1="100" y1="30" x2="100" y2="120" stroke="#c0392b" stroke-width="2"/> <line x1="300" y1="60" x2="300" y2="150" stroke="#c0392b" stroke-width="2"/> <line x1="100" y1="20" x2="100" y2="180" class="sweep-line"/>
+            <text x="105" y="195" fill="#d35400" font-size="12">x=100 (Event)</text>
+            
+            <circle cx="100" cy="50" r="3" fill="black"/>
+            <circle cx="100" cy="100" r="3" fill="black"/>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 30.1: Đường quét (cam) gặp đoạn thẳng đứng và đếm giao điểm</div>
+    </div>
+
+    <h2 id="sec30.2">30.2 Cặp điểm gần nhất (Closest pair problem)</h2>
+    <p>
+        Bài toán: Cho \(n\) điểm, tìm khoảng cách nhỏ nhất giữa hai điểm bất kỳ.
+        Thuật toán quét đường giải quyết bài toán này trong \(O(n \log n)\).
+    </p>
+    <p>
+        <strong>Thuật toán:</strong>
+        1. Sắp xếp các điểm theo hoành độ \(x\).
+        2. Duyệt qua các điểm. Gọi \(d\) là khoảng cách nhỏ nhất hiện tại.
+        3. Với điểm hiện tại \((x, y)\), chỉ xét các điểm bên trái có hoành độ \(\ge x - d\). Loại bỏ các điểm xa hơn khỏi cấu trúc dữ liệu.
+        4. Trong dải \([x-d, x]\), chỉ cần xét các điểm có tung độ trong khoảng \([y-d, y+d]\). Sử dụng <code>std::set</code> để truy vấn hiệu quả.
+    </p>
+
+    <h3>Cài đặt</h3>
+<pre><code><span class="cpp-type">struct</span> <span class="cpp-struct">Point</span> { <span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> x, y; };
+
+<span class="cpp-keyword">bool</span> <span class="cpp-func">compareX</span>(Point a, Point b) { <span class="cpp-keyword">return</span> a.x &lt; b.x || (a.x == b.x && a.y &lt; b.y); }
+
+<span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> <span class="cpp-func">closest_pair</span>(<span class="cpp-type">vector</span>&lt;Point&gt;& p) {
+    <span class="cpp-keyword">int</span> n = p.size();
+    sort(p.begin(), p.end(), compareX);
+    
+    <span class="cpp-type">long</span> <span class="cpp-keyword">long</span> d2 = <span class="cpp-number">9e18</span>; <span class="cpp-comment">// d^2 min</span>
+    <span class="cpp-type">set</span>&lt;<span class="cpp-type">pair</span>&lt;<span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span>, <span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span>&gt;&gt; s; <span class="cpp-comment">// Lưu {y, x}</span>
+    
+    <span class="cpp-keyword">int</span> j = <span class="cpp-number">0</span>;
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">0</span>; i &lt; n; i++) {
+        <span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> d = ceil(sqrt(d2));
+        <span class="cpp-comment">// Xóa điểm có x < p[i].x - d</span>
+        <span class="cpp-keyword">while</span> (p[i].x - p[j].x &gt;= d) {
+            s.erase({p[j].y, p[j].x});
+            j++;
+        }
+        
+        <span class="cpp-comment">// Xét điểm có y trong [p[i].y - d, p[i].y + d]</span>
+        <span class="cpp-keyword">auto</span> it = s.lower_bound({p[i].y - d, -<span class="cpp-number">1e18</span>});
+        <span class="cpp-keyword">while</span> (it != s.end() && it-&gt;first &lt;= p[i].y + d) {
+            <span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> dx = p[i].x - it-&gt;second;
+            <span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> dy = p[i].y - it-&gt;first;
+            d2 = min(d2, dx*dx + dy*dy);
+            it++;
+        }
+        s.insert({p[i].y, p[i].x});
+    }
+    <span class="cpp-keyword">return</span> d2;
+}</code></pre>
+
+    <h2 id="sec30.3">30.3 Bài toán bao lồi (Convex Hull problem)</h2>
+    <p>
+        Bao lồi của một tập hợp điểm là đa giác lồi nhỏ nhất chứa tất cả các điểm đó. Một cách tiếp cận phổ biến để tìm bao lồi là thuật toán <strong>Chuỗi đơn điệu (Monotone Chain)</strong>, hay còn gọi là thuật toán Andrew.
+    </p>
+    <p>
+        Thuật toán xây dựng bao lồi bằng cách chia nó thành hai phần: <strong>vỏ trên</strong> (upper hull) và <strong>vỏ dưới</strong> (lower hull).
+        1. Sắp xếp các điểm theo tọa độ \(x\).
+        2. Duyệt các điểm để xây dựng vỏ trên và vỏ dưới. Tại mỗi bước, nếu việc thêm điểm mới tạo ra một góc lõm (rẽ phải hoặc thẳng hàng), ta loại bỏ điểm ngay trước đó. Sử dụng tích có hướng để kiểm tra hướng rẽ.
+    </p>
+
+    <div class="graphic-box">
+        <svg width="350" height="250" viewBox="0 0 350 250">
+            <g id="internal-points">
+                <circle cx="100" cy="100" r="3" fill="#ccc"/>
+                <circle cx="150" cy="120" r="3" fill="#ccc"/>
+                <circle cx="120" cy="80" r="3" fill="#ccc"/>
+                <circle cx="200" cy="130" r="3" fill="#ccc"/>
+                <circle cx="180" cy="90" r="3" fill="#ccc"/>
+            </g>
+
+            <path d="M 50,150 L 100,50 L 200,40 L 300,100" class="hull-line" stroke="#e67e22"/> <path d="M 50,150 L 120,180 L 250,190 L 300,100" class="hull-line" stroke="#2980b9"/> <g id="hull-points">
+                <circle cx="50" cy="150" r="4" class="point-circle"/>
+                <circle cx="100" cy="50" r="4" class="point-circle"/>
+                <circle cx="200" cy="40" r="4" class="point-circle"/>
+                <circle cx="300" cy="100" r="4" class="point-circle"/>
+                <circle cx="250" cy="190" r="4" class="point-circle"/>
+                <circle cx="120" cy="180" r="4" class="point-circle"/>
+            </g>
+            
+            <text x="175" y="230" font-size="13" fill="#555">Cam: Vỏ trên, Xanh: Vỏ dưới</text>
+        </svg>
+    </div>
+
+    <h3>Cài đặt (Monotone Chain)</h3>
+<pre><code><span class="cpp-type">struct</span> <span class="cpp-struct">Point</span> {
+    <span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> x, y;
+    <span class="cpp-keyword">bool</span> <span class="cpp-keyword">operator</span>&lt;(<span class="cpp-keyword">const</span> Point& other) <span class="cpp-keyword">const</span> {
+        <span class="cpp-keyword">return</span> x &lt; other.x || (x == other.x && y &lt; other.y);
+    }
+    Point <span class="cpp-keyword">operator</span>-(<span class="cpp-keyword">const</span> Point& other) <span class="cpp-keyword">const</span> {
+        <span class="cpp-keyword">return</span> {x - other.x, y - other.y};
+    }
+};
+
+<span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> <span class="cpp-func">cross_product</span>(Point a, Point b) {
+    <span class="cpp-keyword">return</span> a.x * b.y - a.y * b.x;
+}
+
+<span class="cpp-type">vector</span>&lt;Point&gt; <span class="cpp-func">convex_hull</span>(<span class="cpp-type">vector</span>&lt;Point&gt;& pts) {
+    <span class="cpp-keyword">int</span> n = pts.size(), k = <span class="cpp-number">0</span>;
+    <span class="cpp-keyword">if</span> (n &lt;= <span class="cpp-number">2</span>) <span class="cpp-keyword">return</span> pts;
+    <span class="cpp-type">vector</span>&lt;Point&gt; h(<span class="cpp-number">2</span> * n);
+    sort(pts.begin(), pts.end());
+
+    <span class="cpp-comment">// Xây dựng vỏ dưới</span>
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">0</span>; i &lt; n; ++i) {
+        <span class="cpp-keyword">while</span> (k &gt;= <span class="cpp-number">2</span> && <span class="cpp-func">cross_product</span>(h[k-<span class="cpp-number">1</span>]-h[k-<span class="cpp-number">2</span>], pts[i]-h[k-<span class="cpp-number">2</span>]) &lt;= <span class="cpp-number">0</span>) k--;
+        h[k++] = pts[i];
+    }
+
+    <span class="cpp-comment">// Xây dựng vỏ trên</span>
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = n - <span class="cpp-number">2</span>, t = k + <span class="cpp-number">1</span>; i &gt;= <span class="cpp-number">0</span>; i--) {
+        <span class="cpp-keyword">while</span> (k &gt;= t && <span class="cpp-func">cross_product</span>(h[k-<span class="cpp-number">1</span>]-h[k-<span class="cpp-number">2</span>], pts[i]-h[k-<span class="cpp-number">2</span>]) &lt;= <span class="cpp-number">0</span>) k--;
+        h[k++] = pts[i];
+    }
+
+    h.resize(k - <span class="cpp-number">1</span>); <span class="cpp-comment">// Loại bỏ điểm trùng ở cuối</span>
+    <span class="cpp-keyword">return</span> h;
+}</code></pre>
+
+</body>
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPH - Chương 24: Xác suất</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h1 { margin-top: 40px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        
+        /* Code styling */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #f1f3f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+        
+        /* Syntax highlighting */
+        .cpp-keyword { color: #0000ff; font-weight: bold; }
+        .cpp-type { color: #2b91af; }
+        .cpp-number { color: #098658; }
+        .cpp-func { color: #795e26; }
+        .cpp-comment { color: #008000; font-style: italic; }
+
+        /* Graphics Containers */
+        .graphic-box {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        
+        /* SVG Styling */
+        svg text { font-family: "Segoe UI", sans-serif; font-size: 14px; text-anchor: middle; dominant-baseline: central; font-weight: bold; }
+        .node-circle { fill: #fff; stroke: #2c3e50; stroke-width: 2; }
+        .edge-line { stroke: #555; stroke-width: 2; marker-end: url(#arrowProb); }
+        .bar-rect { fill: #3498db; stroke: #2980b9; }
+        .highlight-text { fill: #c0392b; font-weight: bold; }
+
+        /* TOC */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc a { text-decoration: none; color: #007bff; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="toc">
+        <h3>Mục lục - Chương 24</h3>
+        <ul>
+            <li><a href="#intro">Xác suất</a></li>
+            <li><a href="#sec24.1">24.1 Biến cố và xác suất</a></li>
+            <li><a href="#sec24.2">24.2 Biến ngẫu nhiên</a></li>
+            <li><a href="#sec24.3">24.3 Giá trị kỳ vọng</a></li>
+            <li><a href="#sec24.4">24.4 Xích Markov</a></li>
+        </ul>
+    </div>
+
+    <h1 id="intro">Chương 24: Xác suất (Probability)</h1>
+    <p>
+        Xác suất là một công cụ mạnh mẽ trong thiết kế thuật toán, đặc biệt là trong các thuật toán ngẫu nhiên (randomized algorithms). Trong lập trình thi đấu, các bài toán xác suất thường yêu cầu tính khả năng xảy ra của một sự kiện hoặc giá trị trung bình của một đại lượng (kỳ vọng).
+    </p>
+
+    <h2 id="sec24.1">24.1 Biến cố và xác suất (Events and probability)</h2>
+    <p>
+        Xác suất của một biến cố \(A\) được ký hiệu là \(P(A)\), là một giá trị nằm trong khoảng \([0, 1]\).
+        Nếu tập hợp tất cả các kết quả có thể xảy ra là \(\Omega\) và mỗi kết quả có khả năng xảy ra như nhau, thì:
+        $$ P(A) = \frac{|A|}{|\Omega|} $$
+    </p>
+
+    <h3>Các quy tắc cơ bản</h3>
+    <ul>
+        <li><strong>Biến cố đối:</strong> \(P(A^c) = 1 - P(A)\), trong đó \(A^c\) là biến cố "A không xảy ra".</li>
+        <li><strong>Hợp (Union):</strong> \(P(A \cup B) = P(A) + P(B) - P(A \cap B)\).</li>
+        <li><strong>Độc lập (Independence):</strong> Nếu \(A\) và \(B\) độc lập, thì \(P(A \cap B) = P(A)P(B)\).</li>
+    </ul>
+
+    <div class="graphic-box">
+        <svg width="300" height="200" viewBox="0 0 300 200">
+            <rect x="10" y="10" width="280" height="180" fill="#f9f9f9" stroke="#999" rx="10"/>
+            <text x="30" y="30" fill="#999">Ω</text>
+            
+            <circle cx="110" cy="100" r="60" fill="rgba(231, 76, 60, 0.4)" stroke="#c0392b" stroke-width="2"/>
+            <text x="90" y="100" fill="#c0392b">A</text>
+            
+            <circle cx="190" cy="100" r="60" fill="rgba(52, 152, 219, 0.4)" stroke="#2980b9" stroke-width="2"/>
+            <text x="210" y="100" fill="#2980b9">B</text>
+            
+            <text x="150" y="180" font-size="12">Giao nhau: A ∩ B</text>
+        </svg>
+    </div>
+
+    <h3>Mô phỏng Monte Carlo</h3>
+    <p>
+        Đôi khi việc tính toán chính xác rất khó, chúng ta có thể sử dụng phương pháp mô phỏng ngẫu nhiên (Monte Carlo) để ước lượng xác suất. Bằng cách lặp lại thí nghiệm nhiều lần, tần suất xuất hiện của biến cố sẽ hội tụ về xác suất thực tế.
+    </p>
+
+<pre><code><span class="cpp-comment">// Ví dụ: Ước lượng xác suất 2 lần tung xúc xắc có tổng bằng 10</span>
+<span class="cpp-type">double</span> <span class="cpp-func">simulate</span>(<span class="cpp-keyword">int</span> trials) {
+    <span class="cpp-keyword">int</span> count = <span class="cpp-number">0</span>;
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">0</span>; i &lt; trials; i++) {
+        <span class="cpp-keyword">int</span> d1 = rand() % <span class="cpp-number">6</span> + <span class="cpp-number">1</span>;
+        <span class="cpp-keyword">int</span> d2 = rand() % <span class="cpp-number">6</span> + <span class="cpp-number">1</span>;
+        <span class="cpp-keyword">if</span> (d1 + d2 == <span class="cpp-number">10</span>) count++;
+    }
+    <span class="cpp-keyword">return</span> (<span class="cpp-type">double</span>)count / trials;
+}</code></pre>
+
+    <h2 id="sec24.2">24.2 Biến ngẫu nhiên (Random variables)</h2>
+    <p>
+        Biến ngẫu nhiên là một giá trị được xác định bởi kết quả của một phép thử ngẫu nhiên.
+        Ví dụ: \(X\) là kết quả khi tung một con xúc xắc.
+    </p>
+
+    <h2 id="sec24.3">24.3 Giá trị kỳ vọng (Expected value)</h2>
+    <p>
+        Giá trị kỳ vọng \(E[X]\) cho biết giá trị trung bình của biến ngẫu nhiên \(X\) nếu phép thử được lặp lại vô số lần.
+        $$ E[X] = \sum_{x} x P(X=x) $$
+    </p>
+    <p>
+        <strong>Tính chất tuyến tính của kỳ vọng (Linearity of Expectation):</strong>
+        Đây là tính chất quan trọng nhất trong lập trình thi đấu.
+        $$ E[X_1 + X_2 + \dots + X_n] = E[X_1] + E[X_2] + \dots + E[X_n] $$
+        Tính chất này đúng ngay cả khi các biến ngẫu nhiên <strong>không độc lập</strong>.
+    </p>
+
+    <h3>Ví dụ: Bài toán sưu tập coupon</h3>
+    <p>
+        Có \(n\) loại coupon khác nhau. Mỗi lần mua một hộp, bạn nhận được một coupon ngẫu nhiên (xác suất mỗi loại là \(1/n\)). Kỳ vọng số hộp cần mua để sưu tập đủ \(n\) loại coupon là bao nhiêu?
+    </p>
+    <p>
+        Giải: Gọi \(X\) là số hộp cần mua. \(X = X_1 + X_2 + \dots + X_n\), trong đó \(X_i\) là số hộp cần mua để có được loại coupon mới thứ \(i\).
+        Khi đã có \(i-1\) loại, xác suất lấy được loại mới là \(p = \frac{n-(i-1)}{n}\). Số bước kỳ vọng để thành công với xác suất \(p\) là \(1/p\).
+        Vậy \(E[X_i] = \frac{n}{n-i+1}\).
+        $$ E[X] = \sum_{i=1}^n \frac{n}{n-i+1} = n \left( \frac{1}{n} + \frac{1}{n-1} + \dots + 1 \right) \approx n \ln n $$
+    </p>
+
+    <h3>Kỳ vọng với Quy hoạch động</h3>
+    <p>
+        Nhiều bài toán kỳ vọng có thể giải bằng DP. Nếu chúng ta đang ở trạng thái \(s\), và có thể chuyển sang trạng thái \(next\) với xác suất \(p\), thì:
+        $$ E[s] = \sum_{next} p(s, next) \cdot (1 + E[next]) $$
+        (Số 1 biểu thị chi phí cho 1 bước chuyển).
+    </p>
+
+    <h2 id="sec24.4">24.4 Xích Markov (Markov Chains)</h2>
+    <p>
+        Xích Markov là một quá trình ngẫu nhiên bao gồm các trạng thái và xác suất chuyển đổi giữa chúng. Tính chất Markov: trạng thái tiếp theo chỉ phụ thuộc vào trạng thái hiện tại, không phụ thuộc vào quá khứ.
+    </p>
+    <p>
+        Chúng ta có thể biểu diễn Xích Markov dưới dạng một đồ thị có hướng, trong đó các cạnh được gán trọng số là xác suất chuyển đổi. Tổng trọng số các cạnh đi ra từ một nút luôn bằng 1.
+    </p>
+
+    <div class="graphic-box">
+        <svg width="400" height="200" viewBox="0 0 400 200">
+            <defs>
+                <marker id="arrowProb" markerWidth="10" markerHeight="10" refX="24" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#555" />
+                </marker>
+            </defs>
+
+            <g id="markov-edges">
+                <path d="M100,100 Q150,50 200,100" fill="none" stroke="#555" stroke-width="2" marker-end="url(#arrowProb)"/>
+                <text x="150" y="60" font-size="12">0.7</text>
+
+                <path d="M200,100 Q150,150 100,100" fill="none" stroke="#555" stroke-width="2" marker-end="url(#arrowProb)"/>
+                <text x="150" y="140" font-size="12">0.4</text>
+
+                <path d="M100,100 C60,60 60,140 100,100" fill="none" stroke="#555" stroke-width="2" marker-end="url(#arrowProb)"/>
+                <text x="50" y="100" font-size="12">0.3</text>
+
+                <path d="M200,100 C240,60 240,140 200,100" fill="none" stroke="#555" stroke-width="2" marker-end="url(#arrowProb)"/>
+                <text x="240" y="100" font-size="12">0.6</text>
+            </g>
+
+            <g id="markov-nodes">
+                <circle cx="100" cy="100" r="15" class="node-circle"/> <text x="100" y="100">A</text>
+                <circle cx="200" cy="100" r="15" class="node-circle"/> <text x="200" y="100">B</text>
+            </g>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 24.1: Ví dụ Xích Markov với 2 trạng thái</div>
+    </div>
+
+    <h3>Cài đặt: Tính kỳ vọng số bước</h3>
+    <p>
+        Bài toán: Cho một đồ thị DAG (hoặc trò chơi không có chu trình), tính kỳ vọng số bước để đi từ \(u\) đến đích.
+    </p>
+
+<pre><code><span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt; adj[N];
+<span class="cpp-type">double</span> dp[N];
+<span class="cpp-keyword">bool</span> visited[N];
+<span class="cpp-keyword">int</span> out_degree[N];
+
+<span class="cpp-type">double</span> <span class="cpp-func">expected_steps</span>(<span class="cpp-keyword">int</span> u) {
+    <span class="cpp-comment">// Nếu là đích, kỳ vọng là 0</span>
+    <span class="cpp-keyword">if</span> (out_degree[u] == <span class="cpp-number">0</span>) <span class="cpp-keyword">return</span> <span class="cpp-number">0</span>;
+    <span class="cpp-keyword">if</span> (visited[u]) <span class="cpp-keyword">return</span> dp[u];
+
+    <span class="cpp-type">double</span> sum = <span class="cpp-number">0</span>;
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> v : adj[u]) {
+        sum += <span class="cpp-func">expected_steps</span>(v);
+    }
+
+    <span class="cpp-comment">// E[u] = 1 + average(E[v])</span>
+    <span class="cpp-comment">// = 1 + (1/k) * sum(E[v])</span>
+    dp[u] = <span class="cpp-number">1.0</span> + sum / out_degree[u];
+    visited[u] = <span class="cpp-keyword">true</span>;
+    <span class="cpp-keyword">return</span> dp[u];
+}</code></pre>
+
+    <p>
+        Nếu đồ thị có chu trình, chúng ta không thể dùng DP đơn thuần mà phải lập hệ phương trình tuyến tính \(E[u] = 1 + \sum P(u,v) E[v]\) và giải bằng phương pháp khử Gauss.
+    </p>
+
+</body>
+</html>

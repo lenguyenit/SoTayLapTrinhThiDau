@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPH - Chương 16: Đồ thị có hướng</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h1 { margin-top: 40px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        
+        /* Code styling */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #f1f3f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+        
+        /* Syntax highlighting */
+        .cpp-keyword { color: #0000ff; font-weight: bold; }
+        .cpp-type { color: #2b91af; }
+        .cpp-number { color: #098658; }
+        .cpp-func { color: #795e26; }
+        .cpp-comment { color: #008000; font-style: italic; }
+
+        /* Graphics Containers */
+        .graphic-box {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        
+        /* SVG Styling */
+        svg text { font-family: "Segoe UI", sans-serif; font-size: 14px; text-anchor: middle; dominant-baseline: central; font-weight: bold; }
+        .node-circle { fill: #fff; stroke: #2c3e50; stroke-width: 2; }
+        .node-highlight { fill: #e3f2fd; stroke: #2196f3; stroke-width: 2; }
+        .edge-line { stroke: #555; stroke-width: 2; }
+        .arrow-head { fill: #555; }
+        
+        /* TOC */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc a { text-decoration: none; color: #007bff; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="toc">
+        <h3>Mục lục - Chương 16</h3>
+        <ul>
+            <li><a href="#intro">Đồ thị có hướng</a></li>
+            <li><a href="#sec16.1">16.1 Sắp xếp topo</a></li>
+            <li><a href="#sec16.2">16.2 Quy hoạch động</a></li>
+            <li><a href="#sec16.3">16.3 Đồ thị kế tiếp</a></li>
+            <li><a href="#sec16.4">16.4 Phát hiện chu trình</a></li>
+        </ul>
+    </div>
+
+    <h1 id="intro">Chương 16: Đồ thị có hướng (Directed graphs)</h1>
+    <p>
+        Trong chương này, chúng ta tập trung vào hai lớp đồ thị có hướng đặc biệt:
+    </p>
+    <ul>
+        <li><strong>Đồ thị có hướng không chu trình</strong> (Directed Acyclic Graphs - DAG): Đồ thị không chứa bất kỳ chu trình nào.</li>
+        <li><strong>Đồ thị kế tiếp</strong> (Successor graphs): Đồ thị mà bậc ra (outdegree) của mỗi nút đều bằng 1.</li>
+    </ul>
+    <p>
+        Hóa ra chúng ta có thể thiết kế các thuật toán rất hiệu quả cho các loại đồ thị này.
+    </p>
+
+    <h2 id="sec16.1">16.1 Sắp xếp topo (Topological sorting)</h2>
+    <p>
+        Sắp xếp topo là một thứ tự các nút của đồ thị có hướng sao cho với mỗi cạnh từ nút \(a\) đến nút \(b\), nút \(a\) luôn xuất hiện trước nút \(b\) trong thứ tự đó.
+    </p>
+    <p>
+        Ví dụ, đối với đồ thị sau:
+    </p>
+
+    <div class="graphic-box">
+        <svg width="400" height="150" viewBox="0 0 400 150">
+            <defs>
+                <marker id="arrowTopo" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#555" />
+                </marker>
+            </defs>
+
+            <g id="topo-edges">
+                <line x1="50" y1="75" x2="150" y2="25" class="edge-line" marker-end="url(#arrowTopo)"/> <line x1="50" y1="75" x2="150" y2="125" class="edge-line" marker-end="url(#arrowTopo)"/> <line x1="150" y1="25" x2="250" y2="25" class="edge-line" marker-end="url(#arrowTopo)"/> <line x1="150" y1="125" x2="250" y2="125" class="edge-line" marker-end="url(#arrowTopo)"/> <line x1="150" y1="25" x2="150" y2="125" class="edge-line" marker-end="url(#arrowTopo)"/> <line x1="250" y1="25" x2="350" y2="75" class="edge-line" marker-end="url(#arrowTopo)"/> <line x1="250" y1="125" x2="350" y2="75" class="edge-line" marker-end="url(#arrowTopo)"/> </g>
+
+            <g id="topo-nodes">
+                <circle cx="50" cy="75" r="18" class="node-circle"/> <text x="50" y="75">1</text>
+                <circle cx="150" cy="25" r="18" class="node-circle"/> <text x="150" y="25">2</text>
+                <circle cx="150" cy="125" r="18" class="node-circle"/> <text x="150" y="125">3</text>
+                <circle cx="250" cy="25" r="18" class="node-circle"/> <text x="250" y="25">4</text>
+                <circle cx="250" cy="125" r="18" class="node-circle"/> <text x="250" y="125">5</text>
+                <circle cx="350" cy="75" r="18" class="node-circle"/> <text x="350" y="75">6</text>
+            </g>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 16.1: Một đồ thị không chu trình</div>
+    </div>
+
+    <p>
+        Một thứ tự topo hợp lệ là: <code>[1, 2, 4, 3, 5, 6]</code>. Ngoài ra, <code>[1, 2, 3, 4, 5, 6]</code> cũng là một thứ tự topo hợp lệ.
+    </p>
+    <p>
+        Một đồ thị có hướng có thứ tự topo khi và chỉ khi nó là đồ thị không chu trình (DAG). Nếu đồ thị chứa chu trình, không thể tồn tại thứ tự topo, vì không có cách nào để sắp xếp các nút của chu trình sao cho mỗi cạnh đều đi từ nút trước đến nút sau.
+    </p>
+
+    <h3>Thuật toán</h3>
+    <p>
+        Chúng ta có thể xây dựng thứ tự topo bằng cách sử dụng tìm kiếm theo chiều sâu (DFS). Phương pháp là đi qua các nút của đồ thị và thêm mỗi nút vào một danh sách khi quá trình tìm kiếm tại nút đó <strong>kết thúc</strong> (tức là khi chúng ta rời khỏi nút đó sau khi đã thăm hết các con). Sau khi duyệt xong, đảo ngược danh sách này sẽ cho ta thứ tự topo.
+    </p>
+    <p>
+        Giải thích: Nếu có cạnh \(a \to b\), thì việc xử lý nút \(b\) phải kết thúc trước khi việc xử lý nút \(a\) kết thúc (vì DFS sẽ đi từ \(a\) đến \(b\), thăm hết \(b\), rồi mới quay lại hoàn tất \(a\)). Do đó, \(b\) được thêm vào danh sách trước \(a\). Khi đảo ngược danh sách, \(a\) sẽ đứng trước \(b\).
+    </p>
+
+<pre><code><span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt; topo;
+<span class="cpp-keyword">bool</span> visited[N];
+
+<span class="cpp-keyword">void</span> <span class="cpp-func">dfs</span>(<span class="cpp-keyword">int</span> s) {
+    visited[s] = <span class="cpp-keyword">true</span>;
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">auto</span> u : adj[s]) {
+        <span class="cpp-keyword">if</span> (!visited[u]) <span class="cpp-func">dfs</span>(u);
+    }
+    topo.push_back(s); <span class="cpp-comment">// thêm vào danh sách khi hoàn tất</span>
+}
+
+<span class="cpp-comment">// Trong hàm main:</span>
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">1</span>; i &lt;= n; i++) {
+    <span class="cpp-keyword">if</span> (!visited[i]) <span class="cpp-func">dfs</span>(i);
+}
+reverse(topo.begin(), topo.end());</code></pre>
+
+    <h2 id="sec16.2">16.2 Quy hoạch động (Dynamic programming)</h2>
+    <p>
+        Nếu một đồ thị có hướng là không chu trình (DAG), chúng ta có thể áp dụng quy hoạch động để giải quyết các bài toán liên quan đến đường đi. Các nút có thể được xử lý theo thứ tự topo: khi chúng ta đến một nút \(x\), chúng ta đảm bảo rằng tất cả các nút có cạnh hướng tới \(x\) đã được xử lý trước đó.
+    </p>
+
+    <h3>Ví dụ: Đường đi dài nhất</h3>
+    <p>
+        Hãy xem xét bài toán tìm đường đi dài nhất từ nút 1 đến nút \(n\).
+        Gọi \(dist[x]\) là độ dài đường đi dài nhất từ nút 1 đến nút \(x\).
+        Công thức truy hồi là:
+        $$ dist[x] = \max_{(u,x) \in E} \{dist[u] + 1\} $$
+        trong đó \((u,x) \in E\) là các cạnh đi vào \(x\).
+    </p>
+    <p>
+        Để cài đặt, chúng ta duyệt các nút theo thứ tự topo. Với mỗi nút \(u\), chúng ta cập nhật giá trị cho các láng giềng \(v\) của nó:
+    </p>
+
+<pre><code><span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">1</span>; i &lt;= n; i++) dist[i] = <span class="cpp-number">0</span>; <span class="cpp-comment">// hoặc -INF</span>
+dist[<span class="cpp-number">1</span>] = <span class="cpp-number">0</span>;
+
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">auto</span> u : topo) {
+    <span class="cpp-comment">// u được lấy theo thứ tự topo</span>
+    <span class="cpp-keyword">if</span> (u == target) <span class="cpp-keyword">break</span>; 
+    
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">auto</span> v : adj[u]) {
+        <span class="cpp-keyword">if</span> (dist[u] + <span class="cpp-number">1</span> > dist[v]) {
+            dist[v] = dist[u] + <span class="cpp-number">1</span>;
+        }
+    }
+}</code></pre>
+
+    <h3>Các bài toán khác</h3>
+    <p>
+        Tương tự, chúng ta có thể tính:
+    </p>
+    <ul>
+        <li><strong>Đường đi ngắn nhất:</strong> \(dist[x] = \min(dist[u] + w)\).</li>
+        <li><strong>Số lượng đường đi:</strong> \(count[x] = \sum count[u]\).</li>
+    </ul>
+
+    <h2 id="sec16.3">16.3 Đồ thị kế tiếp (Successor graphs)</h2>
+    <p>
+        Trong đồ thị kế tiếp (hay còn gọi là đồ thị hàm), bậc ra của mỗi nút là chính xác 1. Đồ thị này bao gồm một tập hợp các thành phần, mỗi thành phần chứa đúng một chu trình và một số đường dẫn dẫn vào chu trình đó.
+    </p>
+    
+    <div class="graphic-box">
+        <svg width="400" height="200" viewBox="0 0 400 200">
+            <defs>
+                <marker id="arrowSucc" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#555" />
+                </marker>
+            </defs>
+
+            <g id="succ-edges">
+                <line x1="50" y1="100" x2="100" y2="50" class="edge-line" marker-end="url(#arrowSucc)"/>
+                <line x1="100" y1="50" x2="150" y2="50" class="edge-line" marker-end="url(#arrowSucc)"/>
+                <line x1="150" y1="50" x2="200" y2="100" class="edge-line" marker-end="url(#arrowSucc)"/>
+                <line x1="200" y1="100" x2="150" y2="150" class="edge-line" marker-end="url(#arrowSucc)"/>
+                <line x1="150" y1="150" x2="100" y2="150" class="edge-line" marker-end="url(#arrowSucc)"/>
+                <line x1="100" y1="150" x2="100" y2="50" class="edge-line" marker-end="url(#arrowSucc)"/>
+                
+                <line x1="300" y1="50" x2="350" y2="100" class="edge-line" marker-end="url(#arrowSucc)"/>
+                <line x1="350" y1="100" x2="300" y2="150" class="edge-line" marker-end="url(#arrowSucc)"/>
+                <line x1="300" y1="150" x2="300" y2="50" class="edge-line" marker-end="url(#arrowSucc)"/>
+            </g>
+
+            <g id="succ-nodes">
+                <circle cx="50" cy="100" r="15" class="node-circle"/> <text x="50" y="100">1</text>
+                <circle cx="100" cy="50" r="15" class="node-highlight"/> <text x="100" y="50">2</text>
+                <circle cx="150" cy="50" r="15" class="node-highlight"/> <text x="150" y="50">3</text>
+                <circle cx="200" cy="100" r="15" class="node-highlight"/> <text x="200" y="100">4</text>
+                <circle cx="150" cy="150" r="15" class="node-highlight"/> <text x="150" y="150">5</text>
+                <circle cx="100" cy="150" r="15" class="node-highlight"/> <text x="100" y="150">6</text>
+                
+                <circle cx="300" cy="50" r="15" class="node-highlight"/> <text x="300" y="50">7</text>
+                <circle cx="350" cy="100" r="15" class="node-highlight"/> <text x="350" y="100">8</text>
+                <circle cx="300" cy="150" r="15" class="node-highlight"/> <text x="300" y="150">9</text>
+            </g>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 16.2: Cấu trúc của đồ thị kế tiếp (các nút xanh thuộc chu trình)</div>
+    </div>
+
+    <p>
+        Vì mỗi nút có một nút kế tiếp duy nhất, chúng ta có thể định nghĩa hàm \(succ(x)\) trả về nút kế tiếp của \(x\).
+        Bài toán thường gặp là tính \(succ(x, k)\): nút mà chúng ta sẽ đến nếu bắt đầu từ \(x\) và đi tiếp \(k\) bước.
+    </p>
+    <p>
+        Cách tiếp cận ngây thơ mất \(O(k)\), quá chậm nếu \(k\) lớn (ví dụ \(10^{18}\)). Chúng ta có thể sử dụng kỹ thuật <strong>nhân đôi</strong> (binary lifting) để tính toán trong \(O(\log k)\).
+    </p>
+    <p>
+        Gọi \(succ(x, k)\) là điểm đến sau \(2^k\) bước. Ta có:
+        $$ succ(x, k) = succ(succ(x, k-1), k-1) $$
+        Nghĩa là, đi \(2^k\) bước tương đương với đi \(2^{k-1}\) bước, rồi từ đó đi thêm \(2^{k-1}\) bước nữa.
+    </p>
+
+    <h3>Cài đặt</h3>
+    <p>
+        Chúng ta tính trước bảng <code>up[N][LOG]</code> (trong đó <code>LOG</code> khoảng 30 cho \(10^9\) bước hoặc 60 cho \(10^{18}\)).
+    </p>
+
+<pre><code><span class="cpp-comment">// Tiền xử lý</span>
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">1</span>; i &lt;= n; i++) up[i][<span class="cpp-number">0</span>] = succ[i];
+
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> j = <span class="cpp-number">1</span>; j &lt; LOG; j++) {
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">1</span>; i &lt;= n; i++) {
+        up[i][j] = up[up[i][j-<span class="cpp-number">1</span>]][j-<span class="cpp-number">1</span>];
+    }
+}
+
+<span class="cpp-comment">// Truy vấn: đi k bước từ x</span>
+<span class="cpp-keyword">int</span> <span class="cpp-func">query</span>(<span class="cpp-keyword">int</span> x, <span class="cpp-keyword">int</span> k) {
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">0</span>; i &lt; LOG; i++) {
+        <span class="cpp-keyword">if</span> ((k &gt;&gt; i) & <span class="cpp-number">1</span>) {
+            x = up[x][i];
+        }
+    }
+    <span class="cpp-keyword">return</span> x;
+}</code></pre>
+
+    <h2 id="sec16.4">16.4 Phát hiện chu trình (Cycle detection)</h2>
+    <p>
+        Trong đồ thị có hướng, chu trình tồn tại nếu chúng ta có thể đi từ một nút trở về chính nó. Một cách đơn giản để phát hiện chu trình là sử dụng DFS và theo dõi trạng thái của mỗi nút.
+    </p>
+    <p>
+        Mỗi nút có thể có một trong ba trạng thái:
+    </p>
+    <ul>
+        <li><strong>0 (Màu trắng):</strong> Chưa được thăm.</li>
+        <li><strong>1 (Màu xám):</strong> Đang được thăm (nằm trong ngăn xếp đệ quy hiện tại).</li>
+        <li><strong>2 (Màu đen):</strong> Đã thăm xong.</li>
+    </ul>
+    <p>
+        Nếu trong quá trình DFS, chúng ta gặp một cạnh đi tới một nút có trạng thái là <strong>1 (Màu xám)</strong>, thì đồ thị chứa chu trình. Cạnh này được gọi là cạnh ngược (back edge).
+    </p>
+
+    <div class="graphic-box">
+        <svg width="250" height="150" viewBox="0 0 250 150">
+            <defs>
+                <marker id="arrowCycle" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#555" />
+                </marker>
+            </defs>
+
+            <g id="cycle-det-edges">
+                <line x1="50" y1="50" x2="125" y2="20" class="edge-line" marker-end="url(#arrowCycle)"/> <line x1="125" y1="20" x2="200" y2="50" class="edge-line" marker-end="url(#arrowCycle)"/> <line x1="200" y1="50" x2="125" y2="100" class="edge-line" marker-end="url(#arrowCycle)"/> <path d="M125,100 Q125,60 125,35" fill="none" stroke="#e74c3c" stroke-width="2" marker-end="url(#arrowCycle)" stroke-dasharray="4"/>
+            </g>
+
+            <g id="cycle-det-nodes">
+                <circle cx="50" cy="50" r="15" class="node-circle"/> <text x="50" y="50">1</text>
+                <circle cx="125" cy="20" r="15" class="node-highlight"/> <text x="125" y="20">2</text>
+                <circle cx="200" cy="50" r="15" class="node-highlight"/> <text x="200" y="50">3</text>
+                <circle cx="125" cy="100" r="15" class="node-highlight"/> <text x="125" y="100">4</text>
+            </g>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 16.3: Cạnh đứt nét đỏ (4->2) tạo thành chu trình 2-3-4-2.</div>
+    </div>
+
+    <h3>Cài đặt</h3>
+    <p>
+        Mảng <code>state</code> lưu trạng thái của các nút.
+    </p>
+
+<pre><code><span class="cpp-keyword">int</span> state[N]; <span class="cpp-comment">// 0: chưa thăm, 1: đang thăm, 2: đã thăm</span>
+<span class="cpp-keyword">bool</span> cycle = <span class="cpp-keyword">false</span>;
+
+<span class="cpp-keyword">void</span> <span class="cpp-func">dfs</span>(<span class="cpp-keyword">int</span> s) {
+    state[s] = <span class="cpp-number">1</span>;
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">auto</span> u : adj[s]) {
+        <span class="cpp-keyword">if</span> (state[u] == <span class="cpp-number">0</span>) {
+            <span class="cpp-func">dfs</span>(u);
+        } <span class="cpp-keyword">else</span> <span class="cpp-keyword">if</span> (state[u] == <span class="cpp-number">1</span>) {
+            cycle = <span class="cpp-keyword">true</span>;
+            <span class="cpp-comment">// tìm thấy chu trình</span>
+        }
+    }
+    state[s] = <span class="cpp-number">2</span>;
+}</code></pre>
+
+</body>
+</html>

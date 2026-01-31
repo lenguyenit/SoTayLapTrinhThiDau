@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPH - Chương 6: Thuật toán tham lam</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h1 { margin-top: 40px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        
+        /* Code styling */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #f1f3f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+        
+        /* Syntax highlighting */
+        .cpp-keyword { color: #0000ff; font-weight: bold; }
+        .cpp-type { color: #2b91af; }
+        .cpp-number { color: #098658; }
+        .cpp-func { color: #795e26; }
+        .cpp-comment { color: #008000; font-style: italic; }
+
+        /* Graphics Containers */
+        .graphic-box {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        
+        /* SVG Styling */
+        svg text { font-family: "Segoe UI", sans-serif; font-size: 14px; text-anchor: middle; dominant-baseline: central; font-weight: bold; }
+        .node-circle { fill: #fff; stroke: #2c3e50; stroke-width: 2; }
+        .node-highlight { fill: #e3f2fd; stroke: #2196f3; stroke-width: 2; }
+        .edge-line { stroke: #555; stroke-width: 2; }
+        .timeline-bar { fill: #fff; stroke: #333; stroke-width: 1; rx: 4; }
+        .timeline-bar-selected { fill: #c8e6c9; stroke: #2e7d32; stroke-width: 2; rx: 4; }
+        .timeline-axis { stroke: #999; stroke-width: 1; }
+        .step-label { font-size: 16px; fill: #d35400; font-weight: bold; text-anchor: middle; }
+
+        /* Tables */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        th { background-color: #f2f2f2; font-weight: 600; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+
+        /* TOC */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc a { text-decoration: none; color: #007bff; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="toc">
+        <h3>Mục lục - Chương 6</h3>
+        <ul>
+            <li><a href="#intro">Thuật toán tham lam</a></li>
+            <li><a href="#sec6.1">6.1 Bài toán đổi tiền</a></li>
+            <li><a href="#sec6.2">6.2 Lập lịch</a></li>
+            <li><a href="#sec6.3">6.3 Công việc và thời hạn</a></li>
+            <li><a href="#sec6.4">6.4 Tối thiểu hóa tổng</a></li>
+            <li><a href="#sec6.5">6.5 Nén dữ liệu</a></li>
+        </ul>
+    </div>
+
+    <h1 id="intro">Chương 6: Thuật toán tham lam (Greedy algorithms)</h1>
+    <p>
+        Một thuật toán tham lam xây dựng lời giải cho bài toán bằng cách luôn đưa ra lựa chọn trông có vẻ tốt nhất tại thời điểm hiện tại. Một thuật toán tham lam không bao giờ thu lại các lựa chọn của nó, mà trực tiếp xây dựng lời giải cuối cùng. Vì lý do này, các thuật toán tham lam thường rất hiệu quả.
+    </p>
+    <p>
+        Khó khăn trong việc thiết kế thuật toán tham lam là tìm ra một chiến lược tham lam luôn tạo ra lời giải tối ưu cho bài toán. Các lựa chọn tối ưu cục bộ trong một thuật toán tham lam cũng phải là tối ưu toàn cục. Thường rất khó để biện luận rằng một thuật toán tham lam hoạt động chính xác.
+    </p>
+
+    <h2 id="sec6.1">6.1 Bài toán đổi tiền (Coin problem)</h2>
+    <p>
+        Là ví dụ đầu tiên, chúng ta xem xét bài toán nơi chúng ta được cung cấp một tập hợp các đồng xu và nhiệm vụ của chúng ta là tạo thành một tổng tiền \(n\) bằng cách sử dụng các đồng xu. Các giá trị của các đồng xu là \(coins = \{c_1, c_2, \dots, c_k\}\), và mỗi đồng xu có thể được sử dụng bao nhiêu lần tùy ý. Số lượng đồng xu tối thiểu cần thiết là bao nhiêu?
+    </p>
+    <p>
+        Ví dụ, nếu các đồng xu là các đồng xu euro (tính bằng cent):
+        $$ \{1, 2, 5, 10, 20, 50, 100, 200\} $$
+        và \(n = 520\), chúng ta cần ít nhất 4 đồng xu. Lời giải tối ưu là chọn các đồng xu \(200+200+100+20\) có tổng là 520.
+    </p>
+
+    <h3>Thuật toán tham lam</h3>
+    <p>
+        Một thuật toán tham lam đơn giản cho bài toán luôn chọn đồng xu lớn nhất có thể, cho đến khi tổng tiền yêu cầu đã được xây dựng. Thuật toán này hoạt động trong ví dụ trên, bởi vì chúng ta chọn trước hai đồng 200 cent, sau đó một đồng 100 cent và cuối cùng là một đồng 20 cent.
+    </p>
+    <p>
+        Nhưng liệu thuật toán này có luôn hoạt động không? Hóa ra nếu các đồng xu là đồng xu euro, thuật toán tham lam luôn hoạt động, tức là nó luôn tạo ra một lời giải với số lượng đồng xu ít nhất có thể. Tính đúng đắn của thuật toán có thể được chứng minh bằng cách xem xét các tính chất cụ thể của hệ thống tiền tệ euro.
+    </p>
+    
+    <h3>Trường hợp tổng quát</h3>
+    <p>
+        Trong trường hợp tổng quát, tập hợp đồng xu có thể chứa bất kỳ đồng xu nào và thuật toán tham lam không nhất thiết tạo ra lời giải tối ưu.
+    </p>
+    <p>
+        Chúng ta có thể chứng minh rằng một thuật toán tham lam không hoạt động bằng cách đưa ra một phản ví dụ (counterexample) nơi thuật toán đưa ra câu trả lời sai. Trong bài toán này, chúng ta có thể dễ dàng tìm thấy một phản ví dụ: nếu các đồng xu là \(\{1, 3, 4\}\) và tổng mục tiêu là 6, thuật toán tham lam tạo ra lời giải \(4+1+1\) (3 đồng xu) trong khi lời giải tối ưu là \(3+3\) (2 đồng xu).
+    </p>
+    <p>
+        Người ta không biết liệu bài toán đổi tiền tổng quát có thể giải được bằng bất kỳ thuật toán tham lam nào hay không. Tuy nhiên, như chúng ta sẽ thấy trong Chương 7, trong một số trường hợp, bài toán tổng quát có thể được giải quyết hiệu quả bằng thuật toán quy hoạch động, luôn đưa ra câu trả lời đúng.
+    </p>
+
+    <h2 id="sec6.2">6.2 Lập lịch (Scheduling)</h2>
+    <p>
+        Nhiều bài toán lập lịch có thể được giải quyết bằng các thuật toán tham lam. Một bài toán kinh điển như sau: Cho \(n\) sự kiện với thời gian bắt đầu và kết thúc của chúng, hãy tìm một lịch trình bao gồm càng nhiều sự kiện càng tốt. Không thể chọn một phần của sự kiện. Ví dụ, hãy xem xét các sự kiện sau:
+    </p>
+    
+    <table>
+        <thead>
+            <tr><th>Sự kiện</th><th>Thời gian bắt đầu</th><th>Thời gian kết thúc</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>A</td><td>1</td><td>3</td></tr>
+            <tr><td>B</td><td>2</td><td>5</td></tr>
+            <tr><td>C</td><td>3</td><td>9</td></tr>
+            <tr><td>D</td><td>6</td><td>8</td></tr>
+        </tbody>
+    </table>
+
+    <p>
+        Trong trường hợp này, số lượng sự kiện tối đa là 2. Ví dụ, chúng ta có thể chọn các sự kiện B và D.
+    </p>
+
+    <div class="graphic-box">
+        <svg width="500" height="150" viewBox="0 0 500 150">
+            <line x1="20" y1="120" x2="480" y2="120" class="timeline-axis"/>
+            <g font-size="10" fill="#666" font-weight="normal">
+                <text x="20" y="135">0</text><text x="70" y="135">1</text><text x="120" y="135">2</text>
+                <text x="170" y="135">3</text><text x="220" y="135">4</text><text x="270" y="135">5</text>
+                <text x="320" y="135">6</text><text x="370" y="135">7</text><text x="420" y="135">8</text>
+                <text x="470" y="135">9</text>
+            </g>
+
+            <rect x="70" y="20" width="100" height="20" class="timeline-bar"/>
+            <text x="120" y="30">A</text>
+
+            <rect x="120" y="50" width="150" height="20" class="timeline-bar-selected"/>
+            <text x="195" y="60">B</text>
+
+            <rect x="170" y="80" width="300" height="20" class="timeline-bar"/>
+            <text x="320" y="90">C</text>
+
+            <rect x="320" y="20" width="100" height="20" class="timeline-bar-selected"/>
+            <text x="370" y="30">D</text>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 6.1: Minh họa các sự kiện. B và D được chọn (màu xanh).</div>
+    </div>
+
+    <p>
+        Có thể nghĩ ra một vài thuật toán tham lam cho bài toán này, nhưng thuật toán nào trong số đó hoạt động trong mọi trường hợp?
+    </p>
+
+    <h3>Thuật toán 1</h3>
+    <p>
+        Ý tưởng đầu tiên là chọn các sự kiện <strong>ngắn nhất</strong> có thể. Trong ví dụ trên, thuật toán này chọn các sự kiện A (độ dài 2) và D (độ dài 2), tạo ra lời giải đúng (2 sự kiện). Tuy nhiên, việc chọn các sự kiện ngắn không phải lúc nào cũng là một chiến lược đúng đắn. Ví dụ, nếu chúng ta có sự kiện rất ngắn nhưng nó chặn hai sự kiện dài khác, chúng ta sẽ chỉ chọn được 1 sự kiện thay vì 2.
+    </p>
+
+    <h3>Thuật toán 2</h3>
+    <p>
+        Một ý tưởng khác là luôn chọn sự kiện tiếp theo có khả năng bắt đầu <strong>sớm nhất</strong>. Tuy nhiên, chúng ta cũng có thể tìm thấy một phản ví dụ cho thuật toán này. Nếu sự kiện bắt đầu sớm nhất lại rất dài và kéo dài đến hết thời gian, chúng ta sẽ bỏ lỡ nhiều sự kiện ngắn hơn bắt đầu muộn hơn một chút.
+    </p>
+
+    <h3>Thuật toán 3</h3>
+    <p>
+        Ý tưởng thứ ba là luôn chọn sự kiện tiếp theo có khả năng <strong>kết thúc sớm nhất</strong>. Thuật toán này chọn các sự kiện theo thứ tự:
+    </p>
+    <ul>
+        <li>Chọn sự kiện kết thúc sớm nhất.</li>
+        <li>Sau đó, chọn sự kiện tiếp theo kết thúc sớm nhất mà không bị trùng lặp với sự kiện đã chọn, và cứ tiếp tục như vậy.</li>
+    </ul>
+    <p>
+        Hóa ra thuật toán này luôn tạo ra lời giải tối ưu. Lý do là việc chọn một sự kiện kết thúc càng sớm càng tốt luôn là một lựa chọn tối ưu, vì nó để lại nhiều không gian nhất có thể cho các sự kiện tiếp theo.
+    </p>
+
+    <h2 id="sec6.3">6.3 Công việc và thời hạn (Tasks and deadlines)</h2>
+    <p>
+        Bây giờ chúng ta hãy xem xét một bài toán nơi chúng ta được cung cấp \(n\) công việc với thời lượng và thời hạn, và nhiệm vụ của chúng ta là chọn thứ tự để thực hiện các công việc. Với mỗi công việc, chúng ta kiếm được \(d - x\) điểm, trong đó \(d\) là thời hạn của công việc và \(x\) là thời điểm chúng ta hoàn thành công việc. Tổng điểm lớn nhất có thể đạt được là bao nhiêu?
+    </p>
+    <p>
+        Ví dụ, giả sử các công việc như sau:
+    </p>
+    <table>
+        <thead>
+            <tr><th>Công việc</th><th>Thời lượng</th><th>Thời hạn</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>A</td><td>4</td><td>2</td></tr>
+            <tr><td>B</td><td>3</td><td>5</td></tr>
+            <tr><td>C</td><td>2</td><td>7</td></tr>
+            <tr><td>D</td><td>4</td><td>5</td></tr>
+        </tbody>
+    </table>
+    <p>
+        Thật ngạc nhiên, lời giải tối ưu cho bài toán không phụ thuộc vào thời hạn chút nào, mà một chiến lược tham lam đúng đắn là chỉ cần thực hiện các công việc được <strong>sắp xếp theo thời lượng tăng dần</strong>.
+    </p>
+    <p>
+        Trong ví dụ này, thứ tự tối ưu là C (2), B (3), A (4), D (4). Thời gian hoàn thành lần lượt là: 2, 5, 9, 13.
+        Tổng điểm: \((7-2) + (5-5) + (2-9) + (5-13) = 5 + 0 - 7 - 8 = -10\).
+    </p>
+
+    <h2 id="sec6.4">6.4 Tối thiểu hóa tổng (Minimizing sums)</h2>
+    <p>
+        Tiếp theo, chúng ta xem xét một bài toán nơi chúng ta được cung cấp \(n\) số \(a_1, a_2, \dots, a_n\) và nhiệm vụ của chúng ta là tìm một giá trị \(x\) để tối thiểu hóa tổng:
+        $$ |a_1 - x|^c + |a_2 - x|^c + \dots + |a_n - x|^c $$
+    </p>
+
+    <h3>Trường hợp \(c=1\)</h3>
+    <p>
+        Chúng ta cần tối thiểu hóa \(\sum |a_i - x|\). Lựa chọn tốt nhất cho \(x\) là <strong>trung vị</strong> (median) của các số. Nếu \(n\) chẵn, bất kỳ giá trị nào giữa hai trung vị đều tối ưu.
+    </p>
+
+    <h3>Trường hợp \(c=2\)</h3>
+    <p>
+        Chúng ta cần tối thiểu hóa \(\sum (a_i - x)^2\). Lựa chọn tốt nhất cho \(x\) là <strong>trung bình cộng</strong> (average) của các số.
+    </p>
+
+    <h2 id="sec6.5">6.5 Nén dữ liệu (Data compression)</h2>
+    <p>
+        Mã hóa Huffman là một thuật toán tham lam xây dựng một mã tối ưu để nén một chuỗi đã cho. Thuật toán xây dựng một cây nhị phân dựa trên tần suất của các ký tự trong chuỗi.
+    </p>
+    <p>
+        Ví dụ, xét chuỗi <code>AABACDACA</code>. Tần suất: A:5, B:1, C:2, D:1.
+        Thuật toán kết hợp hai nút có trọng số nhỏ nhất tại mỗi bước.
+    </p>
+
+    <div class="graphic-box">
+        <svg width="900" height="300" viewBox="0 0 900 300">
+            <g transform="translate(100, 100)">
+                <text x="0" y="-70" class="step-label">Bước 1: Kết hợp B(1) + D(1)</text>
+                <line x1="0" y1="0" x2="-30" y2="50" class="edge-line"/>
+                <line x1="0" y1="0" x2="30" y2="50" class="edge-line"/>
+                <circle cx="0" cy="0" r="20" class="node-circle"/> <text x="0" y="0">2</text>
+                <circle cx="-30" cy="50" r="15" class="node-circle"/> <text x="-30" y="50">B:1</text>
+                <circle cx="30" cy="50" r="15" class="node-circle"/> <text x="30" y="50">D:1</text>
+            </g>
+
+            <g transform="translate(350, 100)">
+                <text x="0" y="-70" class="step-label">Bước 2: Kết hợp C(2) + (BD)(2)</text>
+                <line x1="0" y1="0" x2="-40" y2="50" class="edge-line"/>
+                <line x1="0" y1="0" x2="40" y2="50" class="edge-line"/>
+                <line x1="40" y1="50" x2="10" y2="100" class="edge-line"/>
+                <line x1="40" y1="50" x2="70" y2="100" class="edge-line"/>
+                
+                <circle cx="0" cy="0" r="20" class="node-circle"/> <text x="0" y="0">4</text>
+                <circle cx="-40" cy="50" r="15" class="node-circle"/> <text x="-40" y="50">C:2</text>
+                <circle cx="40" cy="50" r="15" class="node-circle"/> <text x="40" y="50">2</text>
+                <circle cx="10" cy="100" r="15" class="node-circle"/> <text x="10" y="100">B:1</text>
+                <circle cx="70" cy="100" r="15" class="node-circle"/> <text x="70" y="100">D:1</text>
+            </g>
+
+            <g transform="translate(700, 50)">
+                <text x="0" y="-20" class="step-label">Bước 3: Kết hợp A(5) + (CBD)(4)</text>
+                <line x1="0" y1="50" x2="-60" y2="100" class="edge-line"/>
+                <line x1="0" y1="50" x2="60" y2="100" class="edge-line"/>
+                
+                <line x1="60" y1="100" x2="20" y2="150" class="edge-line"/>
+                <line x1="60" y1="100" x2="100" y2="150" class="edge-line"/>
+                
+                <line x1="100" y1="150" x2="70" y2="200" class="edge-line"/>
+                <line x1="100" y1="150" x2="130" y2="200" class="edge-line"/>
+                
+                <circle cx="0" cy="50" r="25" class="node-highlight"/> <text x="0" y="50">9</text>
+                
+                <circle cx="-60" cy="100" r="20" class="node-circle"/> <text x="-60" y="100">A:5</text>
+                <text x="-40" y="80" fill="red" font-size="12" font-weight="bold">0</text>
+                
+                <circle cx="60" cy="100" r="20" class="node-circle"/> <text x="60" y="100">4</text>
+                <text x="40" y="80" fill="red" font-size="12" font-weight="bold">1</text>
+                
+                <circle cx="20" cy="150" r="15" class="node-circle"/> <text x="20" y="150">C:2</text>
+                <text x="30" y="130" fill="red" font-size="12" font-weight="bold">0</text>
+                
+                <circle cx="100" cy="150" r="15" class="node-circle"/> <text x="100" y="150">2</text>
+                <text x="90" y="130" fill="red" font-size="12" font-weight="bold">1</text>
+                
+                <circle cx="70" cy="200" r="15" class="node-circle"/> <text x="70" y="200">B:1</text>
+                <text x="80" y="180" fill="red" font-size="12" font-weight="bold">0</text>
+                <circle cx="130" cy="200" r="15" class="node-circle"/> <text x="130" y="200">D:1</text>
+                <text x="120" y="180" fill="red" font-size="12" font-weight="bold">1</text>
+            </g>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 6.2: Quá trình xây dựng cây Huffman</div>
+    </div>
+
+    <p>
+        Từ cây trên, ta có các từ mã (codeword):
+        <strong>A: 0</strong>,
+        <strong>B: 110</strong>,
+        <strong>C: 10</strong>,
+        <strong>D: 111</strong>.
+    </p>
+
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPH - Chương 21: Lý thuyết số</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h1 { margin-top: 40px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        
+        /* Code styling */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #f1f3f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+        
+        /* Syntax highlighting */
+        .cpp-keyword { color: #0000ff; font-weight: bold; }
+        .cpp-type { color: #2b91af; }
+        .cpp-number { color: #098658; }
+        .cpp-func { color: #795e26; }
+        .cpp-comment { color: #008000; font-style: italic; }
+
+        /* Graphics Containers */
+        .graphic-box {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        
+        /* SVG Styling */
+        svg text { font-family: "Segoe UI", sans-serif; font-size: 14px; text-anchor: middle; dominant-baseline: central; font-weight: bold; }
+        .node-circle { fill: #fff; stroke: #2c3e50; stroke-width: 2; }
+        .node-prime { fill: #e8f5e9; stroke: #2e7d32; stroke-width: 2; }
+        .node-composite { fill: #ffebee; stroke: #c62828; stroke-width: 2; }
+        .edge-line { stroke: #555; stroke-width: 2; }
+        .rect-box { fill: #e3f2fd; stroke: #1565c0; stroke-width: 2; }
+        
+        /* TOC */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc a { text-decoration: none; color: #007bff; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="toc">
+        <h3>Mục lục - Chương 21</h3>
+        <ul>
+            <li><a href="#intro">Lý thuyết số</a></li>
+            <li><a href="#sec21.1">21.1 Số nguyên tố và ước</a></li>
+            <li><a href="#sec21.2">21.2 Sàng Eratosthenes</a></li>
+            <li><a href="#sec21.3">21.3 Thuật toán Euclid</a></li>
+            <li><a href="#sec21.4">21.4 Số học module</a></li>
+            <li><a href="#sec21.5">21.5 Định lý Euler</a></li>
+            <li><a href="#sec21.6">21.6 Giải phương trình</a></li>
+        </ul>
+    </div>
+
+    <h1 id="intro">Chương 21: Lý thuyết số (Number theory)</h1>
+    <p>
+        Lý thuyết số là một nhánh của toán học nghiên cứu về các số nguyên. Đây là một lĩnh vực cực kỳ quan trọng trong lập trình thi đấu, vì nhiều bài toán liên quan đến tính chia hết, số nguyên tố, và số học module.
+    </p>
+
+    <h2 id="sec21.1">21.1 Số nguyên tố và ước (Primes and factors)</h2>
+    <p>
+        Một số nguyên \(n > 1\) được gọi là <strong>số nguyên tố</strong> (prime) nếu các ước dương duy nhất của nó là 1 và chính nó. Ví dụ: 2, 3, 5, 7, 11, 13, 17...
+        Ngược lại, nếu \(n\) có các ước khác, nó được gọi là <strong>hợp số</strong> (composite). Ví dụ: 4, 6, 8, 9, 10...
+        Số 1 không phải là số nguyên tố cũng không phải là hợp số.
+    </p>
+    <p>
+        Mọi số nguyên \(n > 1\) đều có thể được biểu diễn duy nhất dưới dạng tích của các thừa số nguyên tố:
+        $$ n = p_1^{a_1} p_2^{a_2} \cdots p_k^{a_k} $$
+    </p>
+
+    <div class="graphic-box">
+        <svg width="400" height="220" viewBox="0 0 400 220">
+            <g>
+                <line x1="170" y1="30" x2="120" y2="80" class="edge-line"/> <line x1="170" y1="30" x2="220" y2="80" class="edge-line"/> <line x1="220" y1="80" x2="170" y2="130" class="edge-line"/> <line x1="220" y1="80" x2="270" y2="130" class="edge-line"/> <line x1="270" y1="130" x2="220" y2="180" class="edge-line"/> <line x1="270" y1="130" x2="320" y2="180" class="edge-line"/> </g>
+
+            <g>
+                <circle cx="170" cy="30" r="18" class="node-composite"/> <text x="170" y="30">84</text>
+                
+                <circle cx="120" cy="80" r="15" class="node-prime"/> <text x="120" y="80">2</text>
+                <circle cx="220" cy="80" r="15" class="node-composite"/> <text x="220" y="80">42</text>
+                
+                <circle cx="170" cy="130" r="15" class="node-prime"/> <text x="170" y="130">2</text>
+                <circle cx="270" cy="130" r="15" class="node-composite"/> <text x="270" y="130">21</text>
+                
+                <circle cx="220" cy="180" r="15" class="node-prime"/> <text x="220" y="180">3</text>
+                <circle cx="320" cy="180" r="15" class="node-prime"/> <text x="320" y="180">7</text>
+            </g>
+            <text x="80" y="180" font-size="12" fill="#666">84 = 2² · 3 · 7</text>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 21.1: Cây phân tích thừa số nguyên tố của 84</div>
+    </div>
+
+    <h3>Phân tích thừa số nguyên tố</h3>
+    <p>
+        Chúng ta có thể phân tích thừa số nguyên tố của \(n\) trong thời gian \(O(\sqrt{n})\) bằng cách chia thử.
+    </p>
+
+<pre><code><span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt; <span class="cpp-func">factors</span>(<span class="cpp-keyword">int</span> n) {
+    <span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt; f;
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> x = <span class="cpp-number">2</span>; x*x &lt;= n; x++) {
+        <span class="cpp-keyword">while</span> (n % x == <span class="cpp-number">0</span>) {
+            f.push_back(x);
+            n /= x;
+        }
+    }
+    <span class="cpp-keyword">if</span> (n &gt; <span class="cpp-number">1</span>) f.push_back(n);
+    <span class="cpp-keyword">return</span> f;
+}</code></pre>
+
+    <h2 id="sec21.2">21.2 Sàng Eratosthenes (Sieve of Eratosthenes)</h2>
+    <p>
+        Sàng Eratosthenes là một thuật toán hiệu quả để tìm tất cả các số nguyên tố từ 2 đến \(n\). Độ phức tạp thời gian là \(O(n \log \log n)\).
+    </p>
+    <p>
+        Thuật toán hoạt động như sau: Bắt đầu với danh sách các số từ 2 đến \(n\). Số đầu tiên (2) là số nguyên tố. Sau đó, chúng ta loại bỏ tất cả các bội số của 2. Số tiếp theo chưa bị loại bỏ là 3 (nguyên tố), ta loại bỏ các bội của 3. Cứ tiếp tục như vậy.
+    </p>
+
+    <div class="graphic-box">
+        <svg width="400" height="150" viewBox="0 0 400 150">
+            <g transform="translate(10, 10)">
+                <rect x="0" y="0" width="30" height="30" fill="none" stroke="#ddd"/> <text x="15" y="15" fill="#999">1</text>
+                <rect x="30" y="0" width="30" height="30" class="rect-box" style="stroke:#27ae60"/> <text x="45" y="15">2</text>
+                <rect x="60" y="0" width="30" height="30" class="rect-box" style="stroke:#27ae60"/> <text x="75" y="15">3</text>
+                <rect x="90" y="0" width="30" height="30" fill="#fdedec" stroke="#ddd"/> <text x="105" y="15" fill="#c0392b">4</text>
+                <rect x="120" y="0" width="30" height="30" class="rect-box" style="stroke:#27ae60"/> <text x="135" y="15">5</text>
+                <rect x="150" y="0" width="30" height="30" fill="#fdedec" stroke="#ddd"/> <text x="165" y="15" fill="#c0392b">6</text>
+                <rect x="180" y="0" width="30" height="30" class="rect-box" style="stroke:#27ae60"/> <text x="195" y="15">7</text>
+                <rect x="210" y="0" width="30" height="30" fill="#fdedec" stroke="#ddd"/> <text x="225" y="15" fill="#c0392b">8</text>
+                <rect x="240" y="0" width="30" height="30" fill="#fdedec" stroke="#ddd"/> <text x="255" y="15" fill="#c0392b">9</text>
+                <rect x="270" y="0" width="30" height="30" fill="#fdedec" stroke="#ddd"/> <text x="285" y="15" fill="#c0392b">10</text>
+                
+                <rect x="0" y="30" width="30" height="30" class="rect-box" style="stroke:#27ae60"/> <text x="15" y="45">11</text>
+                <rect x="30" y="30" width="30" height="30" fill="#fdedec" stroke="#ddd"/> <text x="45" y="45" fill="#c0392b">12</text>
+                <rect x="60" y="30" width="30" height="30" class="rect-box" style="stroke:#27ae60"/> <text x="75" y="45">13</text>
+                <rect x="90" y="30" width="30" height="30" fill="#fdedec" stroke="#ddd"/> <text x="105" y="45" fill="#c0392b">14</text>
+                <rect x="120" y="30" width="30" height="30" fill="#fdedec" stroke="#ddd"/> <text x="135" y="45" fill="#c0392b">15</text>
+                <rect x="150" y="30" width="30" height="30" fill="#fdedec" stroke="#ddd"/> <text x="165" y="45" fill="#c0392b">16</text>
+                <rect x="180" y="30" width="30" height="30" class="rect-box" style="stroke:#27ae60"/> <text x="195" y="45">17</text>
+                <rect x="210" y="30" width="30" height="30" fill="#fdedec" stroke="#ddd"/> <text x="225" y="45" fill="#c0392b">18</text>
+                <rect x="240" y="30" width="30" height="30" class="rect-box" style="stroke:#27ae60"/> <text x="255" y="45">19</text>
+                <rect x="270" y="30" width="30" height="30" fill="#fdedec" stroke="#ddd"/> <text x="285" y="45" fill="#c0392b">20</text>
+            </g>
+            
+            <text x="200" y="100" font-size="12" fill="#27ae60" font-weight="bold">Xanh lá: Số nguyên tố</text>
+            <text x="200" y="120" font-size="12" fill="#c0392b">Đỏ nhạt: Hợp số (bị gạch bỏ)</text>
+        </svg>
+    </div>
+
+<pre><code><span class="cpp-keyword">int</span> sieve[N];
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> x = <span class="cpp-number">2</span>; x &lt;= n; x++) {
+    <span class="cpp-keyword">if</span> (sieve[x]) <span class="cpp-keyword">continue</span>;
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> u = <span class="cpp-number">2</span>*x; u &lt;= n; u += x) {
+        sieve[u] = x;
+    }
+}</code></pre>
+
+    <h2 id="sec21.3">21.3 Thuật toán Euclid (Euclid's algorithm)</h2>
+    <p>
+        Thuật toán Euclid tính <strong>ước chung lớn nhất</strong> (GCD) của hai số \(a\) và \(b\).
+        Công thức đệ quy là:
+        $$ \gcd(a, b) = \begin{cases} a & \text{nếu } b = 0 \\ \gcd(b, a \pmod b) & \text{nếu } b \neq 0 \end{cases} $$
+        Bội chung nhỏ nhất (LCM) có thể được tính bằng:
+        $$ \text{lcm}(a, b) = \frac{a \cdot b}{\gcd(a, b)} $$
+    </p>
+
+    <div class="graphic-box">
+        <svg width="400" height="150" viewBox="0 0 400 150">
+            <g transform="translate(50, 20)">
+                <rect x="0" y="0" width="200" height="120" fill="#ecf0f1" stroke="#333"/>
+                <text x="100" y="-10" font-size="12">20</text>
+                <text x="-15" y="60" font-size="12">12</text>
+                
+                <rect x="0" y="0" width="120" height="120" fill="#bdc3c7" stroke="#333" opacity="0.5"/>
+                <text x="60" y="60" font-size="14">12x12</text>
+                
+                <rect x="120" y="0" width="80" height="80" fill="#95a5a6" stroke="#333" opacity="0.6"/>
+                <text x="160" y="40" font-size="14">8x8</text>
+                
+                <rect x="120" y="80" width="40" height="40" fill="#7f8c8d" stroke="#333" opacity="0.7"/>
+                <text x="140" y="100" font-size="10" fill="white">4x4</text>
+                
+                <rect x="160" y="80" width="40" height="40" fill="#7f8c8d" stroke="#333" opacity="0.7"/>
+                <text x="180" y="100" font-size="10" fill="white">4x4</text>
+            </g>
+            <text x="320" y="80" font-size="14" fill="#333" font-weight="bold">GCD(20, 12) = 4</text>
+        </svg>
+    </div>
+
+<pre><code><span class="cpp-keyword">int</span> <span class="cpp-func">gcd</span>(<span class="cpp-keyword">int</span> a, <span class="cpp-keyword">int</span> b) {
+    <span class="cpp-keyword">if</span> (b == <span class="cpp-number">0</span>) <span class="cpp-keyword">return</span> a;
+    <span class="cpp-keyword">return</span> <span class="cpp-func">gcd</span>(b, a % b);
+}</code></pre>
+
+    <h2 id="sec21.4">21.4 Số học module (Modular arithmetic)</h2>
+    <p>
+        Trong số học module, chúng ta thực hiện các phép toán trong tập \(\{0, 1, \dots, m-1\}\).
+        Các tính chất quan trọng:
+        $$ (a + b) \pmod m = (a \pmod m + b \pmod m) \pmod m $$
+        $$ (a \cdot b) \pmod m = (a \pmod m \cdot b \pmod m) \pmod m $$
+    </p>
+
+    <h3>Lũy thừa module</h3>
+    <p>
+        Để tính \(x^n \pmod m\) hiệu quả (thời gian \(O(\log n)\)), ta dùng thuật toán bình phương và nhân:
+    </p>
+
+<pre><code><span class="cpp-type">long</span> <span class="cpp-type">long</span> <span class="cpp-func">modpow</span>(<span class="cpp-type">long</span> <span class="cpp-type">long</span> x, <span class="cpp-type">long</span> <span class="cpp-type">long</span> n, <span class="cpp-type">long</span> <span class="cpp-type">long</span> m) {
+    <span class="cpp-keyword">if</span> (n == <span class="cpp-number">0</span>) <span class="cpp-keyword">return</span> <span class="cpp-number">1</span> % m;
+    <span class="cpp-type">long</span> <span class="cpp-type">long</span> u = <span class="cpp-func">modpow</span>(x, n/<span class="cpp-number">2</span>, m);
+    u = (u * u) % m;
+    <span class="cpp-keyword">if</span> (n % <span class="cpp-number">2</span> == <span class="cpp-number">1</span>) u = (u * x) % m;
+    <span class="cpp-keyword">return</span> u;
+}</code></pre>
+
+    <h2 id="sec21.5">21.5 Định lý Euler (Euler's theorem)</h2>
+    <p>
+        <strong>Hàm phi Euler</strong> \(\varphi(n)\) là số lượng số nguyên dương nhỏ hơn \(n\) và nguyên tố cùng nhau với \(n\).
+        Công thức tính:
+        $$ \varphi(n) = n \prod_{p|n} \left(1 - \frac{1}{p}\right) $$
+        <strong>Định lý Euler:</strong> Nếu \(\gcd(x, m) = 1\), thì:
+        $$ x^{\varphi(m)} \equiv 1 \pmod m $$
+        Đặc biệt, nếu \(m\) là số nguyên tố, \(\varphi(m) = m-1\), và ta có <strong>Định lý nhỏ Fermat</strong>: \(x^{m-1} \equiv 1 \pmod m\).
+    </p>
+
+<pre><code><span class="cpp-comment">// Tính phi(n)</span>
+<span class="cpp-keyword">int</span> <span class="cpp-func">phi</span>(<span class="cpp-keyword">int</span> n) {
+    <span class="cpp-keyword">int</span> result = n;
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">2</span>; i*i &lt;= n; i++) {
+        <span class="cpp-keyword">if</span> (n % i == <span class="cpp-number">0</span>) {
+            <span class="cpp-keyword">while</span> (n % i == <span class="cpp-number">0</span>) n /= i;
+            result -= result / i;
+        }
+    }
+    <span class="cpp-keyword">if</span> (n &gt; <span class="cpp-number">1</span>) result -= result / n;
+    <span class="cpp-keyword">return</span> result;
+}</code></pre>
+
+    <h2 id="sec21.6">21.6 Giải phương trình (Solving equations)</h2>
+    
+    <h3>Phương trình Diophantine</h3>
+    <p>
+        Phương trình có dạng \(ax + by = c\), với \(a, b, c\) là hằng số và cần tìm nghiệm nguyên \(x, y\).
+        Phương trình có nghiệm khi và chỉ khi \(\gcd(a, b)\) là ước của \(c\).
+        Để tìm nghiệm, ta dùng <strong>thuật toán Euclid mở rộng</strong> để tìm \(x, y\) sao cho \(ax + by = \gcd(a, b)\).
+    </p>
+
+<pre><code><span class="cpp-comment">// Trả về {x, y, g} sao cho ax + by = g = gcd(a, b)</span>
+<span class="cpp-type">tuple</span>&lt;<span class="cpp-keyword">int</span>, <span class="cpp-keyword">int</span>, <span class="cpp-keyword">int</span>&gt; <span class="cpp-func">gcd_extended</span>(<span class="cpp-keyword">int</span> a, <span class="cpp-keyword">int</span> b) {
+    <span class="cpp-keyword">if</span> (b == <span class="cpp-number">0</span>) <span class="cpp-keyword">return</span> {<span class="cpp-number">1</span>, <span class="cpp-number">0</span>, a};
+    <span class="cpp-keyword">auto</span> [x1, y1, g] = <span class="cpp-func">gcd_extended</span>(b, a % b);
+    <span class="cpp-keyword">int</span> x = y1;
+    <span class="cpp-keyword">int</span> y = x1 - (a / b) * y1;
+    <span class="cpp-keyword">return</span> {x, y, g};
+}</code></pre>
+
+    <h3>Nghịch đảo module (Modular Inverse)</h3>
+    <p>
+        Nghịch đảo của \(x\) modulo \(m\) là số \(x^{-1}\) sao cho \(x \cdot x^{-1} \equiv 1 \pmod m\).
+        Nếu \(m\) là số nguyên tố, ta có thể dùng định lý nhỏ Fermat:
+        $$ x^{m-2} \pmod m $$
+        Nếu \(m\) không phải nguyên tố nhưng \(\gcd(x, m) = 1\), ta có thể dùng thuật toán Euclid mở rộng để giải \(x \cdot a + m \cdot b = 1\), khi đó \(x^{-1} = a \pmod m\).
+    </p>
+
+<pre><code><span class="cpp-type">long</span> <span class="cpp-type">long</span> <span class="cpp-func">modInverse</span>(<span class="cpp-type">long</span> <span class="cpp-type">long</span> x, <span class="cpp-type">long</span> <span class="cpp-type">long</span> m) {
+    <span class="cpp-keyword">return</span> <span class="cpp-func">modpow</span>(x, m-<span class="cpp-number">2</span>, m); <span class="cpp-comment">// Khi m là số nguyên tố</span>
+}</code></pre>
+
+</body>
+</html>

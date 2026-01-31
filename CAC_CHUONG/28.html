@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPH - Chương 28: Các kỹ thuật cây phân đoạn</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h1 { margin-top: 40px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        
+        /* Code styling */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #f1f3f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+        
+        /* Syntax highlighting */
+        .cpp-keyword { color: #0000ff; font-weight: bold; }
+        .cpp-type { color: #2b91af; }
+        .cpp-number { color: #098658; }
+        .cpp-func { color: #795e26; }
+        .cpp-comment { color: #008000; font-style: italic; }
+        .cpp-struct { color: #267f99; font-weight: bold; }
+
+        /* Graphics Containers */
+        .graphic-box {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        
+        /* SVG Styling */
+        svg text { font-family: "Segoe UI", sans-serif; font-size: 14px; text-anchor: middle; dominant-baseline: central; font-weight: bold; }
+        .node-circle { fill: #fff; stroke: #2c3e50; stroke-width: 2; }
+        .node-lazy { fill: #fff9c4; stroke: #fbc02d; stroke-width: 2; } /* Node có lazy tag */
+        .edge-line { stroke: #555; stroke-width: 2; }
+        .array-rect { fill: #fff; stroke: #333; stroke-width: 1; }
+        .lazy-badge { fill: #e74c3c; } /* Badge màu đỏ cho giá trị lazy */
+        .highlight-range { stroke: #2196f3; stroke-width: 3; stroke-dasharray: 5; fill: none; }
+
+        /* TOC */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc a { text-decoration: none; color: #007bff; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="toc">
+        <h3>Mục lục - Chương 28</h3>
+        <ul>
+            <li><a href="#intro">Mở rộng Cây phân đoạn</a></li>
+            <li><a href="#sec28.1">28.1 Lan truyền lười (Lazy propagation)</a></li>
+            <li><a href="#sec28.2">28.2 Cây phân đoạn động</a></li>
+            <li><a href="#sec28.3">28.3 Cấu trúc dữ liệu trong nút</a></li>
+            <li><a href="#sec28.4">28.4 Cây phân đoạn hai chiều</a></li>
+        </ul>
+    </div>
+
+    <h1 id="intro">Chương 28: Các kỹ thuật cây phân đoạn (Segment Trees Revisited)</h1>
+    <p>
+        Cây phân đoạn (Segment Tree) là một cấu trúc dữ liệu linh hoạt hỗ trợ các truy vấn trên đoạn. Trong chương này, chúng ta sẽ tìm hiểu các biến thể nâng cao cho phép cập nhật trên đoạn, xử lý mảng thưa (sparse arrays) và lưu trữ thông tin phức tạp.
+    </p>
+
+    <h2 id="sec28.1">28.1 Lan truyền lười (Lazy propagation)</h2>
+    <p>
+        Trong cây phân đoạn cơ bản, chúng ta chỉ có thể cập nhật từng phần tử đơn lẻ và truy vấn trên đoạn. Kỹ thuật <strong>Lan truyền lười</strong> (Lazy Propagation) cho phép chúng ta thực hiện cả hai thao tác <strong>cập nhật đoạn</strong> và <strong>truy vấn đoạn</strong> trong thời gian \(O(\log n)\).
+    </p>
+    <p>
+        Ý tưởng là thực hiện cập nhật và truy vấn từ trên xuống dưới. Khi gặp một nút đại diện cho đoạn nằm trọn vẹn trong đoạn cần cập nhật, ta không cập nhật ngay các con của nó. Thay vào đó, ta cập nhật giá trị tại nút đó và đánh dấu một nhãn "lười" (lazy tag) để ghi nhớ rằng các con của nó cần được cập nhật sau này.
+    </p>
+    <p>
+        Giá trị lazy chỉ được "đẩy" (push) xuống các con khi chúng ta thực sự cần truy cập vào các con đó trong một truy vấn hoặc cập nhật tiếp theo.
+    </p>
+
+    <div class="graphic-box">
+        <svg width="400" height="220" viewBox="0 0 400 220">
+            <g id="lazy-edges">
+                <line x1="200" y1="30" x2="100" y2="80" class="edge-line"/>
+                <line x1="200" y1="30" x2="300" y2="80" class="edge-line"/>
+                <line x1="100" y1="80" x2="50" y2="130" class="edge-line"/>
+                <line x1="100" y1="80" x2="150" y2="130" class="edge-line"/>
+                <line x1="300" y1="80" x2="250" y2="130" class="edge-line"/>
+                <line x1="300" y1="80" x2="350" y2="130" class="edge-line"/>
+            </g>
+
+            <g id="lazy-nodes">
+                <circle cx="200" cy="30" r="20" class="node-circle"/> 
+                <text x="200" y="30">Sum</text>
+                
+                <circle cx="100" cy="80" r="20" class="node-lazy"/> 
+                <text x="100" y="80">Val</text>
+                <circle cx="115" cy="65" r="8" class="lazy-badge"/>
+                <text x="115" y="65" fill="white" font-size="10">+5</text>
+
+                <circle cx="300" cy="80" r="20" class="node-circle"/> 
+                <text x="300" y="80">Val</text>
+
+                <circle cx="50" cy="130" r="15" class="node-circle"/>
+                <circle cx="150" cy="130" r="15" class="node-circle"/>
+                <circle cx="250" cy="130" r="15" class="node-circle"/>
+                <circle cx="350" cy="130" r="15" class="node-circle"/>
+            </g>
+            
+            <text x="200" y="180" font-size="12" fill="#555">Lazy tag (+5) đang chờ tại nút màu vàng.</text>
+            <text x="200" y="200" font-size="12" fill="#555">Nó chưa được truyền xuống các con bên dưới.</text>
+        </svg>
+    </div>
+
+    <h3>Cài đặt: Tăng giá trị đoạn, Truy vấn tổng đoạn</h3>
+<pre><code><span class="cpp-keyword">const</span> <span class="cpp-keyword">int</span> N = <span class="cpp-number">200005</span>;
+<span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> tree[<span class="cpp-number">4</span> * N], lazy[<span class="cpp-number">4</span> * N];
+
+<span class="cpp-comment">// Đẩy giá trị lazy xuống con</span>
+<span class="cpp-keyword">void</span> <span class="cpp-func">push</span>(<span class="cpp-keyword">int</span> v, <span class="cpp-keyword">int</span> tl, <span class="cpp-keyword">int</span> tr) {
+    <span class="cpp-keyword">if</span> (lazy[v] != <span class="cpp-number">0</span>) {
+        <span class="cpp-keyword">int</span> tm = (tl + tr) / <span class="cpp-number">2</span>;
+        
+        <span class="cpp-comment">// Cập nhật giá trị tree và lazy của con trái</span>
+        tree[<span class="cpp-number">2</span>*v] += lazy[v] * (tm - tl + <span class="cpp-number">1</span>);
+        lazy[<span class="cpp-number">2</span>*v] += lazy[v];
+        
+        <span class="cpp-comment">// Cập nhật giá trị tree và lazy của con phải</span>
+        tree[<span class="cpp-number">2</span>*v+<span class="cpp-number">1</span>] += lazy[v] * (tr - tm);
+        lazy[<span class="cpp-number">2</span>*v+<span class="cpp-number">1</span>] += lazy[v];
+        
+        <span class="cpp-comment">// Xóa lazy tại nút hiện tại</span>
+        lazy[v] = <span class="cpp-number">0</span>;
+    }
+}
+
+<span class="cpp-keyword">void</span> <span class="cpp-func">update</span>(<span class="cpp-keyword">int</span> v, <span class="cpp-keyword">int</span> tl, <span class="cpp-keyword">int</span> tr, <span class="cpp-keyword">int</span> l, <span class="cpp-keyword">int</span> r, <span class="cpp-keyword">int</span> add) {
+    <span class="cpp-keyword">if</span> (l &gt; r) <span class="cpp-keyword">return</span>;
+    <span class="cpp-keyword">if</span> (l == tl && r == tr) {
+        tree[v] += (<span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span>)add * (r - l + <span class="cpp-number">1</span>);
+        lazy[v] += add;
+    } <span class="cpp-keyword">else</span> {
+        <span class="cpp-func">push</span>(v, tl, tr); <span class="cpp-comment">// Đẩy lazy trước khi đi xuống</span>
+        <span class="cpp-keyword">int</span> tm = (tl + tr) / <span class="cpp-number">2</span>;
+        <span class="cpp-func">update</span>(<span class="cpp-number">2</span>*v, tl, tm, l, min(r, tm), add);
+        <span class="cpp-func">update</span>(<span class="cpp-number">2</span>*v+<span class="cpp-number">1</span>, tm+<span class="cpp-number">1</span>, tr, max(l, tm+<span class="cpp-number">1</span>), r, add);
+        tree[v] = tree[<span class="cpp-number">2</span>*v] + tree[<span class="cpp-number">2</span>*v+<span class="cpp-number">1</span>];
+    }
+}
+
+<span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> <span class="cpp-func">query</span>(<span class="cpp-keyword">int</span> v, <span class="cpp-keyword">int</span> tl, <span class="cpp-keyword">int</span> tr, <span class="cpp-keyword">int</span> l, <span class="cpp-keyword">int</span> r) {
+    <span class="cpp-keyword">if</span> (l &gt; r) <span class="cpp-keyword">return</span> <span class="cpp-number">0</span>;
+    <span class="cpp-keyword">if</span> (l == tl && r == tr) <span class="cpp-keyword">return</span> tree[v];
+    <span class="cpp-func">push</span>(v, tl, tr); <span class="cpp-comment">// Đẩy lazy trước khi đi xuống</span>
+    <span class="cpp-keyword">int</span> tm = (tl + tr) / <span class="cpp-number">2</span>;
+    <span class="cpp-keyword">return</span> <span class="cpp-func">query</span>(<span class="cpp-number">2</span>*v, tl, tm, l, min(r, tm)) +
+           <span class="cpp-func">query</span>(<span class="cpp-number">2</span>*v+<span class="cpp-number">1</span>, tm+<span class="cpp-number">1</span>, tr, max(l, tm+<span class="cpp-number">1</span>), r);
+}</code></pre>
+
+    <h2 id="sec28.2">28.2 Cây phân đoạn động (Dynamic Segment Trees)</h2>
+    <p>
+        Cây phân đoạn thông thường yêu cầu mảng kích thước \(4n\) và được xây dựng trên miền chỉ số \([0, n-1]\). Nếu \(n\) rất lớn (ví dụ \(10^9\)) nhưng số lượng cập nhật nhỏ, chúng ta không thể cấp phát mảng lớn như vậy.
+    </p>
+    <p>
+        <strong>Cây phân đoạn động</strong> giải quyết vấn đề này bằng cách chỉ tạo ra các nút khi thực sự cần thiết (khi chúng được truy cập). Thay vì dùng quy tắc chỉ số \(2v\) và \(2v+1\), mỗi nút sẽ lưu con trỏ tới con trái và con phải.
+    </p>
+
+    <div class="graphic-box">
+        <svg width="300" height="200" viewBox="0 0 300 200">
+            <g>
+                <line x1="150" y1="30" x2="80" y2="80" class="edge-line"/>
+                <line x1="150" y1="30" x2="220" y2="80" class="edge-line" stroke-dasharray="4"/>
+                
+                <line x1="80" y1="80" x2="40" y2="130" class="edge-line" stroke-dasharray="4"/>
+                <line x1="80" y1="80" x2="120" y2="130" class="edge-line"/>
+            </g>
+
+            <g>
+                <circle cx="150" cy="30" r="15" class="node-circle"/>
+                <circle cx="80" cy="80" r="15" class="node-circle"/>
+                <circle cx="220" cy="80" r="12" fill="none" stroke="#ccc" stroke-dasharray="2"/>
+                
+                <circle cx="120" cy="130" r="15" class="node-circle"/>
+            </g>
+            <text x="150" y="170" font-size="12" fill="#555">Chỉ các nút được truy cập (nét liền) mới được tạo trong bộ nhớ.</text>
+        </svg>
+    </div>
+
+    <h3>Cài đặt</h3>
+<pre><code><span class="cpp-keyword">struct</span> <span class="cpp-struct">Node</span> {
+    <span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> val;
+    <span class="cpp-struct">Node</span> *l, *r;
+    <span class="cpp-struct">Node</span>() : val(<span class="cpp-number">0</span>), l(nullptr), r(nullptr) {}
+};
+
+<span class="cpp-keyword">void</span> <span class="cpp-func">update</span>(<span class="cpp-struct">Node</span>* node, <span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> tl, <span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> tr, <span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> idx, <span class="cpp-keyword">int</span> v) {
+    <span class="cpp-keyword">if</span> (tl == tr) {
+        node-&gt;val += v;
+        <span class="cpp-keyword">return</span>;
+    }
+    <span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> tm = (tl + tr) / <span class="cpp-number">2</span>;
+    <span class="cpp-keyword">if</span> (idx &lt;= tm) {
+        <span class="cpp-keyword">if</span> (!node-&gt;l) node-&gt;l = <span class="cpp-keyword">new</span> <span class="cpp-struct">Node</span>();
+        <span class="cpp-func">update</span>(node-&gt;l, tl, tm, idx, v);
+    } <span class="cpp-keyword">else</span> {
+        <span class="cpp-keyword">if</span> (!node-&gt;r) node-&gt;r = <span class="cpp-keyword">new</span> <span class="cpp-struct">Node</span>();
+        <span class="cpp-func">update</span>(node-&gt;r, tm + <span class="cpp-number">1</span>, tr, idx, v);
+    }
+    <span class="cpp-comment">// Tính lại giá trị từ con (nếu tồn tại)</span>
+    <span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> sum_l = node-&gt;l ? node-&gt;l-&gt;val : <span class="cpp-number">0</span>;
+    <span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> sum_r = node-&gt;r ? node-&gt;r-&gt;val : <span class="cpp-number">0</span>;
+    node-&gt;val = sum_l + sum_r;
+}</code></pre>
+
+    <h2 id="sec28.3">28.3 Cấu trúc dữ liệu trong nút (Data structures in nodes)</h2>
+    <p>
+        Trong các cây phân đoạn nâng cao, mỗi nút không chỉ lưu một số nguyên (tổng, max) mà có thể lưu cả một cấu trúc dữ liệu, ví dụ như một `vector` hoặc `multiset`.
+    </p>
+    <p>
+        <strong>Cây Merge Sort (Merge Sort Tree):</strong> Mỗi nút lưu một `vector` chứa các phần tử trong đoạn đó đã được sắp xếp.
+        Cấu trúc này cho phép trả lời các truy vấn dạng: "Có bao nhiêu số nhỏ hơn \(x\) trong đoạn \([l, r]\)?" trong thời gian \(O(\log^2 n)\).
+    </p>
+
+    <div class="graphic-box">
+        <svg width="450" height="200" viewBox="0 0 450 200">
+            <g>
+                <line x1="225" y1="30" x2="110" y2="90" class="edge-line"/>
+                <line x1="225" y1="30" x2="340" y2="90" class="edge-line"/>
+                <line x1="110" y1="90" x2="50" y2="150" class="edge-line"/>
+                <line x1="110" y1="90" x2="170" y2="150" class="edge-line"/>
+            </g>
+
+            <g>
+                <rect x="180" y="10" width="90" height="40" rx="5" class="array-rect"/>
+                <text x="225" y="35" font-size="12">1, 2, 3, 5, 8</text>
+
+                <rect x="80" y="70" width="60" height="40" rx="5" class="array-rect"/>
+                <text x="110" y="95" font-size="12">2, 5, 8</text>
+
+                <rect x="310" y="70" width="60" height="40" rx="5" class="array-rect"/>
+                <text x="340" y="95" font-size="12">1, 3</text>
+                
+                <rect x="30" y="130" width="40" height="30" class="array-rect"/> <text x="50" y="150">5, 8</text>
+                <rect x="150" y="130" width="40" height="30" class="array-rect"/> <text x="170" y="150">2</text>
+            </g>
+        </svg>
+    </div>
+
+    <h3>Cài đặt: Merge Sort Tree</h3>
+<pre><code><span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt; tree[<span class="cpp-number">4</span> * N];
+<span class="cpp-keyword">int</span> a[N];
+
+<span class="cpp-keyword">void</span> <span class="cpp-func">build</span>(<span class="cpp-keyword">int</span> v, <span class="cpp-keyword">int</span> tl, <span class="cpp-keyword">int</span> tr) {
+    <span class="cpp-keyword">if</span> (tl == tr) {
+        tree[v] = {a[tl]};
+    } <span class="cpp-keyword">else</span> {
+        <span class="cpp-keyword">int</span> tm = (tl + tr) / <span class="cpp-number">2</span>;
+        <span class="cpp-func">build</span>(<span class="cpp-number">2</span>*v, tl, tm);
+        <span class="cpp-func">build</span>(<span class="cpp-number">2</span>*v+<span class="cpp-number">1</span>, tm+<span class="cpp-number">1</span>, tr);
+        
+        <span class="cpp-comment">// Hợp nhất hai vector đã sắp xếp (giống Merge Sort)</span>
+        merge(tree[<span class="cpp-number">2</span>*v].begin(), tree[<span class="cpp-number">2</span>*v].end(),
+              tree[<span class="cpp-number">2</span>*v+<span class="cpp-number">1</span>].begin(), tree[<span class="cpp-number">2</span>*v+<span class="cpp-number">1</span>].end(),
+              back_inserter(tree[v]));
+    }
+}
+
+<span class="cpp-comment">// Đếm số phần tử <= x trong đoạn [l, r]</span>
+<span class="cpp-keyword">int</span> <span class="cpp-func">query</span>(<span class="cpp-keyword">int</span> v, <span class="cpp-keyword">int</span> tl, <span class="cpp-keyword">int</span> tr, <span class="cpp-keyword">int</span> l, <span class="cpp-keyword">int</span> r, <span class="cpp-keyword">int</span> x) {
+    <span class="cpp-keyword">if</span> (l &gt; r) <span class="cpp-keyword">return</span> <span class="cpp-number">0</span>;
+    <span class="cpp-keyword">if</span> (l == tl && r == tr) {
+        <span class="cpp-comment">// Tìm kiếm nhị phân trên vector của nút</span>
+        <span class="cpp-keyword">auto</span> it = upper_bound(tree[v].begin(), tree[v].end(), x);
+        <span class="cpp-keyword">return</span> it - tree[v].begin();
+    }
+    <span class="cpp-keyword">int</span> tm = (tl + tr) / <span class="cpp-number">2</span>;
+    <span class="cpp-keyword">return</span> <span class="cpp-func">query</span>(<span class="cpp-number">2</span>*v, tl, tm, l, min(r, tm), x) +
+           <span class="cpp-func">query</span>(<span class="cpp-number">2</span>*v+<span class="cpp-number">1</span>, tm+<span class="cpp-number">1</span>, tr, max(l, tm+<span class="cpp-number">1</span>), r, x);
+}</code></pre>
+
+    <h2 id="sec28.4">28.4 Cây phân đoạn hai chiều (Two-dimensional Segment Trees)</h2>
+    <p>
+        Cây phân đoạn 2D hỗ trợ các truy vấn trên hình chữ nhật con của một ma trận.
+        Cấu trúc là "cây trong cây":
+        1. Xây dựng một cây phân đoạn theo chiều X (hàng).
+        2. Mỗi nút của cây X này sẽ chứa một cây phân đoạn khác theo chiều Y (cột).
+    </p>
+    <p>
+        Độ phức tạp:
+        - Xây dựng: \(O(n^2)\).
+        - Cập nhật/Truy vấn: \(O(\log^2 n)\).
+    </p>
+    <p>
+        Do sự phức tạp và tốn bộ nhớ, kỹ thuật này thường ít dùng hơn so với <strong>Fenwick Tree 2D</strong> nếu phép toán có tính nghịch đảo (như tổng), hoặc dùng <strong>Quadtree</strong> cho các truy vấn hình học.
+    </p>
+
+</body>
+</html>

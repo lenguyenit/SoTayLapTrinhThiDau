@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPH - Chương 14: Thuật toán cây</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h1 { margin-top: 40px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        
+        /* Code styling */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #f1f3f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+        
+        /* Syntax highlighting */
+        .cpp-keyword { color: #0000ff; font-weight: bold; }
+        .cpp-type { color: #2b91af; }
+        .cpp-number { color: #098658; }
+        .cpp-func { color: #795e26; }
+        .cpp-comment { color: #008000; font-style: italic; }
+
+        /* Graphics Containers */
+        .graphic-box {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        
+        /* SVG Styling */
+        svg text { font-family: "Segoe UI", sans-serif; font-size: 14px; text-anchor: middle; dominant-baseline: central; font-weight: bold; }
+        .node-circle { fill: #fff; stroke: #2c3e50; stroke-width: 2; }
+        .node-root { fill: #fff9c4; stroke: #fbc02d; stroke-width: 2; } /* Vàng cho gốc */
+        .node-leaf { fill: #e8f5e9; stroke: #4caf50; stroke-width: 2; } /* Xanh cho lá */
+        .edge-line { stroke: #555; stroke-width: 2; }
+        .path-highlight { fill: none; stroke: #e65100; stroke-width: 4; opacity: 0.5; }
+
+        /* TOC */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc a { text-decoration: none; color: #007bff; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="toc">
+        <h3>Mục lục - Chương 14</h3>
+        <ul>
+            <li><a href="#intro">Thuật toán cây</a></li>
+            <li><a href="#sec14.1">14.1 Duyệt cây</a></li>
+            <li><a href="#sec14.2">14.2 Đường kính</a></li>
+            <li><a href="#sec14.3">14.3 Mọi đường đi dài nhất</a></li>
+            <li><a href="#sec14.4">14.4 Cây nhị phân</a></li>
+        </ul>
+    </div>
+
+    <h1 id="intro">Chương 14: Thuật toán cây (Tree algorithms)</h1>
+    <p>
+        Một <strong>cây</strong> (tree) là một đồ thị liên thông, không có chu trình bao gồm \(n\) nút và \(n-1\) cạnh. Việc loại bỏ bất kỳ cạnh nào khỏi cây sẽ chia nó thành hai thành phần liên thông, và việc thêm bất kỳ cạnh nào vào cây sẽ tạo ra một chu trình. Hơn nữa, luôn có một đường đi duy nhất giữa hai nút bất kỳ của cây.
+    </p>
+    <p>
+        Ví dụ, cây sau bao gồm 8 nút và 7 cạnh:
+    </p>
+
+    <div class="graphic-box">
+        <svg width="400" height="280" viewBox="0 0 400 280">
+            <g id="tree-edges">
+                <line x1="200" y1="40" x2="100" y2="100" class="edge-line"/> <line x1="200" y1="40" x2="200" y2="100" class="edge-line"/> <line x1="200" y1="40" x2="300" y2="100" class="edge-line"/> <line x1="100" y1="100" x2="50" y2="180" class="edge-line"/> <line x1="100" y1="100" x2="150" y2="180" class="edge-line"/> <line x1="300" y1="100" x2="300" y2="180" class="edge-line"/> <line x1="150" y1="180" x2="150" y2="240" class="edge-line"/> </g>
+
+            <g id="tree-nodes">
+                <circle cx="200" cy="40" r="18" class="node-root"/> <text x="200" y="40">1</text>
+                
+                <circle cx="100" cy="100" r="18" class="node-circle"/> <text x="100" y="100">2</text>
+                <circle cx="200" cy="100" r="18" class="node-leaf"/> <text x="200" y="100">3</text>
+                <circle cx="300" cy="100" r="18" class="node-circle"/> <text x="300" y="100">4</text>
+                
+                <circle cx="50" cy="180" r="18" class="node-leaf"/> <text x="50" y="180">5</text>
+                <circle cx="150" cy="180" r="18" class="node-circle"/> <text x="150" y="180">6</text>
+                <circle cx="300" cy="180" r="18" class="node-leaf"/> <text x="300" y="180">7</text>
+                
+                <circle cx="150" cy="240" r="18" class="node-leaf"/> <text x="150" y="240">8</text>
+            </g>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 14.1: Một cây có gốc tại nút 1. Các lá là 3, 5, 7, 8.</div>
+    </div>
+
+    <p>
+        Các <strong>lá</strong> (leaves) của một cây là các nút có bậc bằng 1, tức là chỉ có một láng giềng. Ví dụ, các lá của cây trên là các nút 3, 5, 7 và 8.
+    </p>
+    <p>
+        Trong một <strong>cây có gốc</strong> (rooted tree), một trong các nút được chỉ định làm gốc của cây, và tất cả các nút khác được đặt bên dưới gốc. Trong một cây có gốc, <strong>con</strong> (children) của một nút là các láng giềng phía dưới của nó, và <strong>cha</strong> (parent) của một nút là láng giềng phía trên của nó. Mỗi nút có chính xác một cha, ngoại trừ gốc không có cha.
+    </p>
+    <p>
+        Cấu trúc của một cây có gốc là đệ quy: mỗi nút của cây đóng vai trò là gốc của một <strong>cây con</strong> (subtree) chứa chính nút đó và tất cả các nút nằm trong cây con của các con của nó. Ví dụ, trong cây trên, cây con của nút 2 bao gồm các nút 2, 5, 6 và 8.
+    </p>
+
+    <h2 id="sec14.1">14.1 Duyệt cây (Tree traversal)</h2>
+    <p>
+        Các thuật toán duyệt đồ thị tổng quát có thể được sử dụng để duyệt các nút của một cây. Tuy nhiên, việc duyệt cây dễ cài đặt hơn so với đồ thị tổng quát, vì không có chu trình trong cây và không thể đến một nút từ nhiều hướng khác nhau.
+    </p>
+    <p>
+        Cách điển hình để duyệt một cây là bắt đầu tìm kiếm theo chiều sâu (DFS) tại một nút bất kỳ. Hàm đệ quy sau có thể được sử dụng:
+    </p>
+
+<pre><code><span class="cpp-keyword">void</span> <span class="cpp-func">dfs</span>(<span class="cpp-keyword">int</span> s, <span class="cpp-keyword">int</span> e) {
+    <span class="cpp-comment">// xử lý nút s</span>
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">auto</span> u : adj[s]) {
+        <span class="cpp-keyword">if</span> (u != e) <span class="cpp-func">dfs</span>(u, s);
+    }
+}</code></pre>
+
+    <p>
+        Hàm được cung cấp hai tham số: nút hiện tại <code>s</code> và nút trước đó <code>e</code>. Mục đích của tham số <code>e</code> là đảm bảo rằng việc tìm kiếm chỉ di chuyển đến các nút chưa được thăm. Lời gọi hàm sau bắt đầu tìm kiếm tại nút <code>x</code>:
+    </p>
+    <pre><code>dfs(x, 0);</code></pre>
+    <p>
+        Trong lời gọi đầu tiên <code>e = 0</code>, vì không có nút trước đó, và được phép tiến tới bất kỳ hướng nào trong cây.
+    </p>
+
+    <h3>Quy hoạch động trên cây</h3>
+    <p>
+        Quy hoạch động có thể được sử dụng để tính toán một số thông tin trong quá trình duyệt cây. Sử dụng quy hoạch động, chúng ta có thể, ví dụ, tính toán trong thời gian \(O(n)\) cho mỗi nút của cây có gốc số lượng nút trong cây con của nó hoặc độ dài của đường đi dài nhất từ nút đó đến một lá.
+    </p>
+    <p>
+        Lấy ví dụ, hãy tính toán cho mỗi nút \(s\) một giá trị <code>count[s]</code>: số lượng nút trong cây con của nó. Cây con chứa chính nút đó và tất cả các nút trong cây con của các con của nó, vì vậy chúng ta có thể tính số lượng nút một cách đệ quy:
+    </p>
+
+<pre><code><span class="cpp-keyword">void</span> <span class="cpp-func">dfs</span>(<span class="cpp-keyword">int</span> s, <span class="cpp-keyword">int</span> e) {
+    count[s] = <span class="cpp-number">1</span>;
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">auto</span> u : adj[s]) {
+        <span class="cpp-keyword">if</span> (u == e) <span class="cpp-keyword">continue</span>;
+        <span class="cpp-func">dfs</span>(u, s);
+        count[s] += count[u];
+    }
+}</code></pre>
+
+    <h2 id="sec14.2">14.2 Đường kính (Diameter)</h2>
+    <p>
+        <strong>Đường kính</strong> của một cây là độ dài lớn nhất của một đường đi giữa hai nút. Ví dụ, xem xét cây sau:
+    </p>
+    
+    <div class="graphic-box">
+        <svg width="400" height="250" viewBox="0 0 400 250">
+            <g id="diam-edges">
+                <line x1="200" y1="40" x2="100" y2="100" class="edge-line"/> <line x1="200" y1="40" x2="300" y2="100" class="edge-line"/> <line x1="200" y1="40" x2="200" y2="100" class="edge-line"/> <line x1="100" y1="100" x2="50" y2="150" class="edge-line"/> <line x1="100" y1="100" x2="150" y2="150" class="edge-line"/> <line x1="300" y1="100" x2="350" y2="150" class="edge-line"/> </g>
+
+            <path d="M50,150 L100,100 L200,40 L300,100 L350,150" class="path-highlight"/>
+
+            <g id="diam-nodes">
+                <circle cx="200" cy="40" r="15" class="node-root"/> <text x="200" y="40">1</text>
+                <circle cx="100" cy="100" r="15" class="node-circle"/> <text x="100" y="100">2</text>
+                <circle cx="200" cy="100" r="15" class="node-circle"/> <text x="200" y="100">3</text>
+                <circle cx="300" cy="100" r="15" class="node-circle"/> <text x="300" y="100">4</text>
+                <circle cx="50" cy="150" r="15" class="node-leaf"/> <text x="50" y="150">5</text>
+                <circle cx="150" cy="150" r="15" class="node-circle"/> <text x="150" y="150">6</text>
+                <circle cx="350" cy="150" r="15" class="node-leaf"/> <text x="350" y="150">7</text>
+            </g>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 14.2: Đường kính là 4 (đường đi 5-2-1-4-7)</div>
+    </div>
+
+    <p>
+        Đường kính của cây này là 4, tương ứng với đường đi \(5 \to 2 \to 1 \to 4 \to 7\). Lưu ý rằng có thể có nhiều đường đi có độ dài tối đa.
+    </p>
+    <p>
+        Tiếp theo, chúng ta sẽ thảo luận về hai thuật toán \(O(n)\) để tính toán đường kính của một cây. Thuật toán đầu tiên dựa trên quy hoạch động, và thuật toán thứ hai sử dụng hai lần tìm kiếm theo chiều sâu.
+    </p>
+
+    <h3>Thuật toán 1 (Quy hoạch động)</h3>
+    <p>
+        Một cách tổng quát để tiếp cận nhiều bài toán cây là trước tiên chọn gốc cho cây một cách tùy ý. Sau đó, chúng ta có thể cố gắng giải quyết bài toán riêng biệt cho từng cây con. Thuật toán đầu tiên của chúng ta để tính đường kính dựa trên ý tưởng này.
+    </p>
+    <p>
+        Một quan sát quan trọng là mọi đường đi trong cây có gốc đều có một <strong>điểm cao nhất</strong>: nút cao nhất thuộc về đường đi đó. Do đó, chúng ta có thể tính toán cho mỗi nút \(x\) độ dài của đường đi dài nhất mà điểm cao nhất của nó là \(x\). Một trong những đường đi đó tương ứng với đường kính của cây.
+    </p>
+    <p>
+        Chúng ta tính toán cho mỗi nút \(x\) hai giá trị:
+    </p>
+    <ul>
+        <li><code>toLeaf(x)</code>: độ dài lớn nhất của một đường đi từ \(x\) đến bất kỳ lá nào trong cây con của nó.</li>
+        <li><code>maxLength(x)</code>: độ dài lớn nhất của một đường đi mà điểm cao nhất của nó là \(x\).</li>
+    </ul>
+    <p>
+        <code>toLeaf(x)</code> có thể được tính bằng cách lấy <code>max(toLeaf(c)) + 1</code> với mọi con \(c\) của \(x\) (nếu \(x\) là lá, giá trị là 0).
+    </p>
+    <p>
+        <code>maxLength(x)</code> có thể được tính bằng cách chọn hai con phân biệt \(a\) và \(b\) của \(x\) sao cho tổng <code>toLeaf(a) + toLeaf(b) + 2</code> là lớn nhất.
+    </p>
+
+    <h3>Thuật toán 2 (Hai lần DFS)</h3>
+    <p>
+        Một cách hiệu quả khác để tính đường kính của cây dựa trên hai lần tìm kiếm theo chiều sâu (hoặc chiều rộng).
+    </p>
+    <ol>
+        <li>Chọn một nút tùy ý \(a\) trong cây và tìm nút \(b\) xa nhất từ \(a\).</li>
+        <li>Tìm nút \(c\) xa nhất từ \(b\).</li>
+    </ol>
+    <p>
+        Đường kính của cây là khoảng cách giữa \(b\) và \(c\). Phương pháp này thanh lịch và hoạt động chính xác. Lý do là \(b\) luôn là một đầu mút của một đường kính nào đó.
+    </p>
+
+    <h2 id="sec14.3">14.3 Mọi đường đi dài nhất (All longest paths)</h2>
+    <p>
+        Bài toán tiếp theo của chúng ta là tính toán cho <strong>mọi</strong> nút trong cây độ dài tối đa của một đường đi bắt đầu tại nút đó. Đây có thể được xem là sự tổng quát hóa của bài toán đường kính cây.
+    </p>
+    <p>
+        Cũng như trước, điểm khởi đầu tốt là chọn gốc cho cây tùy ý. Phần đầu tiên của bài toán là tính toán cho mỗi nút \(x\) độ dài tối đa của một đường đi đi xuống qua một con của \(x\). Phần này có thể giải quyết bằng quy hoạch động như đã làm trước đó (tương tự <code>toLeaf</code>).
+    </p>
+    <p>
+        Phần thứ hai là tính toán cho mỗi nút \(x\) độ dài tối đa của một đường đi đi lên qua cha \(p\) của nó. Thoạt nhìn, có vẻ như chúng ta nên chọn đường đi dài nhất từ \(p\). Tuy nhiên, điều này không phải lúc nào cũng đúng, vì đường đi dài nhất từ \(p\) có thể đi qua chính \(x\).
+    </p>
+    
+    <div class="graphic-box">
+        <svg width="250" height="200" viewBox="0 0 250 200">
+            <g id="alp-edges">
+                <line x1="125" y1="40" x2="75" y2="100" class="edge-line"/> <line x1="125" y1="40" x2="175" y2="100" class="edge-line"/> <line x1="75" y1="100" x2="50" y2="160" class="edge-line"/> <line x1="75" y1="100" x2="100" y2="160" class="edge-line"/> </g>
+            
+            <g id="alp-nodes">
+                <circle cx="125" cy="40" r="15" class="node-root"/> <text x="125" y="40">1</text>
+                <circle cx="75" cy="100" r="15" class="node-circle"/> <text x="75" y="100">2</text>
+                <circle cx="175" cy="100" r="15" class="node-circle"/> <text x="175" y="100">3</text>
+                <circle cx="50" cy="160" r="15" class="node-circle"/> <text x="50" y="160">4</text>
+                <circle cx="100" cy="160" r="15" class="node-circle"/> <text x="100" y="160">5</text>
+            </g>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 14.3: Xét đường đi dài nhất qua cha</div>
+    </div>
+
+    <p>
+        Để giải quyết vấn đề này, chúng ta cần lưu trữ hai độ dài lớn nhất cho mỗi nút \(x\) dựa trên các đường đi xuống các con của nó:
+    </p>
+    <ul>
+        <li><code>maxLength1(x)</code>: đường đi dài nhất từ \(x\) xuống dưới.</li>
+        <li><code>maxLength2(x)</code>: đường đi dài thứ hai từ \(x\) xuống dưới (đi qua một con khác với đường đi thứ nhất).</li>
+    </ul>
+    <p>
+        Khi tính toán đường đi đi lên cho một nút con \(u\) của \(p\): nếu đường đi dài nhất từ \(p\) đi qua \(u\), chúng ta sử dụng <code>maxLength2(p) + 1</code>. Ngược lại, chúng ta sử dụng <code>maxLength1(p) + 1</code>. Ngoài ra, chúng ta cũng cần xem xét đường đi đi lên từ \(p\) đến cha của \(p\) (đã được tính trước đó).
+    </p>
+
+    <h2 id="sec14.4">14.4 Cây nhị phân (Binary trees)</h2>
+    <p>
+        Một <strong>cây nhị phân</strong> là một cây có gốc mà mỗi nút có cây con bên trái và bên phải (có thể rỗng). Do đó, mỗi nút trong cây nhị phân có 0, 1 hoặc 2 con.
+    </p>
+    <p>
+        Các nút của cây nhị phân có ba thứ tự tự nhiên tương ứng với các cách khác nhau để duyệt cây đệ quy:
+    </p>
+    <ul>
+        <li><strong>Pre-order (Tiền thứ tự):</strong> xử lý gốc, sau đó duyệt cây con trái, rồi duyệt cây con phải.</li>
+        <li><strong>In-order (Trung thứ tự):</strong> duyệt cây con trái, sau đó xử lý gốc, rồi duyệt cây con phải.</li>
+        <li><strong>Post-order (Hậu thứ tự):</strong> duyệt cây con trái, sau đó duyệt cây con phải, rồi xử lý gốc.</li>
+    </ul>
+
+    <div class="graphic-box">
+        <svg width="300" height="200" viewBox="0 0 300 200">
+            <g id="bt-edges">
+                <line x1="150" y1="40" x2="100" y2="90" class="edge-line"/> <line x1="150" y1="40" x2="200" y2="90" class="edge-line"/> <line x1="100" y1="90" x2="70" y2="140" class="edge-line"/> <line x1="100" y1="90" x2="130" y2="140" class="edge-line"/> <line x1="200" y1="90" x2="170" y2="140" class="edge-line"/> <line x1="200" y1="90" x2="230" y2="140" class="edge-line"/> </g>
+
+            <g id="bt-nodes">
+                <circle cx="150" cy="40" r="15" class="node-root"/> <text x="150" y="40">1</text>
+                
+                <circle cx="100" cy="90" r="15" class="node-circle"/> <text x="100" y="90">2</text>
+                <circle cx="200" cy="90" r="15" class="node-circle"/> <text x="200" y="90">3</text>
+                
+                <circle cx="70" cy="140" r="15" class="node-leaf"/> <text x="70" y="140">4</text>
+                <circle cx="130" cy="140" r="15" class="node-leaf"/> <text x="130" y="140">5</text>
+                <circle cx="170" cy="140" r="15" class="node-leaf"/> <text x="170" y="140">6</text>
+                <circle cx="230" cy="140" r="15" class="node-leaf"/> <text x="230" y="140">7</text>
+            </g>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 14.4: Một cây nhị phân</div>
+    </div>
+
+    <p>
+        Đối với cây trên:
+    </p>
+    <ul>
+        <li><strong>Pre-order:</strong> [1, 2, 4, 5, 3, 6, 7]</li>
+        <li><strong>In-order:</strong> [4, 2, 5, 1, 6, 3, 7]</li>
+        <li><strong>Post-order:</strong> [4, 5, 2, 6, 7, 3, 1]</li>
+    </ul>
+    <p>
+        Nếu chúng ta biết <em>pre-order</em> và <em>in-order</em> của một cây, chúng ta có thể tái tạo lại cấu trúc chính xác của cây. Tương tự, <em>post-order</em> và <em>in-order</em> cũng xác định duy nhất một cây. Tuy nhiên, nếu chỉ biết <em>pre-order</em> và <em>post-order</em>, chúng ta có thể không xác định được duy nhất một cây.
+    </p>
+
+</body>
+</html>

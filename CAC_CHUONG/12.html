@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPH - Chương 12: Duyệt đồ thị</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h1 { margin-top: 40px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        
+        /* Code styling */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #f1f3f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+        
+        /* Syntax highlighting */
+        .cpp-keyword { color: #0000ff; font-weight: bold; }
+        .cpp-type { color: #2b91af; }
+        .cpp-number { color: #098658; }
+        .cpp-func { color: #795e26; }
+        .cpp-comment { color: #008000; font-style: italic; }
+
+        /* Graphics Container */
+        .graphic-box {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        
+        /* SVG Styling */
+        svg text { font-family: "Segoe UI", sans-serif; font-size: 14px; text-anchor: middle; dominant-baseline: central; font-weight: bold; }
+        .node-circle { fill: #fff; stroke: #2c3e50; stroke-width: 2; }
+        .node-visited { fill: #e3f2fd; stroke: #2196f3; }
+        .node-start { fill: #fff9c4; stroke: #fbc02d; }
+        .edge-line { stroke: #555; stroke-width: 2; }
+        .arrow-head { fill: #555; }
+        .node-color-1 { fill: #e3f2fd; stroke: #2196f3; } /* Xanh - Blue */
+        .node-color-2 { fill: #ffebee; stroke: #e57373; } /* Đỏ - Red */
+
+        /* TOC */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc a { text-decoration: none; color: #007bff; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="toc">
+        <h3>Mục lục - Chương 12</h3>
+        <ul>
+            <li><a href="#intro">Duyệt đồ thị</a></li>
+            <li><a href="#sec12.1">12.1 Tìm kiếm theo chiều sâu</a></li>
+            <li><a href="#sec12.2">12.2 Tìm kiếm theo chiều rộng</a></li>
+            <li><a href="#sec12.3">12.3 Ứng dụng</a></li>
+        </ul>
+    </div>
+
+    <h1 id="intro">Chương 12: Duyệt đồ thị (Graph traversal)</h1>
+    <p>
+        Chương này thảo luận về hai thuật toán đồ thị cơ bản: tìm kiếm theo chiều sâu (depth-first search) và tìm kiếm theo chiều rộng (breadth-first search). Cả hai thuật toán đều được cung cấp một nút bắt đầu trong đồ thị, và chúng sẽ thăm tất cả các nút có thể đến được từ nút bắt đầu đó. Sự khác biệt giữa các thuật toán là thứ tự mà chúng thăm các nút.
+    </p>
+
+    <h2 id="sec12.1">12.1 Tìm kiếm theo chiều sâu (Depth-first search)</h2>
+    <p>
+        Tìm kiếm theo chiều sâu (DFS) là một kỹ thuật duyệt đồ thị đơn giản. Thuật toán bắt đầu tại một nút xuất phát, và tiến tới tất cả các nút khác có thể đến được từ nút xuất phát thông qua các cạnh của đồ thị.
+    </p>
+    <p>
+        Tìm kiếm theo chiều sâu luôn đi theo một đường dẫn duy nhất trong đồ thị chừng nào nó còn tìm thấy các nút mới. Sau đó, nó quay lại các nút trước đó và bắt đầu khám phá các phần khác của đồ thị. Thuật toán theo dõi các nút đã thăm để đảm bảo xử lý mỗi nút chỉ một lần.
+    </p>
+
+    <h3>Ví dụ</h3>
+    <p>
+        Hãy xem xét cách tìm kiếm theo chiều sâu xử lý đồ thị sau:
+    </p>
+
+    <div class="graphic-box">
+        <svg width="350" height="220" viewBox="0 0 350 220">
+            <g id="dfs-edges">
+                <line x1="50" y1="110" x2="150" y2="50" class="edge-line"/> <line x1="150" y1="50" x2="250" y2="50" class="edge-line"/> <line x1="150" y1="50" x2="250" y2="110" class="edge-line"/> <line x1="250" y1="50" x2="250" y2="110" class="edge-line"/> <line x1="50" y1="110" x2="150" y2="170" class="edge-line"/> </g>
+
+            <g id="dfs-nodes">
+                <circle cx="50" cy="110" r="18" class="node-visited"/> <text x="50" y="110">1</text>
+                <circle cx="150" cy="50" r="18" class="node-visited"/> <text x="150" y="50">2</text>
+                <circle cx="250" cy="50" r="18" class="node-visited"/> <text x="250" y="50">3</text>
+                <circle cx="250" cy="110" r="18" class="node-visited"/> <text x="250" y="110">5</text>
+                <circle cx="150" cy="170" r="18" class="node-visited"/> <text x="150" y="170">4</text>
+            </g>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 12.1: Quá trình duyệt DFS bắt đầu từ nút 1</div>
+    </div>
+
+    <p>
+        Chúng ta có thể bắt đầu tìm kiếm tại bất kỳ nút nào của đồ thị; bây giờ chúng ta sẽ bắt đầu tìm kiếm tại nút 1. Tìm kiếm đầu tiên tiến tới nút 2. Sau đó, các nút 3 và 5 sẽ được thăm.
+    </p>
+    <p>
+        Các láng giềng của nút 5 là 2 và 3, nhưng tìm kiếm đã thăm cả hai nút này rồi, vì vậy đã đến lúc quay lại các nút trước đó. Cũng tương tự, các láng giềng của nút 3 và 2 đã được thăm, vì vậy tiếp theo chúng ta di chuyển từ nút 1 đến nút 4. Sau bước này, tìm kiếm kết thúc vì nó đã thăm tất cả các nút.
+    </p>
+    <p>
+        Độ phức tạp thời gian của tìm kiếm theo chiều sâu là \(O(n + m)\), trong đó \(n\) là số lượng nút và \(m\) là số lượng cạnh, bởi vì thuật toán xử lý mỗi nút và mỗi cạnh một lần.
+    </p>
+
+    <h3>Cài đặt</h3>
+    <p>
+        Tìm kiếm theo chiều sâu có thể được cài đặt thuận tiện bằng cách sử dụng đệ quy. Hàm <code>dfs</code> sau đây bắt đầu tìm kiếm theo chiều sâu tại một nút cho trước. Hàm giả định rằng đồ thị được lưu trữ dưới dạng danh sách kề trong một mảng:
+    </p>
+    <pre><code><span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt; adj[N];</code></pre>
+    <p>
+        và cũng duy trì một mảng <code>visited</code> để theo dõi các nút đã thăm:
+    </p>
+    <pre><code><span class="cpp-keyword">bool</span> visited[N];</code></pre>
+    <p>
+        Ban đầu, mỗi giá trị trong mảng là <code>false</code>, và khi tìm kiếm đến nút <code>s</code>, giá trị của <code>visited[s]</code> trở thành <code>true</code>. Hàm có thể được cài đặt như sau:
+    </p>
+
+<pre><code><span class="cpp-keyword">void</span> <span class="cpp-func">dfs</span>(<span class="cpp-keyword">int</span> s) {
+    <span class="cpp-keyword">if</span> (visited[s]) <span class="cpp-keyword">return</span>;
+    visited[s] = <span class="cpp-keyword">true</span>;
+    <span class="cpp-comment">// xử lý nút s</span>
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">auto</span> u : adj[s]) {
+        <span class="cpp-func">dfs</span>(u);
+    }
+}</code></pre>
+
+    <h2 id="sec12.2">12.2 Tìm kiếm theo chiều rộng (Breadth-first search)</h2>
+    <p>
+        Tìm kiếm theo chiều rộng (BFS) thăm các nút theo thứ tự tăng dần khoảng cách của chúng từ nút bắt đầu. Vì vậy, chúng ta có thể tính khoảng cách từ nút bắt đầu đến tất cả các nút khác bằng cách sử dụng tìm kiếm theo chiều rộng. Tuy nhiên, tìm kiếm theo chiều rộng khó cài đặt hơn tìm kiếm theo chiều sâu.
+    </p>
+    <p>
+        Tìm kiếm theo chiều rộng đi qua các nút theo từng lớp (level). Đầu tiên tìm kiếm khám phá các nút có khoảng cách từ nút bắt đầu là 1, sau đó là các nút có khoảng cách là 2, và cứ tiếp tục như vậy. Quá trình này tiếp tục cho đến khi tất cả các nút đã được thăm.
+    </p>
+
+    <h3>Ví dụ</h3>
+    <p>
+        Hãy xem xét cách tìm kiếm theo chiều rộng xử lý đồ thị sau:
+    </p>
+
+    <div class="graphic-box">
+        <svg width="350" height="250" viewBox="0 0 350 250">
+            <g id="bfs-edges">
+                <line x1="50" y1="125" x2="100" y2="50" class="edge-line"/>
+                <line x1="50" y1="125" x2="100" y2="200" class="edge-line"/>
+                
+                <line x1="100" y1="50" x2="200" y2="50" class="edge-line"/>
+                <line x1="100" y1="50" x2="200" y2="125" class="edge-line"/>
+                
+                <line x1="200" y1="50" x2="300" y2="125" class="edge-line"/>
+                <line x1="200" y1="125" x2="300" y2="125" class="edge-line"/>
+            </g>
+
+            <g id="bfs-nodes">
+                <circle cx="50" cy="125" r="18" class="node-visited"/> <text x="50" y="125">1</text>
+                <text x="50" y="155" fill="#666" font-size="12" font-weight="normal">d=0</text>
+
+                <circle cx="100" cy="50" r="18" class="node-visited"/> <text x="100" y="50">2</text>
+                <text x="100" y="80" fill="#666" font-size="12" font-weight="normal">d=1</text>
+                
+                <circle cx="100" cy="200" r="18" class="node-visited"/> <text x="100" y="200">4</text>
+                <text x="100" y="230" fill="#666" font-size="12" font-weight="normal">d=1</text>
+
+                <circle cx="200" cy="50" r="18" class="node-visited"/> <text x="200" y="50">3</text>
+                <text x="200" y="80" fill="#666" font-size="12" font-weight="normal">d=2</text>
+                
+                <circle cx="200" cy="125" r="18" class="node-visited"/> <text x="200" y="125">5</text>
+                <text x="200" y="155" fill="#666" font-size="12" font-weight="normal">d=2</text>
+
+                <circle cx="300" cy="125" r="18" class="node-visited"/> <text x="300" y="125">6</text>
+                <text x="300" y="155" fill="#666" font-size="12" font-weight="normal">d=3</text>
+            </g>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 12.2: Các lớp khoảng cách trong BFS</div>
+    </div>
+
+    <p>
+        Giả sử tìm kiếm bắt đầu tại nút 1. Đầu tiên, chúng ta xử lý tất cả các nút có thể đến được từ nút 1 bằng một cạnh duy nhất: 2 và 4. Sau đó, chúng ta tiến tới các nút 3 và 5. Cuối cùng, chúng ta thăm nút 6.
+    </p>
+    <p>
+        Bây giờ chúng ta đã tính được khoảng cách từ nút bắt đầu đến tất cả các nút của đồ thị. Các khoảng cách như sau:
+    </p>
+    <table style="width: 50%; margin: 0 auto;">
+        <tr><th>Nút</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td></tr>
+        <tr><th>Khoảng cách</th><td>0</td><td>1</td><td>2</td><td>1</td><td>2</td><td>3</td></tr>
+    </table>
+    <p>
+        Giống như tìm kiếm theo chiều sâu, độ phức tạp thời gian của tìm kiếm theo chiều rộng là \(O(n + m)\), trong đó \(n\) là số lượng nút và \(m\) là số lượng cạnh.
+    </p>
+
+    <h3>Cài đặt</h3>
+    <p>
+        Tìm kiếm theo chiều rộng khó cài đặt hơn tìm kiếm theo chiều sâu, bởi vì thuật toán thăm các nút ở các phần khác nhau của đồ thị. Một cách cài đặt điển hình là dựa trên hàng đợi (queue) chứa các nút. Ở mỗi bước, nút tiếp theo trong hàng đợi sẽ được xử lý.
+    </p>
+    <p>
+        Đoạn mã sau giả định rằng đồ thị được lưu trữ dưới dạng danh sách kề và duy trì các cấu trúc dữ liệu sau:
+    </p>
+<pre><code><span class="cpp-type">queue</span>&lt;<span class="cpp-keyword">int</span>&gt; q;
+<span class="cpp-keyword">bool</span> visited[N];
+<span class="cpp-keyword">int</span> distance[N];</code></pre>
+    <p>
+        Hàng đợi <code>q</code> chứa các nút cần được xử lý theo thứ tự khoảng cách tăng dần. Các nút mới luôn được thêm vào cuối hàng đợi, và nút ở đầu hàng đợi là nút tiếp theo được xử lý. Mảng <code>visited</code> chỉ ra những nút nào tìm kiếm đã thăm, và mảng <code>distance</code> sẽ chứa khoảng cách từ nút bắt đầu đến tất cả các nút của đồ thị.
+    </p>
+    <p>
+        Việc tìm kiếm có thể được cài đặt như sau, bắt đầu tại nút <code>x</code>:
+    </p>
+
+<pre><code>visited[x] = <span class="cpp-keyword">true</span>;
+distance[x] = <span class="cpp-number">0</span>;
+q.push(x);
+<span class="cpp-keyword">while</span> (!q.empty()) {
+    <span class="cpp-keyword">int</span> s = q.front(); q.pop();
+    <span class="cpp-comment">// xử lý nút s</span>
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">auto</span> u : adj[s]) {
+        <span class="cpp-keyword">if</span> (visited[u]) <span class="cpp-keyword">continue</span>;
+        visited[u] = <span class="cpp-keyword">true</span>;
+        distance[u] = distance[s]+<span class="cpp-number">1</span>;
+        q.push(u);
+    }
+}</code></pre>
+
+    <h2 id="sec12.3">12.3 Ứng dụng (Applications)</h2>
+    <p>
+        Sử dụng các thuật toán duyệt đồ thị, chúng ta có thể kiểm tra nhiều tính chất của đồ thị. Thông thường, cả tìm kiếm theo chiều sâu và tìm kiếm theo chiều rộng đều có thể được sử dụng, nhưng trong thực tế, tìm kiếm theo chiều sâu là lựa chọn tốt hơn vì nó dễ cài đặt hơn. Trong các ứng dụng sau, chúng ta sẽ giả định rằng đồ thị là vô hướng.
+    </p>
+
+    <h3>Kiểm tra tính liên thông</h3>
+    <p>
+        Một đồ thị là liên thông nếu có đường đi giữa bất kỳ hai nút nào của đồ thị. Do đó, chúng ta có thể kiểm tra xem một đồ thị có liên thông hay không bằng cách bắt đầu tại một nút tùy ý và tìm xem chúng ta có thể đến được tất cả các nút khác hay không.
+    </p>
+    <p>
+        Ví dụ, trong đồ thị sau, tìm kiếm theo chiều sâu từ nút 1 thăm các nút: 1, 2, 3 và 5. Vì tìm kiếm không thăm tất cả các nút (nút 4 không được thăm), chúng ta có thể kết luận rằng đồ thị không liên thông.
+    </p>
+
+    <div class="graphic-box">
+        <svg width="300" height="150" viewBox="0 0 300 150">
+            <g id="dis-edges">
+                <line x1="50" y1="75" x2="100" y2="25" class="edge-line"/> <line x1="100" y1="25" x2="150" y2="75" class="edge-line"/> <line x1="150" y1="75" x2="100" y2="125" class="edge-line"/> <line x1="100" y1="125" x2="50" y2="75" class="edge-line"/> <line x1="100" y1="25" x2="100" y2="125" class="edge-line"/> </g>
+
+            <g id="dis-nodes">
+                <circle cx="50" cy="75" r="15" class="node-visited"/> <text x="50" y="75">1</text>
+                <circle cx="100" cy="25" r="15" class="node-visited"/> <text x="100" y="25">2</text>
+                <circle cx="150" cy="75" r="15" class="node-visited"/> <text x="150" y="75">3</text>
+                <circle cx="100" cy="125" r="15" class="node-visited"/> <text x="100" y="125">5</text>
+
+                <circle cx="220" cy="75" r="15" class="node-circle"/> <text x="220" y="75">4</text>
+            </g>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 12.3: Đồ thị không liên thông (nút 4 bị cô lập)</div>
+    </div>
+
+    <p>
+        Theo cách tương tự, chúng ta cũng có thể tìm tất cả các thành phần liên thông của một đồ thị bằng cách duyệt qua các nút và luôn bắt đầu một tìm kiếm theo chiều sâu mới nếu nút hiện tại chưa thuộc về bất kỳ thành phần nào.
+    </p>
+
+    <h3>Tìm chu trình (Finding cycles)</h3>
+    <p>
+        Một đồ thị chứa một chu trình nếu trong quá trình duyệt đồ thị, chúng ta tìm thấy một nút mà láng giềng của nó (khác với nút trước đó trong đường dẫn hiện tại) đã được thăm.
+    </p>
+    <p>
+        Ví dụ, đồ thị sau chứa hai chu trình và chúng ta có thể tìm thấy một trong số chúng như sau: \(1 \to 2 \to 5\). Sau khi di chuyển từ nút 2 đến nút 5, chúng ta nhận thấy rằng láng giềng 3 của nút 5 đã được thăm. Do đó, đồ thị chứa một chu trình đi qua nút 3, ví dụ \(3 \to 2 \to 5 \to 3\).
+    </p>
+
+    <div class="graphic-box">
+        <svg width="250" height="180" viewBox="0 0 250 180">
+            <defs>
+                <marker id="arrow" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#333" />
+                </marker>
+            </defs>
+            <g id="cycle-edges">
+                <line x1="50" y1="50" x2="125" y2="20" class="edge-line" marker-end="url(#arrow)"/> <line x1="125" y1="20" x2="200" y2="50" class="edge-line" marker-end="url(#arrow)"/> <line x1="200" y1="50" x2="125" y2="120" class="edge-line" marker-end="url(#arrow)"/> <line x1="125" y1="120" x2="50" y2="50" class="edge-line" marker-end="url(#arrow)"/> <line x1="125" y1="120" x2="125" y2="20" class="edge-line" marker-end="url(#arrow)" stroke-dasharray="4"/>
+            </g>
+
+            <g id="cycle-nodes">
+                <circle cx="50" cy="50" r="15" class="node-visited"/> <text x="50" y="50">1</text>
+                <circle cx="125" cy="20" r="15" class="node-visited"/> <text x="125" y="20">2</text>
+                <circle cx="125" cy="120" r="15" class="node-visited"/> <text x="125" y="120">3</text>
+                <circle cx="200" cy="50" r="15" class="node-visited"/> <text x="200" y="50">5</text>
+                
+                <circle cx="125" cy="160" r="15" class="node-circle"/> <text x="125" y="160">4</text>
+            </g>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 12.4: Phát hiện chu trình (3 được thăm lại)</div>
+    </div>
+
+    <p>
+        Một cách khác để tìm xem đồ thị có chứa chu trình hay không là chỉ cần tính số lượng nút và cạnh trong mỗi thành phần. Nếu một thành phần chứa \(c\) nút và không có chu trình, nó phải chứa chính xác \(c-1\) cạnh (vì vậy nó phải là một cây). Nếu có \(c\) cạnh trở lên, thành phần đó chắc chắn chứa một chu trình.
+    </p>
+
+    <h3>Kiểm tra tính hai phía (Bipartiteness check)</h3>
+    <p>
+        Một đồ thị là hai phía nếu các nút của nó có thể được tô bằng hai màu sao cho không có hai nút kề nhau nào có cùng màu. Thật đáng ngạc nhiên là rất dễ để kiểm tra xem một đồ thị có phải là hai phía hay không bằng cách sử dụng các thuật toán duyệt đồ thị.
+    </p>
+    <p>
+        Ý tưởng là tô màu nút bắt đầu bằng màu xanh, tất cả các láng giềng của nó bằng màu đỏ, tất cả các láng giềng của chúng bằng màu xanh, và cứ thế. Nếu tại một thời điểm nào đó của quá trình tìm kiếm, chúng ta nhận thấy hai nút kề nhau có cùng màu, điều này có nghĩa là đồ thị không phải là hai phía. Ngược lại, đồ thị là hai phía và một cách tô màu đã được tìm thấy.
+    </p>
+
+    <div class="graphic-box">
+        <svg width="250" height="150" viewBox="0 0 250 150">
+            <g id="bipart-edges">
+                <line x1="125" y1="20" x2="50" y2="80" class="edge-line"/> <line x1="125" y1="20" x2="200" y2="80" class="edge-line"/> <line x1="50" y1="80" x2="125" y2="130" class="edge-line"/> <line x1="200" y1="80" x2="125" y2="130" class="edge-line"/> <line x1="50" y1="80" x2="200" y2="80" class="edge-line" stroke="red" stroke-width="3"/> </g>
+
+            <g id="bipart-nodes">
+                <circle cx="125" cy="20" r="18" class="node-color-1"/> <text x="125" y="20">1</text>
+                
+                <circle cx="50" cy="80" r="18" class="node-color-2"/> <text x="50" y="80">2</text>
+                <circle cx="200" cy="80" r="18" class="node-color-2"/> <text x="200" y="80">3</text>
+                
+                <circle cx="125" cy="130" r="18" class="node-color-1"/> <text x="125" y="130">5</text>
+            </g>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 12.5: Xung đột màu sắc giữa nút 2 và 3 (cùng màu đỏ)</div>
+    </div>
+
+    <p>
+        Ví dụ, đồ thị trên không phải là hai phía. Tìm kiếm từ nút 1 tiến hành như sau: Nút 1 được tô xanh. Các láng giềng 2 và 3 được tô đỏ. Chúng ta nhận thấy rằng cả hai nút 2 và 3 đều có màu đỏ, trong khi chúng là các nút kề nhau (được nối bởi cạnh màu đỏ đậm). Do đó, đồ thị không phải là hai phía.
+    </p>
+    <p>
+        Thuật toán này luôn hoạt động, bởi vì khi chỉ có hai màu, màu của nút bắt đầu trong một thành phần sẽ quyết định màu của tất cả các nút khác trong thành phần đó. Không có sự khác biệt nào cho dù nút bắt đầu là màu đỏ hay màu xanh.
+    </p>
+
+</body>
+</html>

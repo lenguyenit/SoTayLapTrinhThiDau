@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPH - Chương 4: Cấu trúc dữ liệu</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h1 { margin-top: 40px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        
+        /* Code styling */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #f1f3f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+        
+        /* Syntax highlighting */
+        .cpp-keyword { color: #0000ff; font-weight: bold; }
+        .cpp-type { color: #2b91af; }
+        .cpp-number { color: #098658; }
+        .cpp-string { color: #a31515; }
+        .cpp-comment { color: #008000; font-style: italic; }
+
+        /* Graphics Containers */
+        .graphic-box {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow-x: auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* SVG Styling */
+        svg text { font-family: "Segoe UI", sans-serif; font-size: 14px; text-anchor: middle; dominant-baseline: central; }
+        .title-text { font-weight: bold; fill: #2c3e50; font-size: 16px; }
+        .sub-text { fill: #666; font-size: 12px; }
+        
+        /* Set/Map SVG */
+        .tree-node { fill: #e3f2fd; stroke: #2196f3; stroke-width: 2; }
+        .tree-edge { stroke: #2196f3; stroke-width: 2; }
+        .hash-bucket { fill: #fff3e0; stroke: #ff9800; stroke-width: 2; }
+        .hash-arrow { stroke: #ff9800; stroke-width: 2; marker-end: url(#arrowHash); stroke-dasharray: 4; }
+
+        /* Stack/Queue SVG */
+        .container-wall { fill: none; stroke: #333; stroke-width: 3; }
+        .data-element { fill: #e8f5e9; stroke: #2e7d32; stroke-width: 2; }
+        .push-arrow { stroke: #2e7d32; stroke-width: 3; marker-end: url(#arrowPush); }
+        .pop-arrow { stroke: #c0392b; stroke-width: 3; marker-end: url(#arrowPop); }
+        .action-text-push { fill: #2e7d32; font-weight: bold; }
+        .action-text-pop { fill: #c0392b; font-weight: bold; }
+
+        /* TOC */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc a { text-decoration: none; color: #007bff; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="toc">
+        <h3>Mục lục - Chương 4</h3>
+        <ul>
+            <li><a href="#intro">Cấu trúc dữ liệu</a></li>
+            <li><a href="#sec4.1">4.1 Mảng động (Vectors)</a></li>
+            <li><a href="#sec4.2">4.2 Cấu trúc tập hợp (Sets)</a></li>
+            <li><a href="#sec4.3">4.3 Cấu trúc bản đồ (Maps)</a></li>
+            <li><a href="#sec4.4">4.4 Bộ lặp và Dải (Iterators)</a></li>
+            <li><a href="#sec4.5">4.5 Các cấu trúc khác (Bitset, Deque, Stack, Queue)</a></li>
+        </ul>
+    </div>
+
+    <h1 id="intro">Chương 4: Cấu trúc dữ liệu (Data structures)</h1>
+    <p>
+        Cấu trúc dữ liệu là cách thức tổ chức và lưu trữ dữ liệu trong máy tính để có thể sử dụng một cách hiệu quả. Việc lựa chọn cấu trúc dữ liệu phù hợp thường quan trọng ngang với việc chọn đúng thuật toán.
+    </p>
+    <p>
+        Thư viện chuẩn C++ (STL - Standard Template Library) cung cấp sẵn nhiều cấu trúc dữ liệu mạnh mẽ và hữu ích cho lập trình thi đấu.
+    </p>
+
+    <h2 id="sec4.1">4.1 Mảng động (Dynamic arrays)</h2>
+    <p>
+        Trong C++, mảng động được gọi là <code>vector</code>. Khác với mảng thông thường có kích thước cố định, vector có thể thay đổi kích thước linh hoạt trong quá trình chạy chương trình.
+    </p>
+    
+    <h3>Các thao tác chính</h3>
+    <ul>
+        <li><code>push_back(x)</code>: Thêm phần tử <code>x</code> vào cuối vector. Độ phức tạp trung bình \(O(1)\).</li>
+        <li><code>pop_back()</code>: Xóa phần tử cuối cùng. Độ phức tạp \(O(1)\).</li>
+        <li><code>back()</code>: Lấy giá trị của phần tử cuối cùng.</li>
+        <li><code>size()</code>: Trả về số lượng phần tử hiện có.</li>
+        <li><code>v[i]</code>: Truy cập phần tử tại chỉ số <code>i</code>. Độ phức tạp \(O(1)\).</li>
+    </ul>
+
+<pre><code><span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt; v;
+v.push_back(<span class="cpp-number">3</span>); <span class="cpp-comment">// v = {3}</span>
+v.push_back(<span class="cpp-number">2</span>); <span class="cpp-comment">// v = {3, 2}</span>
+v.push_back(<span class="cpp-number">5</span>); <span class="cpp-comment">// v = {3, 2, 5}</span>
+
+cout &lt;&lt; v.back() &lt;&lt; <span class="cpp-string">"\n"</span>; <span class="cpp-comment">// 5</span>
+v.pop_back(); <span class="cpp-comment">// v = {3, 2}</span>
+
+<span class="cpp-comment">// Cách khởi tạo khác</span>
+<span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt; a = {<span class="cpp-number">2</span>, <span class="cpp-number">4</span>, <span class="cpp-number">2</span>, <span class="cpp-number">5</span>, <span class="cpp-number">1</span>};
+<span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt; b(<span class="cpp-number">8</span>);       <span class="cpp-comment">// Kích thước 8, giá trị mặc định 0</span>
+<span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt; c(<span class="cpp-number">8</span>, <span class="cpp-number">2</span>);    <span class="cpp-comment">// Kích thước 8, giá trị khởi tạo 2</span>
+
+<span class="cpp-comment">// Duyệt vector</span>
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> x : v) {
+    cout &lt;&lt; x &lt;&lt; <span class="cpp-string">" "</span>;
+}</code></pre>
+
+    <h2 id="sec4.2">4.2 Cấu trúc tập hợp (Set structures)</h2>
+    <p>
+        Tập hợp (Set) là một cấu trúc dữ liệu lưu trữ một tập hợp các phần tử. Thư viện STL cung cấp các phiên bản khác nhau dựa trên yêu cầu về thứ tự và sự trùng lặp.
+    </p>
+
+    <h3>1. Set (std::set)</h3>
+    <p>
+        Được cài đặt bằng <strong>cây tìm kiếm nhị phân cân bằng</strong> (thường là Red-Black Tree).
+    </p>
+    <ul>
+        <li>Các phần tử <strong>không trùng lặp</strong>.</li>
+        <li>Các phần tử luôn được <strong>sắp xếp</strong> tăng dần.</li>
+        <li>Thao tác thêm, xóa, tìm kiếm: \(O(\log n)\).</li>
+    </ul>
+
+    <h3>2. Unordered Set (std::unordered_set)</h3>
+    <p>
+        Được cài đặt bằng <strong>bảng băm</strong> (Hash Table).
+    </p>
+    <ul>
+        <li>Các phần tử <strong>không trùng lặp</strong>.</li>
+        <li>Các phần tử <strong>không có thứ tự</strong> cụ thể.</li>
+        <li>Thao tác thêm, xóa, tìm kiếm: Trung bình \(O(1)\).</li>
+    </ul>
+
+    <h3>3. Multiset (std::multiset)</h3>
+    <p>
+        Giống như <code>set</code> nhưng cho phép chứa các phần tử <strong>trùng lặp</strong>.
+    </p>
+
+    <div class="graphic-box">
+        <svg width="550" height="250" viewBox="0 0 550 250">
+            <defs>
+                <marker id="arrowHash" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                    <path d="M0,0 L8,4 L0,8 z" fill="#ff9800" />
+                </marker>
+            </defs>
+
+            <text x="140" y="30" class="title-text">std::set (Có thứ tự)</text>
+            <text x="140" y="50" class="sub-text">Cấu trúc Cây (Tree) - O(log n)</text>
+
+            <g transform="translate(140, 90)">
+                <line x1="0" y1="0" x2="-50" y2="50" class="tree-edge"/>
+                <line x1="0" y1="0" x2="50" y2="50" class="tree-edge"/>
+                <line x1="-50" y1="50" x2="-25" y2="100" class="tree-edge"/>
+                
+                <circle cx="0" cy="0" r="20" class="tree-node"/> <text x="0" y="0" font-weight="bold">5</text>
+                <circle cx="-50" cy="50" r="20" class="tree-node"/> <text x="-50" y="50" font-weight="bold">3</text>
+                <circle cx="50" cy="50" r="20" class="tree-node"/> <text x="50" y="50" font-weight="bold">8</text>
+                <circle cx="-25" cy="100" r="20" class="tree-node"/> <text x="-25" y="100" font-weight="bold">4</text>
+            </g>
+            <text x="140" y="230" class="sub-text">Dữ liệu luôn được sắp xếp</text>
+
+            <line x1="275" y1="20" x2="275" y2="230" stroke="#eee" stroke-width="2" stroke-dasharray="5"/>
+
+            <text x="410" y="30" class="title-text">std::unordered_set (Không thứ tự)</text>
+            <text x="410" y="50" class="sub-text">Bảng Băm (Hash Table) - Avg O(1)</text>
+
+            <g transform="translate(300, 80)">
+                <text x="-20" y="10">Thêm: 8</text>
+                <text x="-20" y="50">Thêm: 3</text>
+                <text x="-20" y="90">Thêm: 5</text>
+                
+                <path d="M 30,10 Q 60,10 80,30" class="hash-arrow" fill="none"/>
+                <path d="M 30,50 Q 60,50 80,70" class="hash-arrow" fill="none"/>
+                <path d="M 30,90 Q 60,90 80,30" class="hash-arrow" fill="none"/> <rect x="90" y="0" width="120" height="40" class="hash-bucket"/> <text x="150" y="20" font-weight="bold">8, 5</text> <text x="230" y="20" class="sub-text">Bucket 0</text>
+                <rect x="90" y="45" width="120" height="40" class="hash-bucket"/> <text x="150" y="65" font-weight="bold">3</text> <text x="230" y="65" class="sub-text">Bucket 1</text>
+                <rect x="90" y="90" width="120" height="40" class="hash-bucket"/> <text x="150" y="110" class="sub-text">(Rỗng)</text> <text x="230" y="110" class="sub-text">Bucket 2</text>
+            </g>
+            <text x="410" y="230" class="sub-text">Thứ tự ngẫu nhiên do hàm băm</text>
+        </svg>
+    </div>
+
+<pre><code><span class="cpp-type">set</span>&lt;<span class="cpp-keyword">int</span>&gt; s;
+s.insert(<span class="cpp-number">3</span>);
+s.insert(<span class="cpp-number">2</span>);
+s.insert(<span class="cpp-number">5</span>);
+s.insert(<span class="cpp-number">2</span>); <span class="cpp-comment">// Không có tác dụng vì 2 đã tồn tại</span>
+<span class="cpp-comment">// s chứa {2, 3, 5}</span>
+
+<span class="cpp-keyword">if</span> (s.count(<span class="cpp-number">3</span>)) cout &lt;&lt; <span class="cpp-string">"3 có trong tập hợp\n"</span>;
+
+s.erase(<span class="cpp-number">3</span>); <span class="cpp-comment">// Xóa phần tử 3</span>
+
+<span class="cpp-comment">// Với multiset:</span>
+<span class="cpp-type">multiset</span>&lt;<span class="cpp-keyword">int</span>&gt; ms;
+ms.insert(<span class="cpp-number">5</span>); ms.insert(<span class="cpp-number">5</span>); ms.insert(<span class="cpp-number">5</span>);
+cout &lt;&lt; ms.count(<span class="cpp-number">5</span>) &lt;&lt; <span class="cpp-string">"\n"</span>; <span class="cpp-comment">// 3</span>
+ms.erase(ms.find(<span class="cpp-number">5</span>)); <span class="cpp-comment">// Chỉ xóa 1 phần tử 5</span>
+ms.erase(<span class="cpp-number">5</span>);          <span class="cpp-comment">// Xóa TẤT CẢ phần tử 5</span></code></pre>
+
+    <h2 id="sec4.3">4.3 Cấu trúc bản đồ (Map structures)</h2>
+    <p>
+        Bản đồ (Map) là cấu trúc lưu trữ các cặp <strong>khóa - giá trị</strong> (key - value). Mỗi khóa là duy nhất và ánh xạ tới một giá trị.
+    </p>
+    <ul>
+        <li><strong><code>map</code></strong>: Dựa trên cây cân bằng. Các khóa được sắp xếp. Thao tác \(O(\log n)\).</li>
+        <li><strong><code>unordered_map</code></strong>: Dựa trên bảng băm. Các khóa không có thứ tự. Thao tác trung bình \(O(1)\).</li>
+    </ul>
+
+<pre><code><span class="cpp-type">map</span>&lt;<span class="cpp-type">string</span>, <span class="cpp-keyword">int</span>&gt; m;
+m[<span class="cpp-string">"chuoi"</span>] = <span class="cpp-number">4</span>;
+m[<span class="cpp-string">"tao"</span>] = <span class="cpp-number">2</span>;
+m[<span class="cpp-string">"cam"</span>] = <span class="cpp-number">7</span>;
+
+cout &lt;&lt; m[<span class="cpp-string">"chuoi"</span>] &lt;&lt; <span class="cpp-string">"\n"</span>; <span class="cpp-comment">// Output: 4</span>
+
+<span class="cpp-comment">// LƯU Ý QUAN TRỌNG:</span>
+<span class="cpp-comment">// Nếu khóa không tồn tại, toán tử [] sẽ tự động tạo khóa đó</span>
+<span class="cpp-comment">// với giá trị mặc định (0 cho int).</span>
+cout &lt;&lt; m[<span class="cpp-string">"dua hau"</span>] &lt;&lt; <span class="cpp-string">"\n"</span>; <span class="cpp-comment">// Output: 0. Cặp {"dua hau", 0} được thêm vào map.</span>
+
+<span class="cpp-comment">// Để kiểm tra khóa có tồn tại hay không mà không thêm vào:</span>
+<span class="cpp-keyword">if</span> (m.count(<span class="cpp-string">"dua hau"</span>)) { ... }</code></pre>
+
+    <h2 id="sec4.4">4.4 Bộ lặp và Dải (Iterators and Ranges)</h2>
+    <p>
+        Bộ lặp (Iterator) là một biến trỏ đến một phần tử trong cấu trúc dữ liệu. Chúng thường được dùng để duyệt qua các cấu trúc không hỗ trợ truy cập bằng chỉ số <code>[]</code> như <code>set</code> hay <code>map</code>.
+    </p>
+    <ul>
+        <li><code>begin()</code>: Trả về bộ lặp trỏ đến phần tử đầu tiên.</li>
+        <li><code>end()</code>: Trả về bộ lặp trỏ đến vị trí <strong>ngay sau</strong> phần tử cuối cùng.</li>
+    </ul>
+    <p>
+        Dải <code>[begin(), end())</code> là nửa khoảng mở xác định tất cả các phần tử. Ta dùng toán tử <code>*</code> để lấy giá trị mà bộ lặp trỏ tới.
+    </p>
+
+<pre><code><span class="cpp-type">set</span>&lt;<span class="cpp-keyword">int</span>&gt; s = {<span class="cpp-number">2</span>, <span class="cpp-number">5</span>, <span class="cpp-number">8</span>};
+<span class="cpp-keyword">auto</span> it = s.begin(); <span class="cpp-comment">// it trỏ tới 2</span>
+cout &lt;&lt; *it &lt;&lt; <span class="cpp-string">"\n"</span>; <span class="cpp-comment">// 2</span>
+it++;                <span class="cpp-comment">// it di chuyển tới 5</span>
+cout &lt;&lt; *it &lt;&lt; <span class="cpp-string">"\n"</span>; <span class="cpp-comment">// 5</span>
+
+<span class="cpp-comment">// Tìm phần tử lớn nhất trong set (phần tử trước end())</span>
+<span class="cpp-keyword">auto</span> it_last = s.end();
+it_last--; 
+cout &lt;&lt; *it_last &lt;&lt; <span class="cpp-string">"\n"</span>; <span class="cpp-comment">// 8</span>
+
+<span class="cpp-comment">// Tìm kiếm phần tử >= x</span>
+<span class="cpp-keyword">auto</span> it_find = s.lower_bound(<span class="cpp-number">5</span>); 
+<span class="cpp-keyword">if</span> (it_find != s.end()) cout &lt;&lt; *it_find &lt;&lt; <span class="cpp-string">"\n"</span>;</code></pre>
+
+    <h2 id="sec4.5">4.5 Các cấu trúc khác</h2>
+
+    <h3>Bitset</h3>
+    <p>
+        <code>bitset</code> là một mảng các bit nhưng mỗi phần tử chỉ chiếm 1 bit bộ nhớ (so với 1 byte của <code>bool</code> hay 4 byte của <code>int</code>). Điều này giúp tiết kiệm bộ nhớ và hỗ trợ các phép toán bit (AND, OR, XOR, dịch bit) cực nhanh trên toàn bộ mảng.
+    </p>
+<pre><code><span class="cpp-type">bitset</span>&lt;<span class="cpp-number">10</span>&gt; b; // 10 bit, khởi tạo toàn 0
+b[<span class="cpp-number">1</span>] = <span class="cpp-number">1</span>;
+b[<span class="cpp-number">3</span>] = <span class="cpp-number">1</span>;
+cout &lt;&lt; b[<span class="cpp-number">1</span>] &lt;&lt; <span class="cpp-string">"\n"</span>; // 1
+cout &lt;&lt; b.count() &lt;&lt; <span class="cpp-string">"\n"</span>; // 2 (số lượng bit 1)</code></pre>
+
+    <h3>Deque (Double-ended queue)</h3>
+    <p>Hàng đợi hai đầu, cho phép thêm và xóa phần tử ở cả hai đầu (<code>push_front</code>, <code>push_back</code>, <code>pop_front</code>, <code>pop_back</code>) với độ phức tạp trung bình \(O(1)\).</p>
+
+    <h3>Stack, Queue và Priority Queue</h3>
+    <ul>
+        <li><strong>Stack (Ngăn xếp):</strong> Cơ chế LIFO (Last In, First Out - Vào sau ra trước). Các thao tác chính: <code>push</code> (thêm vào đỉnh), <code>pop</code> (lấy khỏi đỉnh), <code>top</code> (xem đỉnh).</li>
+        <li><strong>Queue (Hàng đợi):</strong> Cơ chế FIFO (First In, First Out - Vào trước ra trước). Các thao tác chính: <code>push</code> (thêm vào cuối), <code>pop</code> (lấy khỏi đầu), <code>front</code> (xem đầu).</li>
+        <li><strong>Priority Queue (Hàng đợi ưu tiên):</strong> Luôn cho phép lấy ra phần tử lớn nhất (mặc định) hoặc nhỏ nhất trong \(O(\log n)\). Được cài đặt bằng Heap.</li>
+    </ul>
+
+    <div class="graphic-box">
+        <svg width="550" height="280" viewBox="0 0 550 280">
+            <defs>
+                <marker id="arrowPush" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#2e7d32" />
+                </marker>
+                <marker id="arrowPop" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#c0392b" />
+                </marker>
+            </defs>
+
+            <g transform="translate(80, 30)">
+                <text x="50" y="-10" class="title-text">Stack (Ngăn xếp)</text>
+                <text x="50" y="10" class="sub-text">LIFO: Vào Sau, Ra Trước</text>
+                
+                <polyline points="0,40 0,180 100,180 100,40" class="container-wall"/>
+                
+                <rect x="10" y="140" width="80" height="30" class="data-element"/> <text x="50" y="155" font-weight="bold">1 (Vào đầu)</text>
+                <rect x="10" y="105" width="80" height="30" class="data-element"/> <text x="50" y="120" font-weight="bold">2</text>
+                <rect x="10" y="70" width="80" height="30" class="data-element"/> <text x="50" y="85" font-weight="bold">3 (Đỉnh)</text>
+                
+                <line x1="140" y1="50" x2="110" y2="70" class="push-arrow"/>
+                <text x="170" y="50" class="action-text-push">Push(4)</text>
+
+                <line x1="90" y1="60" x2="140" y2="30" class="pop-arrow"/>
+                <text x="170" y="25" class="action-text-pop">Pop() -> 3</text>
+            </g>
+
+            <line x1="275" y1="20" x2="275" y2="250" stroke="#eee" stroke-width="2" stroke-dasharray="5"/>
+
+            <g transform="translate(330, 80)">
+                <text x="100" y="-40" class="title-text">Queue (Hàng đợi)</text>
+                <text x="100" y="-20" class="sub-text">FIFO: Vào Trước, Ra Trước</text>
+
+                <line x1="0" y1="0" x2="200" y2="0" class="container-wall"/>
+                <line x1="0" y1="60" x2="200" y2="60" class="container-wall"/>
+                
+                <rect x="140" y="10" width="50" height="40" class="data-element"/> <text x="165" y="30" font-weight="bold">1 (Đầu)</text>
+                <rect x="85" y="10" width="50" height="40" class="data-element"/> <text x="110" y="30" font-weight="bold">2</text>
+                <rect x="30" y="10" width="50" height="40" class="data-element"/> <text x="55" y="30" font-weight="bold">3 (Cuối)</text>
+                
+                <line x1="-40" y1="30" x2="10" y2="30" class="push-arrow"/>
+                <text x="-60" y="15" class="action-text-push">Push(4)</text>
+
+                <line x1="210" y1="30" x2="260" y2="30" class="pop-arrow"/>
+                <text x="280" y="15" class="action-text-pop">Pop() -> 1</text>
+            </g>
+        </svg>
+    </div>
+
+<pre><code><span class="cpp-comment">// Priority Queue (Max Heap mặc định)</span>
+<span class="cpp-type">priority_queue</span>&lt;<span class="cpp-keyword">int</span>&gt; pq;
+pq.push(<span class="cpp-number">3</span>);
+pq.push(<span class="cpp-number">5</span>);
+pq.push(<span class="cpp-number">1</span>);
+cout &lt;&lt; pq.top() &lt;&lt; <span class="cpp-string">"\n"</span>; <span class="cpp-comment">// Output: 5 (Lớn nhất)</span>
+pq.pop(); <span class="cpp-comment">// Xóa 5</span>
+cout &lt;&lt; pq.top() &lt;&lt; <span class="cpp-string">"\n"</span>; <span class="cpp-comment">// Output: 3 (Lớn nhất tiếp theo)</span>
+
+<span class="cpp-comment">// Để tạo Min Heap (nhỏ nhất ở đỉnh):</span>
+<span class="cpp-type">priority_queue</span>&lt;<span class="cpp-keyword">int</span>, <span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt;, <span class="cpp-type">greater</span>&lt;<span class="cpp-keyword">int</span>&gt;&gt; min_pq;</code></pre>
+
+</body>
+</html>

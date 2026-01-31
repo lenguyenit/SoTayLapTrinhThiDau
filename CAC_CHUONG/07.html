@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPH - Chương 7: Quy hoạch động</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h1 { margin-top: 40px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        
+        /* Code styling */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #f1f3f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+        
+        /* Syntax highlighting */
+        .cpp-keyword { color: #0000ff; font-weight: bold; }
+        .cpp-type { color: #2b91af; }
+        .cpp-number { color: #098658; }
+        .cpp-func { color: #795e26; }
+        .cpp-comment { color: #008000; font-style: italic; }
+
+        /* Graphic Containers */
+        .graphic-box {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        
+        /* SVG Styling */
+        svg text { font-family: "Segoe UI", sans-serif; font-size: 14px; }
+        .grid-cell { fill: #fff; stroke: #333; stroke-width: 1; }
+        .highlight-cell { fill: #e3f2fd; stroke: #2196f3; stroke-width: 2; }
+        .path-line { fill: none; stroke: #e74c3c; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+        .table-cell { fill: #fff; stroke: #999; stroke-width: 1; }
+        .header-cell { fill: #f0f0f0; stroke: #999; stroke-width: 1; }
+        
+        /* TOC */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc a { text-decoration: none; color: #007bff; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="toc">
+        <h3>Mục lục - Chương 7</h3>
+        <ul>
+            <li><a href="#intro">Quy hoạch động</a></li>
+            <li><a href="#sec7.1">7.1 Bài toán đổi tiền</a></li>
+            <li><a href="#sec7.2">7.2 Dãy con tăng dài nhất</a></li>
+            <li><a href="#sec7.3">7.3 Đường đi trong lưới</a></li>
+            <li><a href="#sec7.4">7.4 Bài toán cái túi</a></li>
+            <li><a href="#sec7.5">7.5 Khoảng cách chỉnh sửa</a></li>
+            <li><a href="#sec7.6">7.6 Đếm số cách lát gạch</a></li>
+        </ul>
+    </div>
+
+    <h1 id="intro">Chương 7: Quy hoạch động (Dynamic programming)</h1>
+    <p>
+        Quy hoạch động là một kỹ thuật kết hợp tính đúng đắn của tìm kiếm toàn bộ (complete search) và hiệu quả của thuật toán tham lam (greedy algorithms). Quy hoạch động có thể được áp dụng nếu bài toán có thể được chia thành các bài toán con chồng gối lên nhau (overlapping subproblems) mà có thể giải quyết một cách độc lập.
+    </p>
+    <p>
+        Có hai cách sử dụng quy hoạch động:
+    </p>
+    <ul>
+        <li><strong>Tìm giải pháp tối ưu:</strong> Chúng ta muốn tìm một giải pháp lớn nhất hoặc nhỏ nhất có thể.</li>
+        <li><strong>Đếm số lượng giải pháp:</strong> Chúng ta muốn tính tổng số lượng giải pháp khả thi.</li>
+    </ul>
+    <p>
+        Trước tiên, chúng ta sẽ xem cách sử dụng quy hoạch động để tìm giải pháp tối ưu, và sau đó chúng ta sẽ sử dụng ý tưởng tương tự để đếm số lượng giải pháp.
+    </p>
+    <p>
+        Hiểu về quy hoạch động là một cột mốc quan trọng trong sự nghiệp của mọi lập trình viên thi đấu. Mặc dù ý tưởng cơ bản rất đơn giản, thách thức nằm ở việc áp dụng quy hoạch động vào các bài toán khác nhau. Chương này giới thiệu một tập hợp các bài toán kinh điển là điểm khởi đầu tốt.
+    </p>
+
+    <h2 id="sec7.1">7.1 Bài toán đổi tiền (Coin problem)</h2>
+    <p>
+        Đầu tiên, chúng ta tập trung vào một bài toán mà chúng ta đã thấy trong Chương 6: Cho một tập hợp các giá trị đồng xu \(coins = \{c_1, c_2, \dots, c_k\}\) và một tổng tiền mục tiêu \(n\), nhiệm vụ của chúng ta là tạo thành tổng \(n\) sử dụng ít đồng xu nhất có thể.
+    </p>
+    <p>
+        Trong Chương 6, chúng ta đã giải bài toán bằng thuật toán tham lam luôn chọn đồng xu lớn nhất có thể. Thuật toán tham lam hoạt động, ví dụ, khi các đồng xu là đồng xu euro, nhưng trong trường hợp tổng quát, thuật toán tham lam không nhất thiết tạo ra giải pháp tối ưu.
+    </p>
+    <p>
+        Bây giờ là lúc giải bài toán một cách hiệu quả bằng quy hoạch động, sao cho thuật toán hoạt động với bất kỳ tập hợp đồng xu nào. Thuật toán quy hoạch động dựa trên một hàm đệ quy đi qua tất cả các khả năng tạo thành tổng, giống như thuật toán vét cạn. Tuy nhiên, thuật toán quy hoạch động hiệu quả vì nó sử dụng kỹ thuật ghi nhớ (memoization) và tính toán câu trả lời cho mỗi bài toán con chỉ một lần.
+    </p>
+
+    <h3>Công thức truy hồi (Recursive formulation)</h3>
+    <p>
+        Ý tưởng trong quy hoạch động là xây dựng công thức cho bài toán một cách đệ quy sao cho giải pháp của bài toán có thể được tính toán từ các giải pháp của các bài toán con nhỏ hơn. Trong bài toán đổi tiền, một bài toán đệ quy tự nhiên là: số lượng đồng xu nhỏ nhất cần thiết để tạo thành tổng \(x\) là bao nhiêu?
+    </p>
+    <p>
+        Gọi \(solve(x)\) là số lượng đồng xu tối thiểu cần thiết cho tổng \(x\). Các giá trị của hàm phụ thuộc vào giá trị của các đồng xu. Ví dụ, nếu \(coins = \{1, 3, 4\}\), các giá trị đầu tiên của hàm như sau:
+    </p>
+    <p>
+        \(solve(0) = 0\)<br>
+        \(solve(1) = 1\)<br>
+        \(solve(2) = 2\)<br>
+        \(solve(3) = 1\)<br>
+        \(solve(4) = 1\)<br>
+        \(solve(5) = 2\)<br>
+        \(solve(6) = 2\)<br>
+        \(solve(7) = 2\)<br>
+        \(solve(8) = 2\)<br>
+        \(solve(9) = 3\)<br>
+        \(solve(10) = 3\)
+    </p>
+    <p>
+        Ví dụ, \(solve(10) = 3\) vì cần ít nhất 3 đồng xu để tạo thành tổng 10. Giải pháp tối ưu là \(3+3+4=10\).
+    </p>
+    <p>
+        Tính chất thiết yếu của \(solve\) là các giá trị của nó có thể được tính toán đệ quy từ các giá trị nhỏ hơn của nó. Ý tưởng là tập trung vào đồng xu đầu tiên mà chúng ta chọn cho tổng. Ví dụ, trong kịch bản trên, đồng xu đầu tiên có thể là 1, 3 hoặc 4. Nếu chúng ta chọn đồng xu 1 trước, nhiệm vụ còn lại là tạo thành tổng 9 sử dụng số lượng đồng xu tối thiểu, đây là một bài toán con của bài toán gốc.
+    </p>
+    <p>
+        Tất nhiên, điều tương tự cũng áp dụng cho các đồng xu 3 và 4. Do đó, chúng ta có thể sử dụng công thức truy hồi sau để tính số lượng đồng xu tối thiểu:
+    </p>
+    <p>
+        $$ solve(x) = \min(solve(x-1)+1, solve(x-3)+1, solve(x-4)+1) $$
+    </p>
+    <p>
+        Trường hợp cơ sở của đệ quy là \(solve(0) = 0\), vì không cần đồng xu nào để tạo thành tổng rỗng.
+    </p>
+    <p>
+        Ví dụ:
+        $$ solve(10) = solve(7)+1 = solve(4)+2 = solve(0)+3 = 3. $$
+    </p>
+    <p>
+        Bây giờ chúng ta sẵn sàng đưa ra hàm đệ quy tổng quát tính toán số lượng đồng xu tối thiểu cần thiết để tạo thành tổng \(x\):
+    </p>
+    <p>
+        $$ solve(x) = \begin{cases} \infty & x < 0 \\ 0 & x = 0 \\ \min_{c \in coins} solve(x-c)+1 & x > 0 \end{cases} $$
+    </p>
+    <p>
+        Đầu tiên, nếu \(x < 0\), giá trị là \(\infty\), vì không thể tạo thành một tổng tiền âm. Sau đó, nếu \(x = 0\), giá trị là 0, vì không cần đồng xu nào để tạo thành tổng rỗng. Cuối cùng, nếu \(x > 0\), biến \(c\) đi qua tất cả các khả năng chọn đồng xu đầu tiên của tổng.
+    </p>
+    <p>
+        Khi đã tìm thấy một hàm đệ quy giải quyết bài toán, chúng ta có thể trực tiếp cài đặt giải pháp trong C++ (hằng số <code>INF</code> biểu thị vô cực):
+    </p>
+
+<pre><code><span class="cpp-keyword">int</span> <span class="cpp-func">solve</span>(<span class="cpp-keyword">int</span> x) {
+    <span class="cpp-keyword">if</span> (x &lt; <span class="cpp-number">0</span>) <span class="cpp-keyword">return</span> INF;
+    <span class="cpp-keyword">if</span> (x == <span class="cpp-number">0</span>) <span class="cpp-keyword">return</span> <span class="cpp-number">0</span>;
+    <span class="cpp-keyword">int</span> best = INF;
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">auto</span> c : coins) {
+        best = min(best, <span class="cpp-func">solve</span>(x-c)+<span class="cpp-number">1</span>);
+    }
+    <span class="cpp-keyword">return</span> best;
+}</code></pre>
+
+    <p>
+        Tuy nhiên, hàm này vẫn chưa hiệu quả, vì có thể có số lượng cách theo cấp số nhân để xây dựng tổng. Tuy nhiên, tiếp theo chúng ta sẽ xem cách làm cho hàm hiệu quả bằng cách sử dụng kỹ thuật ghi nhớ.
+    </p>
+
+    <h3>Sử dụng ghi nhớ (Using memoization)</h3>
+    <p>
+        Ý tưởng của quy hoạch động là sử dụng ghi nhớ để tính toán hiệu quả các giá trị của hàm đệ quy. Điều này có nghĩa là các giá trị của hàm được lưu trữ trong một mảng sau khi tính toán chúng. Với mỗi tham số, giá trị của hàm được tính toán đệ quy chỉ một lần, và sau đó, giá trị có thể được truy xuất trực tiếp từ mảng.
+    </p>
+    <p>
+        Trong bài toán này, chúng ta sử dụng các mảng:
+    </p>
+<pre><code><span class="cpp-keyword">bool</span> ready[N];
+<span class="cpp-keyword">int</span> value[N];</code></pre>
+    <p>
+        trong đó <code>ready[x]</code> chỉ ra liệu giá trị của <code>solve(x)</code> đã được tính toán hay chưa, và nếu có, <code>value[x]</code> chứa giá trị này. Hằng số \(N\) được chọn sao cho tất cả các giá trị cần thiết đều nằm trong mảng.
+    </p>
+    <p>
+        Bây giờ hàm có thể được cài đặt hiệu quả như sau:
+    </p>
+
+<pre><code><span class="cpp-keyword">int</span> <span class="cpp-func">solve</span>(<span class="cpp-keyword">int</span> x) {
+    <span class="cpp-keyword">if</span> (x &lt; <span class="cpp-number">0</span>) <span class="cpp-keyword">return</span> INF;
+    <span class="cpp-keyword">if</span> (x == <span class="cpp-number">0</span>) <span class="cpp-keyword">return</span> <span class="cpp-number">0</span>;
+    <span class="cpp-keyword">if</span> (ready[x]) <span class="cpp-keyword">return</span> value[x];
+    <span class="cpp-keyword">int</span> best = INF;
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">auto</span> c : coins) {
+        best = min(best, <span class="cpp-func">solve</span>(x-c)+<span class="cpp-number">1</span>);
+    }
+    value[x] = best;
+    ready[x] = <span class="cpp-keyword">true</span>;
+    <span class="cpp-keyword">return</span> best;
+}</code></pre>
+
+    <p>
+        Hàm xử lý các trường hợp cơ sở \(x < 0\) và \(x = 0\) như trước. Sau đó, hàm kiểm tra từ <code>ready[x]</code> xem <code>solve(x)</code> đã được lưu trữ trong <code>value[x]</code> chưa, và nếu có, hàm trả về trực tiếp giá trị đó. Ngược lại, hàm tính toán giá trị của <code>solve(x)</code> một cách đệ quy và lưu trữ nó vào <code>value[x]</code>.
+    </p>
+    <p>
+        Hàm này hoạt động hiệu quả, vì câu trả lời cho mỗi tham số \(x\) được tính toán đệ quy chỉ một lần. Sau khi giá trị của <code>solve(x)</code> đã được lưu trữ trong <code>value[x]</code>, nó có thể được truy xuất hiệu quả bất cứ khi nào hàm được gọi lại với tham số \(x\). Độ phức tạp thời gian của thuật toán là \(O(nk)\), trong đó \(n\) là tổng mục tiêu và \(k\) là số lượng đồng xu.
+    </p>
+    <p>
+        Lưu ý rằng chúng ta cũng có thể xây dựng mảng <code>value</code> theo cách lặp (iteratively) bằng cách sử dụng vòng lặp đơn giản tính toán tất cả các giá trị của <code>solve</code> cho các tham số \(0 \dots n\):
+    </p>
+
+<pre><code>value[<span class="cpp-number">0</span>] = <span class="cpp-number">0</span>;
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> x = <span class="cpp-number">1</span>; x &lt;= n; x++) {
+    value[x] = INF;
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">auto</span> c : coins) {
+        <span class="cpp-keyword">if</span> (x-c &gt;= <span class="cpp-number">0</span>) {
+            value[x] = min(value[x], value[x-c]+<span class="cpp-number">1</span>);
+        }
+    }
+}</code></pre>
+
+    <p>
+        Trên thực tế, hầu hết các lập trình viên thi đấu thích cách cài đặt này hơn vì nó ngắn gọn hơn và có các hằng số nhỏ hơn. Từ giờ trở đi, chúng tôi cũng sử dụng các cách cài đặt lặp trong các ví dụ của mình. Tuy nhiên, thường dễ dàng hơn để nghĩ về các giải pháp quy hoạch động dưới dạng các hàm đệ quy.
+    </p>
+
+    <h3>Xây dựng giải pháp (Constructing a solution)</h3>
+    <p>
+        Đôi khi chúng ta được yêu cầu tìm cả giá trị của giải pháp tối ưu và đưa ra ví dụ về cách xây dựng giải pháp đó. Trong bài toán đổi tiền, ví dụ, chúng ta có thể khai báo một mảng khác chỉ ra đồng xu đầu tiên trong một giải pháp tối ưu cho mỗi tổng tiền:
+    </p>
+<pre><code><span class="cpp-keyword">int</span> first[N];</code></pre>
+    <p>
+        Sau đó, chúng ta có thể sửa đổi thuật toán như sau:
+    </p>
+
+<pre><code>value[<span class="cpp-number">0</span>] = <span class="cpp-number">0</span>;
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> x = <span class="cpp-number">1</span>; x &lt;= n; x++) {
+    value[x] = INF;
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">auto</span> c : coins) {
+        <span class="cpp-keyword">if</span> (x-c &gt;= <span class="cpp-number">0</span> && value[x-c]+<span class="cpp-number">1</span> &lt; value[x]) {
+            value[x] = value[x-c]+<span class="cpp-number">1</span>;
+            first[x] = c;
+        }
+    }
+}</code></pre>
+
+    <p>
+        Sau bước này, đoạn code sau có thể được sử dụng để in các đồng xu xuất hiện trong một giải pháp tối ưu cho tổng \(n\):
+    </p>
+
+<pre><code><span class="cpp-keyword">while</span> (n &gt; <span class="cpp-number">0</span>) {
+    <span class="cpp-type">cout</span> &lt;&lt; first[n] &lt;&lt; <span class="cpp-string">"\n"</span>;
+    n -= first[n];
+}</code></pre>
+
+    <h3>Đếm số lượng giải pháp (Counting the number of solutions)</h3>
+    <p>
+        Bây giờ hãy xem xét một phiên bản khác của bài toán đổi tiền, nơi nhiệm vụ của chúng ta là tính toán tổng số cách để tạo ra tổng \(x\) sử dụng các đồng xu. Ví dụ, nếu \(coins = \{1, 3, 4\}\) và \(x = 5\), có tổng cộng 6 cách:
+    </p>
+    <ul>
+        <li>1+1+1+1+1</li>
+        <li>1+1+3</li>
+        <li>1+3+1</li>
+        <li>3+1+1</li>
+        <li>1+4</li>
+        <li>4+1</li>
+    </ul>
+    <p>
+        Một lần nữa, chúng ta có thể giải bài toán một cách đệ quy. Gọi \(solve(x)\) là số cách chúng ta có thể tạo thành tổng \(x\). Ví dụ, nếu \(coins = \{1, 3, 4\}\), thì \(solve(5) = 6\) và công thức truy hồi là:
+        $$ solve(x) = solve(x-1) + solve(x-3) + solve(x-4) $$
+    </p>
+    <p>
+        Sau đó, hàm đệ quy tổng quát là như sau:
+        $$ solve(x) = \begin{cases} 0 & x < 0 \\ 1 & x = 0 \\ \sum_{c \in coins} solve(x-c) & x > 0 \end{cases} $$
+    </p>
+    <p>
+        Nếu \(x < 0\), giá trị là 0, vì không có giải pháp nào. Nếu \(x = 0\), giá trị là 1, vì có đúng một cách để tạo thành tổng rỗng. Ngược lại, chúng ta tính tổng của tất cả các giá trị dạng \(solve(x-c)\) với \(c\) thuộc tập hợp tiền xu.
+    </p>
+    <p>
+        Đoạn code sau xây dựng mảng <code>count</code> sao cho <code>count[x]</code> bằng giá trị của \(solve(x)\) với \(0 \le x \le n\):
+    </p>
+
+<pre><code>count[<span class="cpp-number">0</span>] = <span class="cpp-number">1</span>;
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> x = <span class="cpp-number">1</span>; x &lt;= n; x++) {
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">auto</span> c : coins) {
+        <span class="cpp-keyword">if</span> (x-c &gt;= <span class="cpp-number">0</span>) {
+            count[x] += count[x-c];
+        }
+    }
+}</code></pre>
+
+    <p>
+        Thông thường số lượng giải pháp rất lớn nên không yêu cầu tính toán con số chính xác mà chỉ cần đưa ra câu trả lời theo modulo \(m\), ví dụ \(m = 10^9 + 7\). Điều này có thể được thực hiện bằng cách thay đổi đoạn code để mọi phép tính được thực hiện theo modulo \(m\). Trong đoạn code trên, chỉ cần thêm dòng:
+    </p>
+<pre><code>count[x] %= m;</code></pre>
+    <p>sau dòng <code>count[x] += count[x-c];</code></p>
+
+    <h2 id="sec7.2">7.2 Dãy con tăng dài nhất (Longest increasing subsequence)</h2>
+    <p>
+        Bài toán tiếp theo của chúng ta là tìm dãy con tăng dài nhất trong một mảng \(n\) phần tử. Đây là một dãy các phần tử mảng có độ dài tối đa đi từ trái sang phải, và mỗi phần tử trong dãy lớn hơn phần tử trước đó.
+    </p>
+    <p>
+        Ví dụ, trong mảng:
+    </p>
+    
+    <div class="graphic-box">
+        <svg width="400" height="80" viewBox="0 0 400 80">
+            <g transform="translate(20, 20)">
+                <rect x="0" y="0" width="40" height="40" class="grid-cell" /> <text x="20" y="25" text-anchor="middle">6</text>
+                <rect x="40" y="0" width="40" height="40" class="highlight-cell" /> <text x="60" y="25" text-anchor="middle" font-weight="bold">2</text>
+                <rect x="80" y="0" width="40" height="40" class="highlight-cell" /> <text x="100" y="25" text-anchor="middle" font-weight="bold">5</text>
+                <rect x="120" y="0" width="40" height="40" class="grid-cell" /> <text x="140" y="25" text-anchor="middle">1</text>
+                <rect x="160" y="0" width="40" height="40" class="highlight-cell" /> <text x="180" y="25" text-anchor="middle" font-weight="bold">7</text>
+                <rect x="200" y="0" width="40" height="40" class="grid-cell" /> <text x="220" y="25" text-anchor="middle">4</text>
+                <rect x="240" y="0" width="40" height="40" class="highlight-cell" /> <text x="260" y="25" text-anchor="middle" font-weight="bold">8</text>
+                <rect x="280" y="0" width="40" height="40" class="grid-cell" /> <text x="300" y="25" text-anchor="middle">3</text>
+            </g>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 7.1: Dãy con tăng dài nhất có 4 phần tử: 2, 5, 7, 8</div>
+    </div>
+
+    <p>
+        Gọi \(length(k)\) là độ dài của dãy con tăng dài nhất kết thúc tại vị trí \(k\). Như vậy, nếu chúng ta tính toán tất cả các giá trị của \(length(k)\) với \(0 \le k < n\), chúng ta sẽ tìm ra độ dài của dãy con tăng dài nhất.
+    </p>
+    <p>
+        Ví dụ, các giá trị của hàm cho mảng trên là:
+        \(length(0)=1\) (dãy: 6)<br>
+        \(length(1)=1\) (dãy: 2)<br>
+        \(length(2)=2\) (dãy: 2, 5)<br>
+        \(length(3)=1\) (dãy: 1)<br>
+        \(length(4)=3\) (dãy: 2, 5, 7)<br>
+        \(length(5)=2\) (dãy: 2, 4)<br>
+        \(length(6)=4\) (dãy: 2, 5, 7, 8)<br>
+        \(length(7)=2\) (dãy: 2, 3)<br>
+    </p>
+    <p>
+        Để tính giá trị của \(length(k)\), chúng ta cần tìm một vị trí \(i < k\) sao cho \(array[i] < array[k]\) và \(length(i)\) càng lớn càng tốt. Khi đó chúng ta biết rằng \(length(k) = length(i) + 1\), vì đây là cách tối ưu để thêm \(array[k]\) vào một dãy con. Tuy nhiên, nếu không có vị trí \(i\) như vậy, thì \(length(k) = 1\), nghĩa là dãy con chỉ chứa \(array[k]\).
+    </p>
+    <p>
+        Vì tất cả các giá trị của hàm có thể được tính toán từ các giá trị nhỏ hơn của nó, chúng ta có thể sử dụng quy hoạch động. Trong đoạn code sau, các giá trị của hàm được lưu trữ trong mảng <code>length</code>.
+    </p>
+
+<pre><code><span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> k = <span class="cpp-number">0</span>; k &lt; n; k++) {
+    length[k] = <span class="cpp-number">1</span>;
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">0</span>; i &lt; k; i++) {
+        <span class="cpp-keyword">if</span> (array[i] &lt; array[k]) {
+            length[k] = max(length[k], length[i]+<span class="cpp-number">1</span>);
+        }
+    }
+}</code></pre>
+
+    <p>
+        Đoạn code này hoạt động trong thời gian \(O(n^2)\), vì nó bao gồm hai vòng lặp lồng nhau. Tuy nhiên, cũng có thể cài đặt tính toán quy hoạch động hiệu quả hơn trong thời gian \(O(n \log n)\). Bạn có thể tìm ra cách làm điều này không?
+    </p>
+
+    <h2 id="sec7.3">7.3 Đường đi trong lưới (Paths in a grid)</h2>
+    <p>
+        Bài toán tiếp theo của chúng ta là tìm một đường đi từ góc trên bên trái đến góc dưới bên phải của một lưới \(n \times n\), sao cho chúng ta chỉ di chuyển xuống dưới và sang phải. Mỗi ô chứa một số nguyên dương, và đường đi nên được xây dựng sao cho tổng các giá trị dọc theo đường đi là lớn nhất có thể.
+    </p>
+    <p>
+        Hình ảnh sau đây cho thấy một đường đi tối ưu trong một lưới:
+    </p>
+    
+    <div class="graphic-box">
+        <svg width="250" height="250" viewBox="0 0 250 250">
+            <rect x="0" y="0" width="50" height="50" class="highlight-cell" /> <text x="25" y="30" text-anchor="middle">3</text>
+            <rect x="50" y="0" width="50" height="50" class="grid-cell" /> <text x="75" y="30" text-anchor="middle">7</text>
+            <rect x="100" y="0" width="50" height="50" class="grid-cell" /> <text x="125" y="30" text-anchor="middle">9</text>
+            <rect x="150" y="0" width="50" height="50" class="grid-cell" /> <text x="175" y="30" text-anchor="middle">2</text>
+            <rect x="200" y="0" width="50" height="50" class="grid-cell" /> <text x="225" y="30" text-anchor="middle">7</text>
+            
+            <rect x="0" y="50" width="50" height="50" class="highlight-cell" /> <text x="25" y="80" text-anchor="middle">9</text>
+            <rect x="50" y="50" width="50" height="50" class="highlight-cell" /> <text x="75" y="80" text-anchor="middle">8</text>
+            <rect x="100" y="50" width="50" height="50" class="grid-cell" /> <text x="125" y="80" text-anchor="middle">3</text>
+            <rect x="150" y="50" width="50" height="50" class="grid-cell" /> <text x="175" y="80" text-anchor="middle">5</text>
+            <rect x="200" y="50" width="50" height="50" class="grid-cell" /> <text x="225" y="80" text-anchor="middle">5</text>
+
+            <rect x="0" y="100" width="50" height="50" class="grid-cell" /> <text x="25" y="130" text-anchor="middle">1</text>
+            <rect x="50" y="100" width="50" height="50" class="highlight-cell" /> <text x="75" y="130" text-anchor="middle">7</text>
+            <rect x="100" y="100" width="50" height="50" class="highlight-cell" /> <text x="125" y="130" text-anchor="middle">9</text>
+            <rect x="150" y="100" width="50" height="50" class="highlight-cell" /> <text x="175" y="130" text-anchor="middle">8</text>
+            <rect x="200" y="100" width="50" height="50" class="grid-cell" /> <text x="225" y="130" text-anchor="middle">5</text>
+
+            <rect x="0" y="150" width="50" height="50" class="grid-cell" /> <text x="25" y="180" text-anchor="middle">3</text>
+            <rect x="50" y="150" width="50" height="50" class="grid-cell" /> <text x="75" y="180" text-anchor="middle">8</text>
+            <rect x="100" y="150" width="50" height="50" class="grid-cell" /> <text x="125" y="180" text-anchor="middle">6</text>
+            <rect x="150" y="150" width="50" height="50" class="highlight-cell" /> <text x="175" y="180" text-anchor="middle">4</text>
+            <rect x="200" y="150" width="50" height="50" class="highlight-cell" /> <text x="225" y="180" text-anchor="middle">10</text>
+
+            <rect x="0" y="200" width="50" height="50" class="grid-cell" /> <text x="25" y="230" text-anchor="middle">6</text>
+            <rect x="50" y="200" width="50" height="50" class="grid-cell" /> <text x="75" y="230" text-anchor="middle">3</text>
+            <rect x="100" y="200" width="50" height="50" class="grid-cell" /> <text x="125" y="230" text-anchor="middle">9</text>
+            <rect x="150" y="200" width="50" height="50" class="grid-cell" /> <text x="175" y="230" text-anchor="middle">7</text>
+            <rect x="200" y="200" width="50" height="50" class="highlight-cell" /> <text x="225" y="230" text-anchor="middle">8</text>
+
+            <path d="M25,25 L25,75 L75,75 L75,125 L125,125 L175,125 L175,175 L225,175 L225,225" class="path-line" />
+        </svg>
+        <div style="margin-top: 10px; font-style: italic;">Hình 7.2: Đường đi tối ưu có tổng là 67</div>
+    </div>
+
+    <p>
+        Tổng các giá trị trên đường đi là 67, và đây là tổng lớn nhất có thể trên một đường đi từ góc trên bên trái đến góc dưới bên phải.
+    </p>
+    <p>
+        Giả sử rằng các hàng và cột của lưới được đánh số từ 1 đến \(n\), và <code>value[y][x]</code> bằng giá trị của ô \((y,x)\). Gọi \(sum(y,x)\) là tổng lớn nhất trên đường đi từ góc trên bên trái đến ô \((y,x)\). Bây giờ \(sum(n,n)\) cho chúng ta biết tổng lớn nhất từ góc trên bên trái đến góc dưới bên phải. Ví dụ, trong lưới trên, \(sum(5,5)=67\).
+    </p>
+    <p>
+        Chúng ta có thể tính toán các tổng một cách đệ quy như sau:
+        $$ sum(y,x) = \max(sum(y, x-1), sum(y-1, x)) + value[y][x] $$
+    </p>
+    <p>
+        Công thức đệ quy dựa trên quan sát rằng một đường đi kết thúc tại ô \((y,x)\) có thể đến từ ô \((y,x-1)\) hoặc ô \((y-1,x)\). Vì vậy, chúng ta chọn hướng nào làm cực đại hóa tổng. Chúng ta giả sử rằng \(sum(y,x)=0\) nếu \(y=0\) hoặc \(x=0\) (vì không có đường đi nào như vậy tồn tại), vì vậy công thức đệ quy cũng hoạt động khi \(y=1\) hoặc \(x=1\).
+    </p>
+    <p>
+        Vì hàm \(sum\) có hai tham số, mảng quy hoạch động cũng có hai chiều. Ví dụ, chúng ta có thể sử dụng một mảng <code>int sum[N][N]</code> và tính toán các tổng như sau:
+    </p>
+
+<pre><code><span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> y = <span class="cpp-number">1</span>; y &lt;= n; y++) {
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> x = <span class="cpp-number">1</span>; x &lt;= n; x++) {
+        sum[y][x] = max(sum[y][x-1], sum[y-1][x]) + value[y][x];
+    }
+}</code></pre>
+
+    <p>
+        Độ phức tạp thời gian của thuật toán là \(O(n^2)\).
+    </p>
+
+    <h2 id="sec7.4">7.4 Bài toán cái túi (Knapsack problems)</h2>
+    <p>
+        Thuật ngữ "cái túi" (knapsack) đề cập đến các bài toán trong đó một tập hợp các đối tượng được đưa ra, và các tập con với một số tính chất cần phải được tìm thấy. Bài toán cái túi thường có thể được giải quyết bằng quy hoạch động.
+    </p>
+    <p>
+        Trong phần này, chúng ta tập trung vào bài toán sau: Cho một danh sách các trọng lượng \([w_1, w_2, \dots, w_n]\), xác định tất cả các tổng trọng lượng có thể được xây dựng bằng cách sử dụng các trọng lượng này.
+    </p>
+    <p>
+        Ví dụ, nếu các trọng lượng là \([1, 3, 3, 5]\), các tổng sau là có thể:
+    </p>
+    
+    <div class="graphic-box">
+        <svg width="500" height="60" viewBox="0 0 500 60">
+            <g>
+                <rect x="0" y="0" width="30" height="30" class="header-cell"/> <text x="15" y="20" text-anchor="middle">0</text>
+                <rect x="30" y="0" width="30" height="30" class="header-cell"/> <text x="45" y="20" text-anchor="middle">1</text>
+                <rect x="60" y="0" width="30" height="30" class="header-cell"/> <text x="75" y="20" text-anchor="middle">2</text>
+                <rect x="90" y="0" width="30" height="30" class="header-cell"/> <text x="105" y="20" text-anchor="middle">3</text>
+                <rect x="120" y="0" width="30" height="30" class="header-cell"/> <text x="135" y="20" text-anchor="middle">4</text>
+                <rect x="150" y="0" width="30" height="30" class="header-cell"/> <text x="165" y="20" text-anchor="middle">5</text>
+                <rect x="180" y="0" width="30" height="30" class="header-cell"/> <text x="195" y="20" text-anchor="middle">6</text>
+                <rect x="210" y="0" width="30" height="30" class="header-cell"/> <text x="225" y="20" text-anchor="middle">7</text>
+                <rect x="240" y="0" width="30" height="30" class="header-cell"/> <text x="255" y="20" text-anchor="middle">8</text>
+                <rect x="270" y="0" width="30" height="30" class="header-cell"/> <text x="285" y="20" text-anchor="middle">9</text>
+                <rect x="300" y="0" width="30" height="30" class="header-cell"/> <text x="315" y="20" text-anchor="middle">10</text>
+                <rect x="330" y="0" width="30" height="30" class="header-cell"/> <text x="345" y="20" text-anchor="middle">11</text>
+                <rect x="360" y="0" width="30" height="30" class="header-cell"/> <text x="375" y="20" text-anchor="middle">12</text>
+            </g>
+            <g transform="translate(0, 30)">
+                <rect x="0" y="0" width="30" height="30" class="table-cell"/> <text x="15" y="20" text-anchor="middle" fill="green">X</text>
+                <rect x="30" y="0" width="30" height="30" class="table-cell"/> <text x="45" y="20" text-anchor="middle" fill="green">X</text>
+                <rect x="60" y="0" width="30" height="30" class="table-cell"/>
+                <rect x="90" y="0" width="30" height="30" class="table-cell"/> <text x="105" y="20" text-anchor="middle" fill="green">X</text>
+                <rect x="120" y="0" width="30" height="30" class="table-cell"/> <text x="135" y="20" text-anchor="middle" fill="green">X</text>
+                <rect x="150" y="0" width="30" height="30" class="table-cell"/> <text x="165" y="20" text-anchor="middle" fill="green">X</text>
+                <rect x="180" y="0" width="30" height="30" class="table-cell"/> <text x="195" y="20" text-anchor="middle" fill="green">X</text>
+                <rect x="210" y="0" width="30" height="30" class="table-cell"/> <text x="225" y="20" text-anchor="middle" fill="green">X</text>
+                <rect x="240" y="0" width="30" height="30" class="table-cell"/> <text x="255" y="20" text-anchor="middle" fill="green">X</text>
+                <rect x="270" y="0" width="30" height="30" class="table-cell"/> <text x="285" y="20" text-anchor="middle" fill="green">X</text>
+                <rect x="300" y="0" width="30" height="30" class="table-cell"/>
+                <rect x="330" y="0" width="30" height="30" class="table-cell"/> <text x="345" y="20" text-anchor="middle" fill="green">X</text>
+                <rect x="360" y="0" width="30" height="30" class="table-cell"/> <text x="375" y="20" text-anchor="middle" fill="green">X</text>
+            </g>
+        </svg>
+    </div>
+
+    <p>
+        Trong trường hợp này, tất cả các tổng từ \(0 \dots 12\) đều có thể, ngoại trừ 2 và 10. Ví dụ, tổng 7 là có thể vì chúng ta có thể chọn các trọng lượng \([1, 3, 3]\).
+    </p>
+    <p>
+        Để giải quyết bài toán, chúng ta tập trung vào các bài toán con nơi chúng ta chỉ sử dụng \(k\) trọng lượng đầu tiên để xây dựng các tổng. Gọi \(possible(x,k) = \text{true}\) nếu chúng ta có thể xây dựng tổng \(x\) bằng cách sử dụng \(k\) trọng lượng đầu tiên, và ngược lại là false. Các giá trị của hàm có thể được tính toán đệ quy như sau:
+        $$ possible(x, k) = possible(x - w_k, k-1) \lor possible(x, k-1) $$
+    </p>
+    <p>
+        Công thức dựa trên thực tế là chúng ta có thể sử dụng hoặc không sử dụng trọng lượng \(w_k\) trong tổng. Nếu chúng ta sử dụng \(w_k\), nhiệm vụ còn lại là tạo thành tổng \(x-w_k\) sử dụng \(k-1\) trọng lượng đầu tiên. Nếu không, nhiệm vụ là tạo thành tổng \(x\) sử dụng \(k-1\) trọng lượng đầu tiên.
+    </p>
+    <p>
+        Các trường hợp cơ sở là:
+        $$ possible(x, 0) = \begin{cases} \text{true} & x = 0 \\ \text{false} & x \neq 0 \end{cases} $$
+        vì nếu không có trọng lượng nào được sử dụng, chúng ta chỉ có thể tạo thành tổng 0.
+    </p>
+    <p>
+        Sau khi tính toán các giá trị này, \(possible(x, n)\) cho chúng ta biết liệu chúng ta có thể xây dựng tổng \(x\) bằng cách sử dụng tất cả các trọng lượng hay không. Gọi \(W\) là tổng của tất cả các trọng lượng. Giải pháp quy hoạch động \(O(nW)\) sau đây tương ứng với hàm đệ quy:
+    </p>
+
+<pre><code>possible[<span class="cpp-number">0</span>][<span class="cpp-number">0</span>] = <span class="cpp-keyword">true</span>;
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> k = <span class="cpp-number">1</span>; k &lt;= n; k++) {
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> x = <span class="cpp-number">0</span>; x &lt;= W; x++) {
+        <span class="cpp-keyword">if</span> (x-w[k] &gt;= <span class="cpp-number">0</span>) possible[x][k] |= possible[x-w[k]][k-1];
+        possible[x][k] |= possible[x][k-1];
+    }
+}</code></pre>
+
+    <p>
+        Tuy nhiên, có một cách cài đặt tốt hơn chỉ sử dụng mảng một chiều <code>possible[x]</code> để chỉ ra liệu chúng ta có thể xây dựng một tập con có tổng là \(x\) hay không. Mẹo là cập nhật mảng từ phải sang trái cho mỗi trọng lượng mới:
+    </p>
+
+<pre><code>possible[<span class="cpp-number">0</span>] = <span class="cpp-keyword">true</span>;
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> k = <span class="cpp-number">1</span>; k &lt;= n; k++) {
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> x = W; x &gt;= <span class="cpp-number">0</span>; x--) {
+        <span class="cpp-keyword">if</span> (possible[x]) possible[x+w[k]] = <span class="cpp-keyword">true</span>;
+    }
+}</code></pre>
+
+    <p>
+        Lưu ý rằng ý tưởng tổng quát được trình bày ở đây có thể được sử dụng trong nhiều bài toán cái túi. Ví dụ, nếu chúng ta được cung cấp các đối tượng có trọng lượng và giá trị, chúng ta có thể xác định tổng giá trị lớn nhất của một tập con cho mỗi tổng trọng lượng.
+    </p>
+
+    <h2 id="sec7.5">7.5 Khoảng cách chỉnh sửa (Edit distance)</h2>
+    <p>
+        Khoảng cách chỉnh sửa (hay khoảng cách Levenshtein) là số lượng thao tác chỉnh sửa tối thiểu cần thiết để biến đổi một chuỗi thành chuỗi khác. Các thao tác chỉnh sửa được phép như sau:
+    </p>
+    <ul>
+        <li>thêm một ký tự (ví dụ ABC \(\to\) ABCA)</li>
+        <li>xóa một ký tự (ví dụ ABC \(\to\) AC)</li>
+        <li>thay đổi một ký tự (ví dụ ABC \(\to\) ADC)</li>
+    </ul>
+    <p>
+        Ví dụ, khoảng cách chỉnh sửa giữa LOVE và MOVIE là 2, vì chúng ta có thể thực hiện trước thao tác LOVE \(\to\) MOVE (thay đổi) và sau đó thao tác MOVE \(\to\) MOVIE (thêm). Đây là số lượng thao tác nhỏ nhất có thể, vì rõ ràng một thao tác là không đủ.
+    </p>
+    <p>
+        Giả sử chúng ta có chuỗi \(x\) độ dài \(n\) và chuỗi \(y\) độ dài \(m\), và chúng ta muốn tính khoảng cách chỉnh sửa giữa \(x\) và \(y\). Để giải quyết bài toán, chúng ta định nghĩa hàm \(distance(a, b)\) cho khoảng cách chỉnh sửa giữa các tiền tố \(x[0 \dots a]\) và \(y[0 \dots b]\). Như vậy, sử dụng hàm này, khoảng cách chỉnh sửa giữa \(x\) và \(y\) bằng \(distance(n-1, m-1)\).
+    </p>
+    <p>
+        Chúng ta có thể tính toán các giá trị khoảng cách như sau:
+        $$ distance(a, b) = \min(distance(a, b-1)+1, distance(a-1, b)+1, distance(a-1, b-1)+cost(a,b)) $$
+        Ở đây \(cost(a,b) = 0\) nếu \(x[a] = y[b]\), và ngược lại là 1. Công thức xem xét các cách sau để chỉnh sửa chuỗi \(x\):
+    </p>
+    <ul>
+        <li>\(distance(a, b-1)\): thêm một ký tự vào cuối \(x\).</li>
+        <li>\(distance(a-1, b)\): xóa ký tự cuối cùng của \(x\).</li>
+        <li>\(distance(a-1, b-1)\): khớp hoặc thay đổi ký tự cuối cùng của \(x\).</li>
+    </ul>
+    <p>
+        Bảng sau đây hiển thị các giá trị của khoảng cách trong ví dụ LOVE và MOVIE:
+    </p>
+    
+    <div class="graphic-box">
+        <svg width="400" height="250" viewBox="0 0 400 250">
+            <g>
+                <rect x="50" y="0" width="50" height="50" class="header-cell"/> 
+                <rect x="100" y="0" width="50" height="50" class="header-cell"/> <text x="125" y="30" text-anchor="middle" font-weight="bold">M</text>
+                <rect x="150" y="0" width="50" height="50" class="header-cell"/> <text x="175" y="30" text-anchor="middle" font-weight="bold">O</text>
+                <rect x="200" y="0" width="50" height="50" class="header-cell"/> <text x="225" y="30" text-anchor="middle" font-weight="bold">V</text>
+                <rect x="250" y="0" width="50" height="50" class="header-cell"/> <text x="275" y="30" text-anchor="middle" font-weight="bold">I</text>
+                <rect x="300" y="0" width="50" height="50" class="header-cell"/> <text x="325" y="30" text-anchor="middle" font-weight="bold">E</text>
+            </g>
+            
+            <g transform="translate(0, 50)">
+                <rect x="0" y="0" width="50" height="50" class="header-cell"/> 
+                <rect x="50" y="0" width="50" height="50" class="table-cell"/> <text x="75" y="30" text-anchor="middle">0</text>
+                <rect x="100" y="0" width="50" height="50" class="table-cell"/> <text x="125" y="30" text-anchor="middle">1</text>
+                <rect x="150" y="0" width="50" height="50" class="table-cell"/> <text x="175" y="30" text-anchor="middle">2</text>
+                <rect x="200" y="0" width="50" height="50" class="table-cell"/> <text x="225" y="30" text-anchor="middle">3</text>
+                <rect x="250" y="0" width="50" height="50" class="table-cell"/> <text x="275" y="30" text-anchor="middle">4</text>
+                <rect x="300" y="0" width="50" height="50" class="table-cell"/> <text x="325" y="30" text-anchor="middle">5</text>
+            </g>
+            <g transform="translate(0, 100)">
+                <rect x="0" y="0" width="50" height="50" class="header-cell"/> <text x="25" y="30" text-anchor="middle" font-weight="bold">L</text>
+                <rect x="50" y="0" width="50" height="50" class="table-cell"/> <text x="75" y="30" text-anchor="middle">1</text>
+                <rect x="100" y="0" width="50" height="50" class="table-cell"/> <text x="125" y="30" text-anchor="middle">1</text>
+                <rect x="150" y="0" width="50" height="50" class="table-cell"/> <text x="175" y="30" text-anchor="middle">2</text>
+                <rect x="200" y="0" width="50" height="50" class="table-cell"/> <text x="225" y="30" text-anchor="middle">3</text>
+                <rect x="250" y="0" width="50" height="50" class="table-cell"/> <text x="275" y="30" text-anchor="middle">4</text>
+                <rect x="300" y="0" width="50" height="50" class="table-cell"/> <text x="325" y="30" text-anchor="middle">5</text>
+            </g>
+            <g transform="translate(0, 150)">
+                <rect x="0" y="0" width="50" height="50" class="header-cell"/> <text x="25" y="30" text-anchor="middle" font-weight="bold">O</text>
+                <rect x="50" y="0" width="50" height="50" class="table-cell"/> <text x="75" y="30" text-anchor="middle">2</text>
+                <rect x="100" y="0" width="50" height="50" class="table-cell"/> <text x="125" y="30" text-anchor="middle">2</text>
+                <rect x="150" y="0" width="50" height="50" class="table-cell"/> <text x="175" y="30" text-anchor="middle">1</text>
+                <rect x="200" y="0" width="50" height="50" class="table-cell"/> <text x="225" y="30" text-anchor="middle">2</text>
+                <rect x="250" y="0" width="50" height="50" class="table-cell"/> <text x="275" y="30" text-anchor="middle">3</text>
+                <rect x="300" y="0" width="50" height="50" class="table-cell"/> <text x="325" y="30" text-anchor="middle">4</text>
+            </g>
+            <g transform="translate(0, 200)">
+                <rect x="0" y="0" width="50" height="50" class="header-cell"/> <text x="25" y="30" text-anchor="middle" font-weight="bold">V</text>
+                <rect x="50" y="0" width="50" height="50" class="table-cell"/> <text x="75" y="30" text-anchor="middle">3</text>
+                <rect x="100" y="0" width="50" height="50" class="table-cell"/> <text x="125" y="30" text-anchor="middle">3</text>
+                <rect x="150" y="0" width="50" height="50" class="table-cell"/> <text x="175" y="30" text-anchor="middle">2</text>
+                <rect x="200" y="0" width="50" height="50" class="table-cell"/> <text x="225" y="30" text-anchor="middle">1</text>
+                <rect x="250" y="0" width="50" height="50" class="table-cell"/> <text x="275" y="30" text-anchor="middle">2</text>
+                <rect x="300" y="0" width="50" height="50" class="table-cell"/> <text x="325" y="30" text-anchor="middle">3</text>
+            </g>
+             <g transform="translate(0, 250)">
+                </g>
+        </svg>
+        <div style="font-size: 0.9em; margin-top: 5px;">(Bảng minh họa một phần quá trình tính toán)</div>
+    </div>
+    
+    <p>
+        Các ký tự cuối cùng của LOVE và MOVIE là bằng nhau (E), vì vậy khoảng cách chỉnh sửa giữa chúng bằng khoảng cách chỉnh sửa giữa LOV và MOVI. Chúng ta có thể sử dụng một thao tác chỉnh sửa để xóa ký tự I khỏi MOVI. Do đó, khoảng cách chỉnh sửa lớn hơn một đơn vị so với khoảng cách chỉnh sửa giữa LOV và MOV, v.v.
+    </p>
+
+    <h2 id="sec7.6">7.6 Đếm số cách lát gạch (Counting tilings)</h2>
+    <p>
+        Đôi khi các trạng thái của giải pháp quy hoạch động phức tạp hơn là các tổ hợp số cố định. Ví dụ, hãy xem xét bài toán tính số cách khác nhau để lấp đầy một lưới \(n \times m\) bằng các viên gạch kích thước \(1 \times 2\) và \(2 \times 1\).
+    </p>
+    <p>
+        Ví dụ, một giải pháp hợp lệ cho lưới \(4 \times 7\) là:
+    </p>
+    
+    <div class="graphic-box">
+        <svg width="280" height="160" viewBox="0 0 280 160">
+            <rect x="0" y="0" width="80" height="40" fill="#fff" stroke="#333" stroke-width="2"/> <rect x="80" y="0" width="40" height="80" fill="#eee" stroke="#333" stroke-width="2"/> <rect x="120" y="0" width="80" height="40" fill="#fff" stroke="#333" stroke-width="2"/>
+            <rect x="200" y="0" width="40" height="80" fill="#eee" stroke="#333" stroke-width="2"/>
+            <rect x="240" y="0" width="40" height="80" fill="#eee" stroke="#333" stroke-width="2"/>
+
+            <rect x="0" y="40" width="40" height="80" fill="#eee" stroke="#333" stroke-width="2"/>
+            <rect x="40" y="40" width="40" height="80" fill="#eee" stroke="#333" stroke-width="2"/>
+            <rect x="120" y="40" width="80" height="40" fill="#fff" stroke="#333" stroke-width="2"/>
+            <rect x="80" y="80" width="80" height="40" fill="#fff" stroke="#333" stroke-width="2"/>
+            <rect x="160" y="80" width="40" height="80" fill="#eee" stroke="#333" stroke-width="2"/>
+            <rect x="200" y="80" width="80" height="40" fill="#fff" stroke="#333" stroke-width="2"/>
+
+            <rect x="0" y="120" width="80" height="40" fill="#fff" stroke="#333" stroke-width="2"/>
+            <rect x="80" y="120" width="80" height="40" fill="#fff" stroke="#333" stroke-width="2"/>
+            <rect x="200" y="120" width="80" height="40" fill="#fff" stroke="#333" stroke-width="2"/>
+        </svg>
+    </div>
+
+    <p>
+        và tổng số lượng giải pháp là 781.
+    </p>
+    <p>
+        Bài toán có thể được giải quyết bằng quy hoạch động bằng cách đi qua lưới theo từng hàng. Mỗi hàng trong một giải pháp có thể được biểu diễn dưới dạng một chuỗi chứa \(m\) ký tự mô tả cách các viên gạch phủ lên hàng đó. Ví dụ, giải pháp trên bao gồm bốn hàng tương ứng với các chuỗi sau:
+    </p>
+    <ul>
+        <li><code>[ [ { [ [ { {</code></li>
+        <li><code>{ { ] [ [ ] ]</code></li>
+        <li><code>] ] [ [ { [ [</code></li>
+        <li><code>[ [ ] ] ] ] ]</code></li>
+    </ul>
+    <p>
+        Gọi \(count(k, x)\) là số cách xây dựng giải pháp cho các hàng \(1 \dots k\) của lưới sao cho chuỗi \(x\) tương ứng với hàng \(k\). Có thể sử dụng quy hoạch động ở đây, vì trạng thái của một hàng chỉ bị ràng buộc bởi trạng thái của hàng trước đó.
+    </p>
+    <p>
+        Một giải pháp là hợp lệ nếu hàng 1 không chứa ký tự ']', hàng \(n\) không chứa ký tự '{', và tất cả các hàng liên tiếp đều tương thích. Ví dụ, các hàng <code>[ [ { ] ]</code> và <code>] ] { [ [</code> là tương thích, trong khi các hàng <code>[ [ ] [ [</code> và <code>] ] { ] ]</code> không tương thích.
+    </p>
+    <p>
+        Vì một hàng bao gồm \(m\) ký tự và có bốn lựa chọn cho mỗi ký tự, số lượng hàng khác nhau tối đa là \(4^m\). Do đó, độ phức tạp thời gian của giải pháp là \(O(n 4^{2m})\) vì chúng ta có thể đi qua \(O(4^m)\) trạng thái có thể cho mỗi hàng, và với mỗi trạng thái, có \(O(4^m)\) trạng thái có thể cho hàng trước đó.
+    </p>
+    <p>
+        Trong thực tế, nên xoay lưới sao cho cạnh ngắn hơn có độ dài \(m\), vì yếu tố mũ \(4^{2m}\) chi phối độ phức tạp thời gian. Có thể làm cho giải pháp hiệu quả hơn bằng cách sử dụng biểu diễn gọn hơn cho các hàng. Hóa ra chỉ cần biết ô nào của hàng \(k\) được bao phủ bởi các viên gạch dọc bắt đầu từ hàng \(k\) và ô nào được bao phủ bởi các viên gạch dọc bắt đầu từ hàng \(k-1\). Biểu diễn này giảm số trạng thái xuống \(2^m\).
+    </p>
+
+</body>
+</html>

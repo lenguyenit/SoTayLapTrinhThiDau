@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPH - Chương 5: Tìm kiếm toàn bộ</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h1 { margin-top: 40px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        
+        /* Code styling */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #f1f3f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+        
+        /* Syntax highlighting */
+        .cpp-keyword { color: #0000ff; font-weight: bold; }
+        .cpp-type { color: #2b91af; }
+        .cpp-number { color: #098658; }
+        .cpp-func { color: #795e26; }
+        .cpp-comment { color: #008000; font-style: italic; }
+
+        /* Graphics Containers */
+        .graphic-box {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        /* SVG Styling */
+        svg text { font-family: "Segoe UI", sans-serif; font-size: 14px; text-anchor: middle; dominant-baseline: central; font-weight: bold; }
+        .node-circle { fill: #fff; stroke: #2c3e50; stroke-width: 2; }
+        .node-selected { fill: #e8f5e9; stroke: #2e7d32; stroke-width: 2; }
+        .edge-line { stroke: #555; stroke-width: 2; }
+        .chess-board { fill: #fff; stroke: #333; stroke-width: 2; }
+        .chess-black { fill: #ccc; }
+        .queen { fill: #c0392b; }
+        .conflict-line { stroke: #c0392b; stroke-width: 2; stroke-dasharray: 4; }
+
+        /* TOC */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc a { text-decoration: none; color: #007bff; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="toc">
+        <h3>Mục lục - Chương 5</h3>
+        <ul>
+            <li><a href="#intro">Tìm kiếm toàn bộ</a></li>
+            <li><a href="#sec5.1">5.1 Sinh tập con</a></li>
+            <li><a href="#sec5.2">5.2 Sinh hoán vị</a></li>
+            <li><a href="#sec5.3">5.3 Quay lui</a></li>
+            <li><a href="#sec5.4">5.4 Cắt tỉa nhánh</a></li>
+            <li><a href="#sec5.5">5.5 Gặp nhau ở giữa</a></li>
+        </ul>
+    </div>
+
+    <h1 id="intro">Chương 5: Tìm kiếm toàn bộ (Complete Search)</h1>
+    <p>
+        Tìm kiếm toàn bộ (Complete Search), hay còn gọi là Vét cạn (Brute Force), là một phương pháp giải quyết bài toán bằng cách duyệt qua tất cả các phương án khả thi và kiểm tra xem phương án nào thỏa mãn yêu cầu hoặc là tốt nhất.
+    </p>
+    <p>
+        Đây là phương pháp đáng tin cậy vì nó luôn tìm ra đáp án đúng (nếu có). Nếu bài toán có không gian tìm kiếm nhỏ, vét cạn là lựa chọn tốt nhất vì dễ cài đặt.
+    </p>
+
+    <h2 id="sec5.1">5.1 Sinh tập con (Generating subsets)</h2>
+    <p>
+        Đầu tiên, chúng ta xem xét bài toán sinh tất cả các tập con của một tập hợp gồm \(n\) phần tử: \(\{0, 1, \dots, n-1\}\). Có hai cách phổ biến để làm điều này.
+    </p>
+
+    <h3>Cách 1: Đệ quy (Recursion)</h3>
+    <p>
+        Chúng ta xây dựng tập con từng bước một. Tại mỗi bước \(k\), ta quyết định xem có đưa phần tử \(k\) vào tập con hay không.
+    </p>
+
+    <div class="graphic-box">
+        <svg width="400" height="220" viewBox="0 0 400 220">
+            <circle cx="200" cy="30" r="15" class="node-circle"/> 
+            <text x="200" y="30">{}</text>
+
+            <line x1="200" y1="45" x2="100" y2="90" class="edge-line"/>
+            <line x1="200" y1="45" x2="300" y2="90" class="edge-line"/>
+            
+            <circle cx="100" cy="90" r="15" class="node-circle"/> <text x="100" y="90">{}</text>
+            <circle cx="300" cy="90" r="15" class="node-selected"/> <text x="300" y="90">{0}</text>
+            
+            <text x="130" y="70" font-size="10">Không chọn 0</text>
+            <text x="270" y="70" font-size="10">Chọn 0</text>
+
+            <line x1="100" y1="105" x2="50" y2="150" class="edge-line"/>
+            <line x1="100" y1="105" x2="150" y2="150" class="edge-line"/>
+            <line x1="300" y1="105" x2="250" y2="150" class="edge-line"/>
+            <line x1="300" y1="105" x2="350" y2="150" class="edge-line"/>
+
+            <circle cx="50" cy="150" r="18" class="node-circle"/> <text x="50" y="150">{}</text>
+            <circle cx="150" cy="150" r="18" class="node-selected"/> <text x="150" y="150">{1}</text>
+            <circle cx="250" cy="150" r="18" class="node-selected"/> <text x="250" y="150">{0}</text>
+            <circle cx="350" cy="150" r="18" class="node-selected"/> <text x="350" y="150">{0,1}</text>
+            
+            <text x="200" y="200" fill="#555">Cây quyết định sinh tập con (n=2)</text>
+        </svg>
+    </div>
+
+<pre><code><span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt; subset;
+<span class="cpp-keyword">int</span> n = <span class="cpp-number">3</span>;
+
+<span class="cpp-keyword">void</span> <span class="cpp-func">search</span>(<span class="cpp-keyword">int</span> k) {
+    <span class="cpp-keyword">if</span> (k == n) {
+        <span class="cpp-comment">// Xử lý tập con (in ra, tính toán...)</span>
+        <span class="cpp-keyword">return</span>;
+    }
+    <span class="cpp-comment">// Nhánh 1: Không chọn phần tử k</span>
+    <span class="cpp-func">search</span>(k + <span class="cpp-number">1</span>);
+    
+    <span class="cpp-comment">// Nhánh 2: Chọn phần tử k</span>
+    subset.push_back(k);
+    <span class="cpp-func">search</span>(k + <span class="cpp-number">1</span>);
+    subset.pop_back(); <span class="cpp-comment">// Backtrack: loại bỏ k để quay lại</span>
+}</code></pre>
+
+    <h3>Cách 2: Sử dụng thao tác Bit (Bit manipulation)</h3>
+    <p>
+        Mỗi tập con của tập \(n\) phần tử có thể được biểu diễn bằng một dãy bit độ dài \(n\). Bit thứ \(i\) bằng 1 nghĩa là phần tử \(i\) có trong tập con, bằng 0 nghĩa là không.
+        Ta duyệt qua các số nguyên từ \(0\) đến \(2^n - 1\).
+    </p>
+
+<pre><code><span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> b = <span class="cpp-number">0</span>; b &lt; (<span class="cpp-number">1</span> &lt;&lt; n); b++) {
+    <span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt; subset;
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">0</span>; i &lt; n; i++) {
+        <span class="cpp-keyword">if</span> (b & (<span class="cpp-number">1</span> &lt;&lt; i)) {
+            subset.push_back(i);
+        }
+    }
+    <span class="cpp-comment">// Xử lý tập con</span>
+}</code></pre>
+
+    <h2 id="sec5.2">5.2 Sinh hoán vị (Generating permutations)</h2>
+    <p>
+        Bài toán: Sinh tất cả \(n!\) hoán vị của tập \(\{0, 1, \dots, n-1\}\).
+    </p>
+
+    <h3>Cách 1: Đệ quy</h3>
+    <p>
+        Ta duy trì một mảng <code>chosen</code> để đánh dấu các phần tử đã được sử dụng trong hoán vị hiện tại.
+    </p>
+<pre><code><span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt; permutation;
+<span class="cpp-keyword">bool</span> chosen[N]; <span class="cpp-comment">// Mảng đánh dấu</span>
+
+<span class="cpp-keyword">void</span> <span class="cpp-func">search</span>() {
+    <span class="cpp-keyword">if</span> (permutation.size() == n) {
+        <span class="cpp-comment">// Xử lý hoán vị</span>
+        <span class="cpp-keyword">return</span>;
+    }
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">0</span>; i &lt; n; i++) {
+        <span class="cpp-keyword">if</span> (chosen[i]) <span class="cpp-keyword">continue</span>;
+        
+        chosen[i] = <span class="cpp-keyword">true</span>;
+        permutation.push_back(i);
+        <span class="cpp-func">search</span>();
+        chosen[i] = <span class="cpp-keyword">false</span>;
+        permutation.pop_back();
+    }
+}</code></pre>
+
+    <h3>Cách 2: Sử dụng thư viện chuẩn (STL)</h3>
+    <p>
+        C++ cung cấp hàm <code>next_permutation</code> sinh ra hoán vị tiếp theo theo thứ tự từ điển. Đây là cách gọn nhất.
+    </p>
+<pre><code><span class="cpp-type">vector</span>&lt;<span class="cpp-keyword">int</span>&gt; p;
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">0</span>; i &lt; n; i++) p.push_back(i);
+
+<span class="cpp-keyword">do</span> {
+    <span class="cpp-comment">// Xử lý hoán vị p</span>
+} <span class="cpp-keyword">while</span> (next_permutation(p.begin(), p.end()));</code></pre>
+
+    <h2 id="sec5.3">5.3 Quay lui (Backtracking)</h2>
+    <p>
+        Quay lui là kỹ thuật bắt đầu với một tập hợp lời giải rỗng, và mở rộng lời giải từng bước một. Nếu tại một bước, ta nhận ra lời giải hiện tại không thể dẫn đến kết quả đúng, ta "quay lui" (backtrack) để thử các lựa chọn khác.
+    </p>
+
+    <h3>Bài toán xếp hậu (The N-Queens Problem)</h3>
+    <p>
+        Bài toán: Đặt \(n\) quân hậu lên bàn cờ \(n \times n\) sao cho không có hai quân hậu nào tấn công nhau (không cùng hàng, cột, đường chéo).
+        <br>Cách làm: Đặt từng quân hậu vào các hàng \(0, 1, \dots, n-1\). Tại hàng \(y\), thử đặt hậu vào các cột \(x\).
+    </p>
+    <p>
+        Để kiểm tra nhanh, ta dùng các mảng đánh dấu:
+        <ul>
+            <li><code>column[x]</code>: Cột \(x\) đã có hậu chưa.</li>
+            <li><code>diag1[x+y]</code>: Đường chéo chính (tổng tọa độ không đổi) đã có hậu chưa.</li>
+            <li><code>diag2[x-y+n-1]</code>: Đường chéo phụ (hiệu tọa độ không đổi) đã có hậu chưa.</li>
+        </ul>
+    </p>
+
+    <div class="graphic-box">
+        <svg width="300" height="300" viewBox="0 0 300 300">
+            <g transform="translate(50, 50)">
+                <rect x="0" y="0" width="200" height="200" class="chess-board"/>
+                <rect x="50" y="0" width="50" height="50" class="chess-black"/>
+                <rect x="150" y="0" width="50" height="50" class="chess-black"/>
+                <rect x="0" y="50" width="50" height="50" class="chess-black"/>
+                <rect x="100" y="50" width="50" height="50" class="chess-black"/>
+                <rect x="50" y="100" width="50" height="50" class="chess-black"/>
+                <rect x="150" y="100" width="50" height="50" class="chess-black"/>
+                <rect x="0" y="150" width="50" height="50" class="chess-black"/>
+                <rect x="100" y="150" width="50" height="50" class="chess-black"/>
+
+                <circle cx="75" cy="25" r="15" class="queen"/> <circle cx="25" cy="75" r="15" class="queen"/> <line x1="25" y1="75" x2="75" y2="25" class="conflict-line"/>
+            </g>
+            <text x="150" y="270" font-size="12" fill="#c0392b">Xung đột đường chéo!</text>
+        </svg>
+    </div>
+
+<pre><code><span class="cpp-keyword">void</span> <span class="cpp-func">search</span>(<span class="cpp-keyword">int</span> y) {
+    <span class="cpp-keyword">if</span> (y == n) {
+        count++;
+        <span class="cpp-keyword">return</span>;
+    }
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> x = <span class="cpp-number">0</span>; x &lt; n; x++) {
+        <span class="cpp-keyword">if</span> (column[x] || diag1[x+y] || diag2[x-y+n-<span class="cpp-number">1</span>]) <span class="cpp-keyword">continue</span>;
+        
+        column[x] = diag1[x+y] = diag2[x-y+n-<span class="cpp-number">1</span>] = <span class="cpp-number">1</span>;
+        <span class="cpp-func">search</span>(y + <span class="cpp-number">1</span>);
+        column[x] = diag1[x+y] = diag2[x-y+n-<span class="cpp-number">1</span>] = <span class="cpp-number">0</span>; <span class="cpp-comment">// Backtrack</span>
+    }
+}</code></pre>
+
+    <h2 id="sec5.4">5.4 Cắt tỉa nhánh (Pruning the search)</h2>
+    <p>
+        Cắt tỉa (Pruning) là kỹ thuật thêm trí thông minh vào thuật toán quay lui. Nếu ta phát hiện một nhánh tìm kiếm chắc chắn không dẫn đến kết quả tối ưu (hoặc không hợp lệ), ta dừng ngay lập tức thay vì đi tiếp.
+    </p>
+    <p>
+        <strong>Ví dụ:</strong> Trong bài toán tìm đường đi trên lưới, nếu đường đi hiện tại đã chạm vào chính nó và chia lưới thành hai phần không liên thông mà đích nằm ở phần kia, ta có thể cắt tỉa ngay lập tức. Hoặc đơn giản là tận dụng tính đối xứng để giảm một nửa không gian tìm kiếm.
+    </p>
+
+    <h2 id="sec5.5">5.5 Gặp nhau ở giữa (Meet-in-the-middle)</h2>
+    <p>
+        Đây là kỹ thuật dùng khi không gian tìm kiếm quá lớn (\(2^N\)) nhưng \(N\) chỉ khoảng 40. Ta chia bài toán thành hai nửa kích thước \(N/2\).
+    </p>
+    <p>
+        <strong>Bài toán:</strong> Cho mảng \(n\) số nguyên và số \(x\). Có tồn tại tập con nào có tổng bằng \(x\) không?
+        <br>Với \(n=40\), độ phức tạp \(2^{40}\) là quá lớn.
+        <br><strong>Giải pháp:</strong>
+        1. Chia mảng thành 2 nửa: A (20 phần tử) và B (20 phần tử).
+        2. Sinh tất cả các tổng tập con của A, lưu vào danh sách \(S_A\).
+        3. Sinh tất cả các tổng tập con của B, lưu vào danh sách \(S_B\).
+        4. Sắp xếp \(S_A\) (hoặc dùng Hash Map).
+        5. Với mỗi tổng \(b \in S_B\), kiểm tra xem \(x - b\) có tồn tại trong \(S_A\) không (dùng tìm kiếm nhị phân).
+        <br>Độ phức tạp giảm xuống \(O(2^{n/2} \cdot n)\), khả thi với \(n=40\).
+    </p>
+
+<pre><code><span class="cpp-comment">// Giả mã (Pseudo-code) cho Meet-in-the-middle</span>
+<span class="cpp-keyword">int</span> mid = n / <span class="cpp-number">2</span>;
+vector&lt;<span class="cpp-keyword">int</span>&gt; left_sums = get_subset_sums(a, <span class="cpp-number">0</span>, mid);
+vector&lt;<span class="cpp-keyword">int</span>&gt; right_sums = get_subset_sums(a, mid, n);
+
+sort(left_sums.begin(), left_sums.end());
+
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> val : right_sums) {
+    <span class="cpp-keyword">if</span> (binary_search(left_sums.begin(), left_sums.end(), x - val)) {
+        <span class="cpp-keyword">return</span> <span class="cpp-keyword">true</span>;
+    }
+}</code></pre>
+
+</body>
+</html>

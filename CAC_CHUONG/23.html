@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPH - Chương 23: Ma trận</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h1 { margin-top: 40px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        
+        /* Code styling */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #f1f3f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+        
+        /* Syntax highlighting */
+        .cpp-keyword { color: #0000ff; font-weight: bold; }
+        .cpp-type { color: #2b91af; }
+        .cpp-number { color: #098658; }
+        .cpp-func { color: #795e26; }
+        .cpp-struct { color: #267f99; font-weight: bold; }
+        .cpp-comment { color: #008000; font-style: italic; }
+
+        /* Graphics Containers */
+        .graphic-box {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        
+        /* SVG Styling */
+        svg text { font-family: "Segoe UI", sans-serif; font-size: 14px; text-anchor: middle; dominant-baseline: central; font-weight: bold; }
+        .matrix-cell { fill: #fff; stroke: #ddd; stroke-width: 1; }
+        .highlight-row { fill: #e3f2fd; stroke: #2196f3; stroke-width: 2; }
+        .highlight-col { fill: #ffebee; stroke: #e57373; stroke-width: 2; }
+        .highlight-res { fill: #fff9c4; stroke: #fbc02d; stroke-width: 2; }
+        .edge-line { stroke: #555; stroke-width: 2; }
+        .node-circle { fill: #fff; stroke: #333; stroke-width: 2; }
+        .loop-path { fill: none; stroke: #555; stroke-width: 2; }
+
+        /* TOC */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc a { text-decoration: none; color: #007bff; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="toc">
+        <h3>Mục lục - Chương 23</h3>
+        <ul>
+            <li><a href="#intro">Ma trận</a></li>
+            <li><a href="#sec23.1">23.1 Các phép toán</a></li>
+            <li><a href="#sec23.2">23.2 Lũy thừa ma trận</a></li>
+            <li><a href="#sec23.3">23.3 Công thức truy hồi tuyến tính</a></li>
+            <li><a href="#sec23.4">23.4 Đồ thị và ma trận</a></li>
+        </ul>
+    </div>
+
+    <h1 id="intro">Chương 23: Ma trận (Matrices)</h1>
+    <p>
+        Ma trận (Matrix) là một khái niệm toán học quan trọng có nhiều ứng dụng trong lập trình thi đấu, đặc biệt là trong quy hoạch động, xử lý đồ thị và giải các công thức truy hồi.
+    </p>
+    <p>
+        Một ma trận là một bảng số hình chữ nhật gồm \(n\) hàng và \(m\) cột. Kích thước của ma trận được ký hiệu là \(n \times m\). Phần tử ở hàng \(i\) và cột \(j\) được ký hiệu là \(A_{ij}\).
+    </p>
+
+    <h2 id="sec23.1">23.1 Các phép toán (Operations)</h2>
+    
+    <h3>Tổng và Tích</h3>
+    <p>
+        Tổng của hai ma trận \(A\) và \(B\) (cùng kích thước \(n \times m\)) là ma trận \(C\) với:
+        $$ C_{ij} = A_{ij} + B_{ij} $$
+    </p>
+    <p>
+        Tích của ma trận \(A\) kích thước \(n \times k\) và ma trận \(B\) kích thước \(k \times m\) là ma trận \(C\) kích thước \(n \times m\) với:
+        $$ C_{ij} = \sum_{p=1}^{k} A_{ip} \cdot B_{pj} $$
+        Lưu ý rằng phép nhân ma trận không có tính giao hoán (\(AB \neq BA\) trong trường hợp tổng quát), nhưng có tính kết hợp (\((AB)C = A(BC)\)).
+    </p>
+
+    <div class="graphic-box">
+        <svg width="550" height="220" viewBox="0 0 550 220">
+            <g transform="translate(30, 60)">
+                <text x="35" y="-20" font-weight="bold">A (n x k)</text>
+                <rect x="0" y="0" width="70" height="80" class="matrix-cell"/>
+                <rect x="0" y="30" width="70" height="20" class="highlight-row"/>
+                <text x="-15" y="45" font-size="12">Hàng i</text>
+            </g>
+
+            <text x="120" y="100" font-size="24">×</text>
+
+            <g transform="translate(150, 60)">
+                <text x="35" y="-20" font-weight="bold">B (k x m)</text>
+                <rect x="0" y="0" width="70" height="80" class="matrix-cell"/>
+                <rect x="30" y="0" width="20" height="80" class="highlight-col"/>
+                <text x="40" y="95" font-size="12">Cột j</text>
+            </g>
+
+            <text x="240" y="100" font-size="24">=</text>
+
+            <g transform="translate(280, 60)">
+                <text x="35" y="-20" font-weight="bold">C (n x m)</text>
+                <rect x="0" y="0" width="70" height="80" class="matrix-cell"/>
+                <rect x="30" y="30" width="20" height="20" class="highlight-res"/>
+                <line x1="0" y1="40" x2="30" y2="40" stroke="#2196f3" stroke-dasharray="2,2"/>
+                <line x1="40" y1="0" x2="40" y2="30" stroke="#e57373" stroke-dasharray="2,2"/>
+                <text x="85" y="45" font-size="12">C[i][j]</text>
+            </g>
+            
+            <text x="275" y="170" font-size="13" fill="#555">C[i][j] = (Hàng i của A) • (Cột j của B)</text>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 23.1: Minh họa phép nhân ma trận</div>
+    </div>
+
+    <h3>Cài đặt Ma trận</h3>
+    <p>
+        Trong C++, chúng ta có thể định nghĩa một `struct` để biểu diễn ma trận vuông và nạp chồng toán tử `*`.
+    </p>
+
+<pre><code><span class="cpp-keyword">const</span> <span class="cpp-keyword">int</span> MOD = <span class="cpp-number">1e9</span> + <span class="cpp-number">7</span>;
+<span class="cpp-keyword">const</span> <span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> MOD_SQ = <span class="cpp-number">1LL</span> * MOD * MOD;
+
+<span class="cpp-keyword">struct</span> <span class="cpp-struct">Matrix</span> {
+    <span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> m[<span class="cpp-number">2</span>][<span class="cpp-number">2</span>]; <span class="cpp-comment">// Ví dụ cho ma trận 2x2</span>
+
+    <span class="cpp-struct">Matrix</span>() {
+        memset(m, <span class="cpp-number">0</span>, <span class="cpp-keyword">sizeof</span>(m));
+    }
+};
+
+<span class="cpp-struct">Matrix</span> <span class="cpp-keyword">operator</span>*(<span class="cpp-struct">Matrix</span> a, <span class="cpp-struct">Matrix</span> b) {
+    <span class="cpp-struct">Matrix</span> c;
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">0</span>; i &lt; <span class="cpp-number">2</span>; i++) {
+        <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> j = <span class="cpp-number">0</span>; j &lt; <span class="cpp-number">2</span>; j++) {
+            <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> k = <span class="cpp-number">0</span>; k &lt; <span class="cpp-number">2</span>; k++) {
+                c.m[i][j] += a.m[i][k] * b.m[k][j];
+                <span class="cpp-keyword">if</span> (c.m[i][j] &gt;= MOD_SQ) c.m[i][j] -= MOD_SQ;
+            }
+            c.m[i][j] %= MOD;
+        }
+    }
+    <span class="cpp-keyword">return</span> c;
+}</code></pre>
+
+    <h2 id="sec23.2">23.2 Lũy thừa ma trận (Matrix exponentiation)</h2>
+    <p>
+        Lũy thừa ma trận \(A^k\) có thể được tính hiệu quả trong thời gian \(O(n^3 \log k)\) bằng thuật toán <strong>bình phương và nhân</strong> (tương tự như lũy thừa số học module).
+        Điều này rất hữu ích vì \(n\) (kích thước ma trận) thường nhỏ, trong khi \(k\) có thể rất lớn (ví dụ \(10^{18}\)).
+    </p>
+
+<pre><code><span class="cpp-struct">Matrix</span> <span class="cpp-func">power</span>(<span class="cpp-struct">Matrix</span> a, <span class="cpp-keyword">long</span> <span class="cpp-keyword">long</span> k) {
+    <span class="cpp-struct">Matrix</span> res;
+    <span class="cpp-comment">// Khởi tạo res là ma trận đơn vị</span>
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">0</span>; i &lt; <span class="cpp-number">2</span>; i++) res.m[i][i] = <span class="cpp-number">1</span>;
+
+    <span class="cpp-keyword">while</span> (k &gt; <span class="cpp-number">0</span>) {
+        <span class="cpp-keyword">if</span> (k & <span class="cpp-number">1</span>) res = res * a;
+        a = a * a;
+        k &gt;&gt;= <span class="cpp-number">1</span>;
+    }
+    <span class="cpp-keyword">return</span> res;
+}</code></pre>
+
+    <h2 id="sec23.3">23.3 Công thức truy hồi tuyến tính (Linear recurrences)</h2>
+    <p>
+        Lũy thừa ma trận là công cụ mạnh mẽ để tính số hạng thứ \(n\) của một dãy truy hồi tuyến tính.
+        Ví dụ kinh điển là dãy Fibonacci:
+        $$ f_0 = 0, f_1 = 1, f_n = f_{n-1} + f_{n-2} $$
+        Chúng ta có thể biểu diễn bước chuyển trạng thái dưới dạng ma trận:
+        $$ \begin{pmatrix} f_n \\ f_{n-1} \end{pmatrix} = \begin{pmatrix} 1 & 1 \\ 1 & 0 \end{pmatrix} \begin{pmatrix} f_{n-1} \\ f_{n-2} \end{pmatrix} $$
+    </p>
+    <p>
+        Từ đó suy ra công thức tổng quát:
+        $$ \begin{pmatrix} f_n \\ f_{n-1} \end{pmatrix} = \begin{pmatrix} 1 & 1 \\ 1 & 0 \end{pmatrix}^{n-1} \begin{pmatrix} f_1 \\ f_0 \end{pmatrix} $$
+    </p>
+
+    <h3>Tổng quát</h3>
+    <p>
+        Cho dãy truy hồi \(f_n = c_1 f_{n-1} + c_2 f_{n-2} + \dots + c_k f_{n-k}\).
+        Ma trận chuyển trạng thái \(Z\) kích thước \(k \times k\) sẽ có dạng:
+    </p>
+    $$ Z = \begin{pmatrix} 
+    c_1 & c_2 & \dots & c_{k-1} & c_k \\
+    1 & 0 & \dots & 0 & 0 \\
+    0 & 1 & \dots & 0 & 0 \\
+    \vdots & \vdots & \ddots & \vdots & \vdots \\
+    0 & 0 & \dots & 1 & 0 
+    \end{pmatrix} $$
+    <p>
+        Khi đó vector trạng thái \([f_n, f_{n-1}, \dots, f_{n-k+1}]^T\) có thể được tính bằng \(Z^{n-k}\) nhân với vector trạng thái ban đầu.
+    </p>
+
+    <h2 id="sec23.4">23.4 Đồ thị và ma trận (Graphs and matrices)</h2>
+    <p>
+        Ma trận kề \(A\) của đồ thị có một tính chất thú vị khi được lũy thừa.
+        Gọi \(A\) là ma trận kề của một đồ thị không trọng số, trong đó \(A_{ij} = 1\) nếu có cạnh từ \(i\) đến \(j\), và 0 nếu ngược lại.
+    </p>
+    
+    <h3>Đếm số đường đi</h3>
+    <p>
+        Phần tử ở hàng \(i\), cột \(j\) của ma trận \(A^k\) (lũy thừa bậc \(k\) của ma trận kề) chính là <strong>số lượng đường đi</strong> từ nút \(i\) đến nút \(j\) có độ dài chính xác là \(k\).
+    </p>
+
+    <div class="graphic-box">
+        <svg width="450" height="200" viewBox="0 0 450 200">
+            <defs>
+                <marker id="arrowM" markerWidth="10" markerHeight="10" refX="24" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#555" />
+                </marker>
+            </defs>
+
+            <g transform="translate(60, 60)">
+                <text x="30" y="-30" font-weight="bold">Đồ thị G</text>
+                
+                <g id="edges">
+                    <line x1="50" y1="10" x2="20" y2="70" class="edge-line" marker-end="url(#arrowM)"/>
+                    <line x1="20" y1="70" x2="80" y2="70" class="edge-line" marker-end="url(#arrowM)"/>
+                    <line x1="80" y1="70" x2="50" y2="10" class="edge-line" marker-end="url(#arrowM)"/>
+                    <path d="M 40,0 C 20,-30 80,-30 60,0" class="loop-path" marker-end="url(#arrowM)"/>
+                </g>
+
+                <g id="nodes">
+                    <circle cx="50" cy="10" r="15" class="node-circle"/> <text x="50" y="10">1</text>
+                    <circle cx="20" cy="70" r="15" class="node-circle"/> <text x="20" y="70">2</text>
+                    <circle cx="80" cy="70" r="15" class="node-circle"/> <text x="80" y="70">3</text>
+                </g>
+            </g>
+
+            <line x1="160" y1="60" x2="220" y2="60" stroke="#333" stroke-width="2" marker-end="url(#arrowM)"/>
+            <text x="190" y="50" font-size="12">Lũy thừa A^k</text>
+
+            <g transform="translate(260, 30)">
+                <text x="70" y="0" font-weight="bold">Ma trận A^k</text>
+                <rect x="20" y="20" width="100" height="100" fill="none" stroke="#333" stroke-width="2"/>
+                
+                <rect x="60" y="50" width="30" height="30" fill="#fff9c4" stroke="#fbc02d"/>
+                <text x="135" y="60" font-size="12" text-anchor="start">Ô (i, j)</text>
+                <text x="135" y="80" font-size="12" text-anchor="start">= Số đường đi i->j</text>
+                <text x="135" y="100" font-size="12" text-anchor="start">độ dài k</text>
+                
+                <line x1="90" y1="65" x2="130" y2="65" stroke="#ccc" stroke-dasharray="2,2"/>
+            </g>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 23.2: Lũy thừa ma trận kề để đếm số đường đi</div>
+    </div>
+
+    <h3>Đường đi ngắn nhất (Shortest paths)</h3>
+    <p>
+        Nếu đồ thị có trọng số, chúng ta có thể sửa đổi phép nhân ma trận để giải bài toán đường đi ngắn nhất. Thay vì phép tính thông thường:
+        $$ C_{ij} = \sum_{k} A_{ik} B_{kj} $$
+        Chúng ta sử dụng cấu trúc <strong>(min, +)</strong> (Tropical Semiring):
+        $$ C_{ij} = \min_{k} (A_{ik} + B_{kj}) $$
+    </p>
+    <p>
+        Khi đó, \(A^k\) (với phép nhân mới này) sẽ chứa độ dài đường đi ngắn nhất giữa mọi cặp nút sử dụng chính xác \(k\) cạnh. Chúng ta cũng có thể tính toán điều này nhanh chóng bằng lũy thừa nhị phân.
+    </p>
+
+    <h4>Cài đặt phép nhân (Min, +)</h4>
+<pre><code><span class="cpp-struct">Matrix</span> <span class="cpp-keyword">operator</span>*(<span class="cpp-struct">Matrix</span> a, <span class="cpp-struct">Matrix</span> b) {
+    <span class="cpp-struct">Matrix</span> c;
+    <span class="cpp-comment">// Khởi tạo c với Vô cực (INF)</span>
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">0</span>; i &lt; N; i++)
+        <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> j = <span class="cpp-number">0</span>; j &lt; N; j++) c.m[i][j] = INF;
+
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">0</span>; i &lt; N; i++) {
+        <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> j = <span class="cpp-number">0</span>; j &lt; N; j++) {
+            <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> k = <span class="cpp-number">0</span>; k &lt; N; k++) {
+                <span class="cpp-comment">// c[i][j] = min(c[i][j], a[i][k] + b[k][j])</span>
+                c.m[i][j] = min(c.m[i][j], a.m[i][k] + b.m[k][j]);
+            }
+        }
+    }
+    <span class="cpp-keyword">return</span> c;
+}</code></pre>
+
+</body>
+</html>

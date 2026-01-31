@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPH - Chương 13: Đường đi ngắn nhất</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h1 { margin-top: 40px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        
+        /* Code styling */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #f1f3f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+        
+        /* Syntax highlighting */
+        .cpp-keyword { color: #0000ff; font-weight: bold; }
+        .cpp-type { color: #2b91af; }
+        .cpp-number { color: #098658; }
+        .cpp-func { color: #795e26; }
+        .cpp-comment { color: #008000; font-style: italic; }
+
+        /* Graphics Containers */
+        .graphic-box {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        
+        /* SVG Styling */
+        svg text { font-family: "Segoe UI", sans-serif; font-size: 14px; text-anchor: middle; dominant-baseline: central; font-weight: bold; }
+        .node-circle { fill: #fff; stroke: #2c3e50; stroke-width: 2; }
+        .node-start { fill: #fff9c4; stroke: #fbc02d; stroke-width: 2; } /* Vàng */
+        .edge-line { stroke: #555; stroke-width: 2; }
+        .edge-weight-bg { fill: #fff; stroke: #fff; stroke-width: 4px; } /* Tạo viền trắng quanh số để dễ đọc */
+        .edge-weight-text { fill: #e65100; font-size: 13px; font-weight: bold; }
+
+        /* TOC */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc a { text-decoration: none; color: #007bff; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="toc">
+        <h3>Mục lục - Chương 13</h3>
+        <ul>
+            <li><a href="#intro">Đường đi ngắn nhất</a></li>
+            <li><a href="#sec13.1">13.1 Thuật toán Bellman-Ford</a></li>
+            <li><a href="#sec13.2">13.2 Thuật toán Dijkstra</a></li>
+            <li><a href="#sec13.3">13.3 Thuật toán Floyd-Warshall</a></li>
+        </ul>
+    </div>
+
+    <h1 id="intro">Chương 13: Đường đi ngắn nhất (Shortest paths)</h1>
+    <p>
+        Tìm đường đi ngắn nhất giữa hai nút trong đồ thị là một bài toán quan trọng có nhiều ứng dụng thực tế. Ví dụ, trong bản đồ đường bộ, các nút tương ứng với các ngã tư và các cạnh tương ứng với các đoạn đường nối giữa chúng. Trọng số của cạnh có thể biểu thị độ dài của đoạn đường hoặc thời gian cần thiết để đi qua nó. Đường đi ngắn nhất giữa hai nút tương ứng với tuyến đường nhanh nhất giữa hai địa điểm.
+    </p>
+    <p>
+        Trong chương này, chúng ta sẽ thảo luận về các thuật toán tìm đường đi ngắn nhất trong đồ thị có trọng số. Độ dài của đường đi là tổng trọng số của các cạnh trên đường đi đó.
+    </p>
+
+    <h2 id="sec13.1">13.1 Thuật toán Bellman-Ford</h2>
+    <p>
+        Thuật toán Bellman-Ford tìm đường đi ngắn nhất từ một nút xuất phát đến tất cả các nút khác của đồ thị. Thuật toán có thể xử lý đồ thị chứa các cạnh có trọng số âm, miễn là đồ thị không chứa chu trình âm (chu trình mà tổng trọng số các cạnh là số âm). Nếu đồ thị chứa chu trình âm, thuật toán có thể phát hiện ra điều này.
+    </p>
+    <p>
+        Thuật toán duy trì khoảng cách ước tính đến mỗi nút. Ban đầu, khoảng cách đến nút xuất phát là 0, và khoảng cách đến tất cả các nút khác là vô cùng. Thuật toán bao gồm \(n-1\) vòng lặp, trong đó \(n\) là số lượng nút. Trong mỗi vòng lặp, thuật toán đi qua tất cả các cạnh của đồ thị và cố gắng giảm khoảng cách.
+    </p>
+    <p>
+        Cụ thể, nếu có một cạnh từ \(a\) đến \(b\) với trọng số \(w\), và khoảng cách hiện tại đến \(b\) lớn hơn khoảng cách đến \(a\) cộng với \(w\) (tức là \(distance[b] > distance[a] + w\)), thì chúng ta cập nhật khoảng cách đến \(b\):
+        $$ distance[b] = distance[a] + w $$
+    </p>
+
+    <h3>Ví dụ</h3>
+    <p>
+        Hãy xem xét cách thuật toán Bellman-Ford hoạt động trên đồ thị sau, với nút xuất phát là 1. Ban đầu, khoảng cách đến nút 1 là 0 và đến các nút khác là vô cùng.
+    </p>
+
+    <div class="graphic-box">
+        <svg width="350" height="220" viewBox="0 0 350 220">
+            <defs>
+                <marker id="arrowBF" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#555" />
+                </marker>
+            </defs>
+
+            <g id="bf-edges">
+                <line x1="50" y1="110" x2="150" y2="50" class="edge-line" marker-end="url(#arrowBF)"/> <line x1="50" y1="110" x2="150" y2="110" class="edge-line" marker-end="url(#arrowBF)"/> <line x1="50" y1="110" x2="150" y2="170" class="edge-line" marker-end="url(#arrowBF)"/> <line x1="150" y1="50" x2="250" y2="50" class="edge-line" marker-end="url(#arrowBF)"/> <line x1="150" y1="50" x2="150" y2="170" class="edge-line" marker-end="url(#arrowBF)"/> <line x1="150" y1="50" x2="150" y2="110" class="edge-line" marker-end="url(#arrowBF)"/> <line x1="150" y1="110" x2="150" y2="170" class="edge-line" marker-end="url(#arrowBF)"/> <line x1="150" y1="170" x2="250" y2="50" class="edge-line" marker-end="url(#arrowBF)"/> </g>
+
+            <g id="bf-weights">
+                <rect x="90" y="70" width="20" height="20" class="edge-weight-bg" transform="translate(-10,-10)"/>
+                <text x="90" y="70" class="edge-weight-text">5</text>
+                
+                <rect x="100" y="110" width="20" height="20" class="edge-weight-bg" transform="translate(-10,-10)"/>
+                <text x="100" y="110" class="edge-weight-text">3</text>
+                
+                <rect x="90" y="150" width="20" height="20" class="edge-weight-bg" transform="translate(-10,-10)"/>
+                <text x="90" y="150" class="edge-weight-text">7</text>
+
+                <rect x="200" y="50" width="20" height="20" class="edge-weight-bg" transform="translate(-10,-10)"/>
+                <text x="200" y="50" class="edge-weight-text">2</text>
+
+                <rect x="150" y="140" width="20" height="20" class="edge-weight-bg" transform="translate(-10,-10)"/>
+                <text x="150" y="140" class="edge-weight-text">1</text>
+                
+                <rect x="210" y="100" width="20" height="20" class="edge-weight-bg" transform="translate(-10,-10)"/>
+                <text x="210" y="100" class="edge-weight-text">2</text>
+            </g>
+
+            <g id="bf-nodes">
+                <circle cx="50" cy="110" r="18" class="node-start"/> <text x="50" y="110">1</text>
+                <circle cx="150" cy="50" r="18" class="node-circle"/> <text x="150" y="50">2</text>
+                <circle cx="150" cy="110" r="18" class="node-circle"/> <text x="150" y="110">3</text>
+                <circle cx="150" cy="170" r="18" class="node-circle"/> <text x="150" y="170">4</text>
+                <circle cx="250" cy="50" r="18" class="node-circle"/> <text x="250" y="50">5</text>
+            </g>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 13.1: Đồ thị minh họa (Nút 1 là xuất phát)</div>
+    </div>
+
+    <p>
+        Thuật toán thực hiện \(n-1\) vòng lặp. Trong mỗi vòng lặp, tất cả các cạnh được kiểm tra.
+    </p>
+    <ul>
+        <li><strong>Vòng 1:</strong>
+            <ul>
+                <li>\(1 \to 2\): \(d[2] = \min(\infty, 0+5) = 5\)</li>
+                <li>\(1 \to 3\): \(d[3] = \min(\infty, 0+3) = 3\)</li>
+                <li>\(1 \to 4\): \(d[4] = \min(\infty, 0+7) = 7\)</li>
+            </ul>
+        </li>
+        <li><strong>Vòng 2:</strong>
+            <ul>
+                <li>\(2 \to 5\): \(d[5] = \min(\infty, 5+2) = 7\)</li>
+                <li>\(3 \to 4\): \(d[4] = \min(7, 3+1) = 4\)</li>
+            </ul>
+        </li>
+        <li><strong>Vòng 3:</strong>
+            <ul>
+                <li>\(4 \to 5\): \(d[5] = \min(7, 4+2) = 6\)</li>
+            </ul>
+        </li>
+    </ul>
+    <p>
+        Sau vòng lặp này, không còn thay đổi nào nữa. Khoảng cách cuối cùng là: \(0, 5, 3, 4, 6\).
+    </p>
+
+    <h3>Cài đặt</h3>
+    <p>
+        Thuật toán có thể được cài đặt thuận tiện nếu đồ thị được lưu trữ dưới dạng danh sách cạnh. Mảng <code>distance</code> chứa khoảng cách, được khởi tạo là vô cùng.
+    </p>
+
+<pre><code><span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">1</span>; i &lt;= n; i++) distance[i] = INF;
+distance[x] = <span class="cpp-number">0</span>;
+<span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">1</span>; i &lt;= n<span class="cpp-number">-1</span>; i++) {
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">auto</span> e : edges) {
+        <span class="cpp-keyword">int</span> a, b, w;
+        tie(a, b, w) = e;
+        distance[b] = min(distance[b], distance[a]+w);
+    }
+}</code></pre>
+
+    <p>
+        Độ phức tạp thời gian là \(O(nm)\), vì thuật toán gồm \(n-1\) vòng và mỗi vòng duyệt qua \(m\) cạnh.
+    </p>
+
+    <h3>Chu trình âm (Negative cycles)</h3>
+    <p>
+        Thuật toán Bellman-Ford cũng có thể được sử dụng để kiểm tra xem đồ thị có chứa chu trình có độ dài âm hay không. Cụ thể, nếu đồ thị chứa chu trình âm, chúng ta có thể giảm khoảng cách vô hạn lần.
+    </p>
+    <p>
+        Để phát hiện điều này, chúng ta chạy thuật toán thêm \(n\) vòng. Nếu ở vòng thứ \(n\), có bất kỳ khoảng cách nào giảm, điều đó có nghĩa là đồ thị chứa một chu trình âm.
+    </p>
+
+    <h2 id="sec13.2">13.2 Thuật toán Dijkstra</h2>
+    <p>
+        Thuật toán Dijkstra hiệu quả hơn Bellman-Ford để tìm đường đi ngắn nhất, nhưng nó yêu cầu đồ thị <strong>không có trọng số cạnh âm</strong>.
+    </p>
+    <p>
+        Dijkstra duy trì khoảng cách tới các nút và trạng thái "đã xử lý" (processed). Ban đầu khoảng cách tới nút xuất phát là 0 và tới các nút khác là vô cùng. Ở mỗi bước, thuật toán chọn một nút chưa được xử lý có khoảng cách nhỏ nhất, đánh dấu nó là đã xử lý, và cập nhật khoảng cách tới các láng giềng của nó.
+    </p>
+    <p>
+        Lợi thế của Dijkstra là nó chỉ xử lý mỗi cạnh một lần, sử dụng tính chất tham lam: khi một nút được chọn để xử lý, khoảng cách cuối cùng của nó đã được xác định (với điều kiện không có cạnh âm).
+    </p>
+    
+    <div class="graphic-box">
+        <svg width="400" height="200" viewBox="0 0 400 200">
+            <defs>
+                <marker id="arrowDijk" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#555" />
+                </marker>
+            </defs>
+
+            <g id="dijk-edges">
+                <line x1="50" y1="100" x2="150" y2="50" class="edge-line" marker-end="url(#arrowDijk)"/> <line x1="50" y1="100" x2="150" y2="150" class="edge-line" marker-end="url(#arrowDijk)"/> <line x1="150" y1="50" x2="250" y2="50" class="edge-line" marker-end="url(#arrowDijk)"/> <line x1="150" y1="150" x2="250" y2="150" class="edge-line" marker-end="url(#arrowDijk)"/> <line x1="150" y1="50" x2="150" y2="150" class="edge-line" marker-end="url(#arrowDijk)"/> <line x1="250" y1="50" x2="350" y2="100" class="edge-line" marker-end="url(#arrowDijk)"/> <line x1="250" y1="150" x2="350" y2="100" class="edge-line" marker-end="url(#arrowDijk)"/> </g>
+
+            <g id="dijk-weights">
+                <text x="90" y="65" class="edge-weight-text">2</text>
+                <text x="90" y="135" class="edge-weight-text">6</text>
+                <text x="200" y="40" class="edge-weight-text">5</text>
+                <text x="200" y="160" class="edge-weight-text">1</text>
+                <text x="160" y="100" class="edge-weight-text">1</text>
+                <text x="300" y="65" class="edge-weight-text">2</text>
+                <text x="300" y="135" class="edge-weight-text">5</text>
+            </g>
+
+            <g id="dijk-nodes">
+                <circle cx="50" cy="100" r="18" class="node-start"/> <text x="50" y="100">1</text>
+                <circle cx="150" cy="50" r="18" class="node-circle"/> <text x="150" y="50">2</text>
+                <circle cx="150" cy="150" r="18" class="node-circle"/> <text x="150" y="150">3</text>
+                <circle cx="250" cy="50" r="18" class="node-circle"/> <text x="250" y="50">4</text>
+                <circle cx="250" cy="150" r="18" class="node-circle"/> <text x="250" y="150">5</text>
+                <circle cx="350" cy="100" r="18" class="node-circle"/> <text x="350" y="100">6</text>
+            </g>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 13.2: Minh họa cho Dijkstra</div>
+    </div>
+
+    <h3>Cài đặt</h3>
+    <p>
+        Một cách cài đặt hiệu quả của thuật toán Dijkstra sử dụng hàng đợi ưu tiên (priority queue). Hàng đợi chứa các cặp <code>(d, u)</code> nghĩa là khoảng cách hiện tại đến nút \(u\) là \(d\). Hàng đợi ưu tiên được sắp xếp sao cho nút có khoảng cách nhỏ nhất luôn ở trên cùng.
+    </p>
+
+<pre><code><span class="cpp-type">priority_queue</span>&lt;<span class="cpp-type">pair</span>&lt;<span class="cpp-keyword">int</span>,<span class="cpp-keyword">int</span>&gt;&gt; q;
+distance[x] = <span class="cpp-number">0</span>;
+q.push({<span class="cpp-number">0</span>,x});
+
+<span class="cpp-keyword">while</span> (!q.empty()) {
+    <span class="cpp-keyword">int</span> a = q.top().second; q.pop();
+    <span class="cpp-keyword">if</span> (processed[a]) <span class="cpp-keyword">continue</span>;
+    processed[a] = <span class="cpp-keyword">true</span>;
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">auto</span> u : adj[a]) {
+        <span class="cpp-keyword">int</span> b = u.first, w = u.second;
+        <span class="cpp-keyword">if</span> (distance[a]+w &lt; distance[b]) {
+            distance[b] = distance[a]+w;
+            q.push({-distance[b], b});
+        }
+    }
+}</code></pre>
+
+    <p>
+        Lưu ý rằng <code>priority_queue</code> mặc định của C++ sắp xếp phần tử lớn nhất lên đầu. Để lấy phần tử nhỏ nhất, chúng ta thường đẩy giá trị âm của khoảng cách vào hàng đợi (như trong đoạn mã trên: <code>-distance[b]</code>).
+    </p>
+    <p>
+        Độ phức tạp thời gian là \(O(n + m \log m)\), vì thuật toán đi qua mỗi cạnh một lần và mỗi thao tác trên hàng đợi ưu tiên mất \(O(\log m)\).
+    </p>
+
+    <h2 id="sec13.3">13.3 Thuật toán Floyd-Warshall</h2>
+    <p>
+        Thuật toán Floyd-Warshall tìm đường đi ngắn nhất giữa **tất cả** các cặp nút trong đồ thị trong một lần chạy.
+    </p>
+    <p>
+        Thuật toán duy trì một mảng hai chiều chứa khoảng cách giữa các nút. Ban đầu, khoảng cách giữa các nút kề nhau là trọng số cạnh, và khoảng cách giữa một nút với chính nó là 0.
+    </p>
+    <p>
+        Ý tưởng chính: Tại vòng lặp thứ \(k\), thuật toán xem xét các đường đi có thể đi qua các nút trung gian trong tập \(\{1, 2, \dots, k\}\). Công thức cập nhật là:
+        $$ distance[a][b] = \min(distance[a][b], distance[a][k] + distance[k][b]) $$
+    </p>
+
+    <h3>Cài đặt</h3>
+    <p>
+        Giả sử <code>dist[N][N]</code> là ma trận kề (với vô cực nếu không có cạnh). Cài đặt thuật toán cực kỳ ngắn gọn:
+    </p>
+
+<pre><code><span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> k = <span class="cpp-number">1</span>; k &lt;= n; k++) {
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">1</span>; i &lt;= n; i++) {
+        <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> j = <span class="cpp-number">1</span>; j &lt;= n; j++) {
+            distance[i][j] = min(distance[i][j], distance[i][k]+distance[k][j]);
+        }
+    }
+}</code></pre>
+
+    <p>
+        Độ phức tạp thời gian là \(O(n^3)\). Thuật toán này rất hiệu quả cho các đồ thị nhỏ (ví dụ \(n \le 500\)) vì hằng số thời gian rất nhỏ và cấu trúc vòng lặp thân thiện với bộ nhớ cache.
+    </p>
+
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPH - Chương 22: Tổ hợp</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h1 { margin-top: 40px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        
+        /* Code styling */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #f1f3f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+        
+        /* Syntax highlighting */
+        .cpp-keyword { color: #0000ff; font-weight: bold; }
+        .cpp-type { color: #2b91af; }
+        .cpp-number { color: #098658; }
+        .cpp-func { color: #795e26; }
+        .cpp-comment { color: #008000; font-style: italic; }
+
+        /* Graphics Containers */
+        .graphic-box {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        
+        /* SVG Styling */
+        svg text { font-family: "Segoe UI", sans-serif; font-size: 14px; text-anchor: middle; dominant-baseline: central; font-weight: bold; }
+        .edge-line { stroke: #ccc; stroke-width: 1; }
+        .pascal-text { font-size: 12px; }
+        .catalan-path { stroke: #e65100; stroke-width: 3; fill: none; }
+        .venn-circle { fill-opacity: 0.3; stroke-width: 2; }
+        .venn-A { fill: #e74c3c; stroke: #c0392b; }
+        .venn-B { fill: #3498db; stroke: #2980b9; }
+        .venn-C { fill: #2ecc71; stroke: #27ae60; }
+
+        /* TOC */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc a { text-decoration: none; color: #007bff; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="toc">
+        <h3>Mục lục - Chương 22</h3>
+        <ul>
+            <li><a href="#intro">Tổ hợp</a></li>
+            <li><a href="#sec22.1">22.1 Hệ số nhị thức</a></li>
+            <li><a href="#sec22.2">22.2 Số Catalan</a></li>
+            <li><a href="#sec22.3">22.3 Nguyên lý bao hàm - loại trừ</a></li>
+            <li><a href="#sec22.4">22.4 Bổ đề Burnside</a></li>
+            <li><a href="#sec22.5">22.5 Công thức Cayley</a></li>
+        </ul>
+    </div>
+
+    <h1 id="intro">Chương 22: Tổ hợp (Combinatorics)</h1>
+    <p>
+        Tổ hợp nghiên cứu về việc đếm số lượng đối tượng thỏa mãn một số tính chất nhất định. Các bài toán tổ hợp thường xuất hiện trong lập trình thi đấu, đòi hỏi việc tính toán số lượng cách sắp xếp, chọn lựa, hoặc cấu hình.
+    </p>
+
+    <h2 id="sec22.1">22.1 Hệ số nhị thức (Binomial coefficients)</h2>
+    <p>
+        Hệ số nhị thức \(\binom{n}{k}\), đọc là "n chọn k", đếm số cách chọn \(k\) phần tử từ tập hợp gồm \(n\) phần tử mà không quan tâm đến thứ tự. Công thức tính là:
+        $$ \binom{n}{k} = \frac{n!}{k!(n-k)!} $$
+    </p>
+
+    <h3>Tam giác Pascal</h3>
+    <p>
+        Các giá trị của hệ số nhị thức có thể được tính bằng công thức truy hồi:
+        $$ \binom{n}{k} = \binom{n-1}{k-1} + \binom{n-1}{k} $$
+    </p>
+
+    <div class="graphic-box">
+        <svg width="300" height="150" viewBox="0 0 300 150">
+            <g stroke="#eee" stroke-width="1">
+                <line x1="150" y1="20" x2="120" y2="50"/> <line x1="150" y1="20" x2="180" y2="50"/>
+                <line x1="120" y1="50" x2="90" y2="80"/> <line x1="120" y1="50" x2="150" y2="80"/>
+                <line x1="180" y1="50" x2="150" y2="80"/> <line x1="180" y1="50" x2="210" y2="80"/>
+            </g>
+            <text x="150" y="20">1</text>
+            <text x="120" y="50">1</text> <text x="180" y="50">1</text>
+            <text x="90" y="80">1</text> <text x="150" y="80">2</text> <text x="210" y="80">1</text>
+            <text x="60" y="110">1</text> <text x="120" y="110">3</text> <text x="180" y="110">3</text> <text x="240" y="110">1</text>
+            <text x="30" y="140">1</text> <text x="90" y="140">4</text> <text x="150" y="140">6</text> <text x="210" y="140">4</text> <text x="270" y="140">1</text>
+        </svg>
+    </div>
+
+    <h3>Bài toán chia kẹo (Stars and Bars)</h3>
+    <p>
+        Một bài toán quan trọng là đếm số cách chia \(k\) đồ vật giống nhau vào \(n\) chiếc hộp khác nhau (hộp có thể rỗng). Ta có thể tưởng tượng có \(k\) ngôi sao và \(n-1\) vách ngăn. Số cách xếp là:
+        $$ \binom{k+n-1}{n-1} $$
+    </p>
+
+    <h3>Hệ số đa thức (Multinomial coefficients)</h3>
+    <p>
+        Số cách chia \(n\) phần tử khác nhau vào các nhóm có kích thước \(k_1, k_2, \dots, k_m\) (với \(k_1 + \dots + k_m = n\)) là:
+        $$ \frac{n!}{k_1! k_2! \cdots k_m!} $$
+    </p>
+
+    <h3>Cài đặt (Tính nCk modulo)</h3>
+    <p>
+        Để tính tổ hợp với \(n\) lớn, ta cần tính trước giai thừa và sử dụng nghịch đảo module (theo định lý Fermat nhỏ: \(a^{MOD-2} \equiv a^{-1}\)).
+    </p>
+
+<pre><code><span class="cpp-keyword">const</span> <span class="cpp-keyword">int</span> MOD = <span class="cpp-number">1e9</span> + <span class="cpp-number">7</span>;
+<span class="cpp-keyword">const</span> <span class="cpp-keyword">int</span> N = <span class="cpp-number">1000005</span>;
+<span class="cpp-type">long</span> <span class="cpp-type">long</span> fact[N], invFact[N];
+
+<span class="cpp-comment">// Tính lũy thừa a^b % m</span>
+<span class="cpp-type">long</span> <span class="cpp-type">long</span> <span class="cpp-func">power</span>(<span class="cpp-type">long</span> <span class="cpp-type">long</span> base, <span class="cpp-type">long</span> <span class="cpp-type">long</span> exp) {
+    <span class="cpp-type">long</span> <span class="cpp-type">long</span> res = <span class="cpp-number">1</span>;
+    base %= MOD;
+    <span class="cpp-keyword">while</span> (exp &gt; <span class="cpp-number">0</span>) {
+        <span class="cpp-keyword">if</span> (exp % <span class="cpp-number">2</span> == <span class="cpp-number">1</span>) res = (res * base) % MOD;
+        base = (base * base) % MOD;
+        exp /= <span class="cpp-number">2</span>;
+    }
+    <span class="cpp-keyword">return</span> res;
+}
+
+<span class="cpp-type">long</span> <span class="cpp-type">long</span> <span class="cpp-func">modInverse</span>(<span class="cpp-type">long</span> <span class="cpp-type">long</span> n) {
+    <span class="cpp-keyword">return</span> <span class="cpp-func">power</span>(n, MOD - <span class="cpp-number">2</span>);
+}
+
+<span class="cpp-comment">// Khởi tạo giai thừa</span>
+<span class="cpp-keyword">void</span> <span class="cpp-func">init</span>() {
+    fact[<span class="cpp-number">0</span>] = <span class="cpp-number">1</span>;
+    invFact[<span class="cpp-number">0</span>] = <span class="cpp-number">1</span>;
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">1</span>; i &lt; N; i++) {
+        fact[i] = (fact[i - <span class="cpp-number">1</span>] * i) % MOD;
+        invFact[i] = <span class="cpp-func">modInverse</span>(fact[i]);
+    }
+}
+
+<span class="cpp-type">long</span> <span class="cpp-type">long</span> <span class="cpp-func">nCk</span>(<span class="cpp-keyword">int</span> n, <span class="cpp-keyword">int</span> k) {
+    <span class="cpp-keyword">if</span> (k &lt; <span class="cpp-number">0</span> || k &gt; n) <span class="cpp-keyword">return</span> <span class="cpp-number">0</span>;
+    <span class="cpp-keyword">return</span> fact[n] * invFact[k] % MOD * invFact[n - k] % MOD;
+}
+
+<span class="cpp-comment">// Cài đặt Stars and Bars (k vật, n hộp)</span>
+<span class="cpp-type">long</span> <span class="cpp-type">long</span> <span class="cpp-func">starsAndBars</span>(<span class="cpp-keyword">int</span> k, <span class="cpp-keyword">int</span> n) {
+    <span class="cpp-keyword">if</span> (n == <span class="cpp-number">0</span>) <span class="cpp-keyword">return</span> k == <span class="cpp-number">0</span>;
+    <span class="cpp-keyword">return</span> <span class="cpp-func">nCk</span>(k + n - <span class="cpp-number">1</span>, n - <span class="cpp-number">1</span>);
+}</code></pre>
+
+    <h2 id="sec22.2">22.2 Số Catalan (Catalan numbers)</h2>
+    <p>
+        Số Catalan \(C_n\) là dãy số: 1, 1, 2, 5, 14, 42, 132...
+        Công thức:
+        $$ C_n = \frac{1}{n+1} \binom{2n}{n} $$
+    </p>
+    <p><strong>Ứng dụng:</strong></p>
+    <ul>
+        <li>Số dãy ngoặc đúng độ dài \(2n\).</li>
+        <li>Số cây nhị phân có \(n\) nút.</li>
+        <li>Số cách chia đa giác \(n+2\) cạnh thành \(n\) tam giác.</li>
+        <li>Đường đi trên lưới \(n \times n\) từ \((0,0)\) đến \((n,n)\) không vượt quá đường chéo.</li>
+    </ul>
+
+    <div class="graphic-box">
+        <svg width="200" height="200" viewBox="0 0 200 200">
+            <defs>
+                <pattern id="smallGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#eee" stroke-width="1"/>
+                </pattern>
+            </defs>
+            <rect width="160" height="160" fill="url(#smallGrid)" transform="translate(20, 20)"/>
+            <line x1="20" y1="180" x2="180" y2="20" stroke="#ccc" stroke-dasharray="4"/>
+            <path d="M20,180 L60,180 L100,180 L100,140 L140,140 L140,100 L140,60 L180,60 L180,20" class="catalan-path"/>
+            <circle cx="20" cy="180" r="3" fill="black"/> <circle cx="180" cy="20" r="3" fill="black"/>
+        </svg>
+        <div style="font-style: italic; font-size: 12px; margin-top: 5px;">Hình 22.1: Đường đi Catalan n=4</div>
+    </div>
+
+    <h3>Cài đặt</h3>
+<pre><code><span class="cpp-type">long</span> <span class="cpp-type">long</span> <span class="cpp-func">catalan</span>(<span class="cpp-keyword">int</span> n) {
+    <span class="cpp-type">long</span> <span class="cpp-type">long</span> val = <span class="cpp-func">nCk</span>(<span class="cpp-number">2</span> * n, n);
+    <span class="cpp-keyword">return</span> (val * <span class="cpp-func">modInverse</span>(n + <span class="cpp-number">1</span>)) % MOD;
+}</code></pre>
+
+    <h2 id="sec22.3">22.3 Nguyên lý bao hàm - loại trừ (Inclusion-Exclusion)</h2>
+    <p>
+        Công thức tổng quát để tính kích thước hợp của \(n\) tập hợp:
+        $$ |\bigcup_{i=1}^n A_i| = \sum |A_i| - \sum |A_i \cap A_j| + \sum |A_i \cap A_j \cap A_k| - \dots $$
+    </p>
+
+    <div class="graphic-box">
+        <svg width="250" height="180" viewBox="0 0 250 180">
+            <circle cx="80" cy="70" r="50" class="venn-circle venn-A"/> <text x="60" y="50">A</text>
+            <circle cx="170" cy="70" r="50" class="venn-circle venn-B"/> <text x="190" y="50">B</text>
+            <circle cx="125" cy="130" r="50" class="venn-circle venn-C"/> <text x="125" y="150">C</text>
+        </svg>
+    </div>
+
+    <h3>Hoán vị không điểm bất động (Derangements)</h3>
+    <p>
+        \(D_n\) là số hoán vị của \(n\) phần tử sao cho không phần tử nào đứng đúng vị trí của nó.
+        Công thức truy hồi: \( D_n = (n-1)(D_{n-1} + D_{n-2}) \).
+    </p>
+
+    <h3>Cài đặt</h3>
+<pre><code><span class="cpp-type">long</span> <span class="cpp-type">long</span> D[N];
+<span class="cpp-keyword">void</span> <span class="cpp-func">calc_derangements</span>() {
+    D[<span class="cpp-number">0</span>] = <span class="cpp-number">1</span>; <span class="cpp-comment">// Theo quy ước</span>
+    D[<span class="cpp-number">1</span>] = <span class="cpp-number">0</span>;
+    D[<span class="cpp-number">2</span>] = <span class="cpp-number">1</span>;
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">3</span>; i &lt; N; i++) {
+        D[i] = (i - <span class="cpp-number">1</span>) * (D[i - <span class="cpp-number">1</span>] + D[i - <span class="cpp-number">2</span>]) % MOD;
+    }
+}</code></pre>
+
+    <h2 id="sec22.4">22.4 Bổ đề Burnside (Burnside's Lemma)</h2>
+    <p>
+        Dùng để đếm số lượng đối tượng phân biệt dưới tác động của các phép đối xứng (nhóm đối xứng \(G\)).
+        $$ |X/G| = \frac{1}{|G|} \sum_{g \in G} |X^g| $$
+        Trong đó \(|X^g|\) là số lượng cấu hình không đổi khi áp dụng phép đối xứng \(g\).
+    </p>
+    <p>
+        <strong>Ví dụ vòng cổ:</strong> Đếm số cách tô \(m\) màu cho vòng cổ \(n\) hạt. Các phép đối xứng là xoay \(k\) bước (\(0 \le k < n\)). Số cấu hình bất biến khi xoay \(k\) bước là \(m^{\gcd(n, k)}\).
+    </p>
+
+    <h3>Cài đặt</h3>
+<pre><code><span class="cpp-keyword">long</span> <span class="cpp-type">long</span> <span class="cpp-func">gcd</span>(<span class="cpp-keyword">long</span> <span class="cpp-type">long</span> a, <span class="cpp-keyword">long</span> <span class="cpp-type">long</span> b) {
+    <span class="cpp-keyword">return</span> b == <span class="cpp-number">0</span> ? a : <span class="cpp-func">gcd</span>(b, a % b);
+}
+
+<span class="cpp-type">long</span> <span class="cpp-type">long</span> <span class="cpp-func">count_necklaces</span>(<span class="cpp-keyword">int</span> n, <span class="cpp-keyword">int</span> m) {
+    <span class="cpp-type">long</span> <span class="cpp-type">long</span> ans = <span class="cpp-number">0</span>;
+    <span class="cpp-keyword">for</span> (<span class="cpp-keyword">int</span> i = <span class="cpp-number">0</span>; i &lt; n; i++) {
+        <span class="cpp-comment">// Với phép xoay i bước, số chu trình là gcd(i, n)</span>
+        ans = (ans + <span class="cpp-func">power</span>(m, <span class="cpp-func">gcd</span>(i, n))) % MOD;
+    }
+    <span class="cpp-comment">// Chia trung bình cho n (nhân nghịch đảo)</span>
+    ans = (ans * <span class="cpp-func">modInverse</span>(n)) % MOD;
+    <span class="cpp-keyword">return</span> ans;
+}</code></pre>
+
+    <h2 id="sec22.5">22.5 Công thức Cayley (Cayley's formula)</h2>
+    <p>
+        Số lượng cây bao trùm (spanning trees) khác nhau trên \(n\) đỉnh được đánh nhãn là:
+        $$ T_n = n^{n-2} $$
+    </p>
+
+    <h3>Cài đặt</h3>
+<pre><code><span class="cpp-type">long</span> <span class="cpp-type">long</span> <span class="cpp-func">count_spanning_trees</span>(<span class="cpp-keyword">int</span> n) {
+    <span class="cpp-keyword">if</span> (n == <span class="cpp-number">1</span>) <span class="cpp-keyword">return</span> <span class="cpp-number">1</span>;
+    <span class="cpp-keyword">if</span> (n == <span class="cpp-number">2</span>) <span class="cpp-keyword">return</span> <span class="cpp-number">1</span>;
+    <span class="cpp-keyword">return</span> <span class="cpp-func">power</span>(n, n - <span class="cpp-number">2</span>);
+}</code></pre>
+
+</body>
+</html>

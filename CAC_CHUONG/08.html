@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPH - Chương 8: Phân tích khấu hao</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h1 { margin-top: 40px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        
+        /* Code styling */
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #f1f3f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #d63384;
+        }
+        
+        /* Syntax highlighting */
+        .cpp-keyword { color: #0000ff; font-weight: bold; }
+        .cpp-type { color: #2b91af; }
+        .cpp-number { color: #098658; }
+        .cpp-func { color: #795e26; }
+        .cpp-comment { color: #008000; font-style: italic; }
+
+        /* Graphics Container */
+        .graphic-box {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        
+        /* SVG Text Styling */
+        svg text { font-family: "Segoe UI", sans-serif; font-size: 14px; }
+        .label-text { font-size: 12px; fill: #666; }
+        .title-text { font-size: 16px; font-weight: bold; fill: #333; }
+        
+        /* Shape Styling */
+        .array-cell { fill: #fff; stroke: #333; stroke-width: 1.5; }
+        .active-cell { fill: #e3f2fd; stroke: #2196f3; stroke-width: 2; }
+        .stack-rect { fill: #fff; stroke: #333; stroke-width: 2; }
+        .popped-rect { fill: #f5f5f5; stroke: #999; stroke-dasharray: 4; }
+        .window-frame { fill: none; stroke: #e67e22; stroke-width: 3; rx: 5; }
+        .deque-elem { fill: #f3e5f5; stroke: #8e24aa; stroke-width: 1.5; }
+
+        /* TOC */
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 30px;
+        }
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc a { text-decoration: none; color: #007bff; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="toc">
+        <h3>Mục lục - Chương 8</h3>
+        <ul>
+            <li><a href="#intro">Phân tích khấu hao</a></li>
+            <li><a href="#sec8.1">8.1 Phương pháp hai con trỏ</a></li>
+            <li><a href="#sec8.2">8.2 Phần tử nhỏ hơn gần nhất</a></li>
+            <li><a href="#sec8.3">8.3 Giá trị nhỏ nhất trong cửa sổ trượt</a></li>
+        </ul>
+    </div>
+
+    <h1 id="intro">Chương 8: Phân tích khấu hao (Amortized Analysis)</h1>
+    <p>
+        Độ phức tạp thời gian của một thuật toán thường dễ phân tích chỉ bằng cách kiểm tra cấu trúc của thuật toán: thuật toán chứa những vòng lặp nào và các vòng lặp được thực hiện bao nhiêu lần. Tuy nhiên, đôi khi một phân tích đơn giản không đưa ra bức tranh thực sự về hiệu quả của thuật toán.
+    </p>
+    <p>
+        <strong>Phân tích khấu hao</strong> (Amortized analysis) có thể được sử dụng để phân tích các thuật toán chứa các thao tác có độ phức tạp thời gian thay đổi. Ý tưởng là ước tính tổng thời gian sử dụng cho tất cả các thao tác như vậy trong quá trình thực thi thuật toán, thay vì tập trung vào từng thao tác riêng lẻ.
+    </p>
+
+    <h2 id="sec8.1">8.1 Phương pháp hai con trỏ (Two pointers method)</h2>
+    <p>
+        Trong phương pháp hai con trỏ, hai con trỏ được sử dụng để duyệt qua các giá trị của mảng. Cả hai con trỏ đều có thể di chuyển theo một hướng duy nhất, điều này đảm bảo rằng thuật toán hoạt động hiệu quả. Tiếp theo, chúng ta thảo luận về hai bài toán có thể giải quyết bằng phương pháp hai con trỏ.
+    </p>
+
+    <h3>Tổng mảng con (Subarray sum)</h3>
+    <p>
+        Là ví dụ đầu tiên, hãy xem xét bài toán nơi chúng ta được cung cấp một mảng gồm \(n\) số nguyên dương và một tổng mục tiêu \(x\), và chúng ta muốn tìm một mảng con có tổng bằng \(x\) hoặc báo cáo rằng không có mảng con nào như vậy.
+    </p>
+    <p>
+        Ví dụ, mảng:
+    </p>
+    <div style="text-align: center; font-family: monospace; font-size: 1.2em; margin: 10px;">
+        1 3 2 5 1 1 2 3
+    </div>
+    <p>
+        chứa một mảng con có tổng là 8:
+    </p>
+    <div style="text-align: center; font-family: monospace; font-size: 1.2em; margin: 10px;">
+        1 3 [2 5 1] 1 2 3
+    </div>
+    <p>
+        Bài toán này có thể được giải quyết trong thời gian \(O(n)\) bằng cách sử dụng phương pháp hai con trỏ. Ý tưởng là duy trì các con trỏ trỏ đến giá trị đầu tiên và cuối cùng của mảng con. Trên mỗi lượt, con trỏ trái di chuyển một bước sang phải, và con trỏ phải di chuyển sang phải chừng nào tổng mảng con hiện tại không vượt quá \(x\). Nếu tổng chính xác là \(x\), một giải pháp đã được tìm thấy.
+    </p>
+    
+    <div class="graphic-box">
+        <svg width="600" height="180" viewBox="0 0 600 180">
+            <defs>
+                <marker id="arrowRed" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+                    <path d="M0,0 L10,5 L0,10 z" fill="#e74c3c" />
+                </marker>
+            </defs>
+
+            <text x="300" y="20" text-anchor="middle" class="title-text">Tìm mảng con có tổng = 8</text>
+
+            <g transform="translate(50, 60)">
+                <rect x="0" y="0" width="50" height="50" class="array-cell"/> <text x="25" y="30" text-anchor="middle">1</text>
+                <rect x="50" y="0" width="50" height="50" class="array-cell"/> <text x="75" y="30" text-anchor="middle">3</text>
+                
+                <rect x="100" y="0" width="50" height="50" class="active-cell"/> <text x="125" y="30" text-anchor="middle" font-weight="bold">2</text>
+                <rect x="150" y="0" width="50" height="50" class="active-cell"/> <text x="175" y="30" text-anchor="middle" font-weight="bold">5</text>
+                <rect x="200" y="0" width="50" height="50" class="active-cell"/> <text x="225" y="30" text-anchor="middle" font-weight="bold">1</text>
+                
+                <rect x="250" y="0" width="50" height="50" class="array-cell"/> <text x="275" y="30" text-anchor="middle">1</text>
+                <rect x="300" y="0" width="50" height="50" class="array-cell"/> <text x="325" y="30" text-anchor="middle">2</text>
+                <rect x="350" y="0" width="50" height="50" class="array-cell"/> <text x="375" y="30" text-anchor="middle">3</text>
+                
+                <text x="125" y="75" text-anchor="middle" fill="#e74c3c" font-weight="bold">L</text>
+                <line x1="125" y1="63" x2="125" y2="53" stroke="#e74c3c" stroke-width="2" marker-end="url(#arrowRed)"/>
+                
+                <text x="225" y="75" text-anchor="middle" fill="#e74c3c" font-weight="bold">R</text>
+                <line x1="225" y1="63" x2="225" y2="53" stroke="#e74c3c" stroke-width="2" marker-end="url(#arrowRed)"/>
+
+                <path d="M110,-10 L110,-20 L240,-20 L240,-10" fill="none" stroke="#2196f3" stroke-width="2"/>
+                <text x="175" y="-30" text-anchor="middle" fill="#2196f3" font-weight="bold">Tổng = 8</text>
+            </g>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 8.1: Con trỏ L và R xác định mảng con [2, 5, 1]</div>
+    </div>
+
+    <p>
+        Thời gian chạy của thuật toán phụ thuộc vào số bước mà con trỏ phải di chuyển. Vì con trỏ phải không bao giờ di chuyển sang trái, nó di chuyển tối đa \(n\) bước. Tương tự, con trỏ trái di chuyển tối đa \(n\) bước. Do đó, cả hai con trỏ di chuyển tổng cộng \(O(n)\) bước, và độ phức tạp thời gian là \(O(n)\).
+    </p>
+
+    <h3>Bài toán 2SUM (2SUM problem)</h3>
+    <p>
+        Một bài toán khác có thể giải quyết bằng phương pháp hai con trỏ là bài toán <strong>2SUM</strong>: cho một mảng \(n\) số và một tổng mục tiêu \(x\), hãy tìm hai giá trị trong mảng có tổng là \(x\) (hoặc báo cáo không tồn tại). Ví dụ, nếu mảng là \([1, 4, 5, 6, 7, 9, 9, 10]\) và \(x=12\), giải pháp là \(5+7=12\).
+    </p>
+    <p>
+        Để giải quyết bài toán, trước tiên chúng ta sắp xếp các giá trị mảng theo thứ tự tăng dần. Sau đó, chúng ta duyệt qua mảng bằng hai con trỏ. Con trỏ trái bắt đầu ở giá trị đầu tiên và di chuyển một bước sang phải mỗi lượt. Con trỏ phải bắt đầu ở giá trị cuối cùng và luôn di chuyển sang trái cho đến khi tổng của giá trị trái và phải tối đa là \(x\). Nếu tổng chính xác là \(x\), một giải pháp đã được tìm thấy.
+    </p>
+    
+    <div class="graphic-box">
+        <svg width="600" height="150" viewBox="0 0 600 150">
+            <defs>
+                <marker id="arrowRed2" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+                    <path d="M0,0 L10,5 L0,10 z" fill="#e74c3c" />
+                </marker>
+            </defs>
+            <text x="300" y="20" text-anchor="middle" class="title-text">Tìm cặp số có tổng = 12</text>
+
+            <g transform="translate(50, 50)">
+                <rect x="0" y="0" width="40" height="40" class="array-cell"/> <text x="20" y="25" text-anchor="middle">1</text>
+                <rect x="40" y="0" width="40" height="40" class="array-cell"/> <text x="60" y="25" text-anchor="middle">4</text>
+                <rect x="80" y="0" width="40" height="40" class="array-cell"/> <text x="100" y="25" text-anchor="middle">5</text>
+                <rect x="120" y="0" width="40" height="40" class="array-cell"/> <text x="140" y="25" text-anchor="middle">6</text>
+                <rect x="160" y="0" width="40" height="40" class="array-cell"/> <text x="180" y="25" text-anchor="middle">7</text>
+                <rect x="200" y="0" width="40" height="40" class="array-cell"/> <text x="220" y="25" text-anchor="middle">9</text>
+                <rect x="240" y="0" width="40" height="40" class="array-cell"/> <text x="260" y="25" text-anchor="middle">9</text>
+                <rect x="280" y="0" width="40" height="40" class="array-cell"/> <text x="300" y="25" text-anchor="middle">10</text>
+                
+                <text x="20" y="70" text-anchor="middle" fill="#e74c3c" font-weight="bold">L</text>
+                <line x1="20" y1="58" x2="20" y2="45" stroke="#e74c3c" stroke-width="2" marker-end="url(#arrowRed2)"/>
+
+                <text x="300" y="70" text-anchor="middle" fill="#e74c3c" font-weight="bold">R</text>
+                <line x1="300" y1="58" x2="300" y2="45" stroke="#e74c3c" stroke-width="2" marker-end="url(#arrowRed2)"/>
+
+                <text x="360" y="25" class="label-text" font-size="14" fill="#333">
+                    <tspan x="360" dy="0">1 + 10 = 11</tspan>
+                    <tspan x="360" dy="20" font-weight="bold" fill="#e74c3c">11 &lt; 12</tspan>
+                    <tspan x="360" dy="20">=> L tiến lên</tspan>
+                </text>
+            </g>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 8.2: Tổng hiện tại nhỏ hơn mục tiêu, cần tăng giá trị</div>
+    </div>
+
+    <p>
+        Thời gian chạy của thuật toán là \(O(n \log n)\), vì trước tiên nó sắp xếp mảng trong thời gian \(O(n \log n)\), và sau đó cả hai con trỏ di chuyển \(O(n)\) bước.
+    </p>
+    <p>
+        Một bài toán khó hơn là bài toán <strong>3SUM</strong> yêu cầu tìm ba giá trị mảng có tổng là \(x\). Sử dụng ý tưởng của thuật toán trên, bài toán này có thể được giải quyết trong thời gian \(O(n^2)\).
+    </p>
+
+    <h2 id="sec8.2">8.2 Phần tử nhỏ hơn gần nhất (Nearest smaller elements)</h2>
+    <p>
+        Phân tích khấu hao thường được sử dụng để ước tính số lượng thao tác được thực hiện trên một cấu trúc dữ liệu. Các thao tác có thể được phân phối không đồng đều sao cho hầu hết các thao tác xảy ra trong một giai đoạn nhất định của thuật toán, nhưng tổng số lượng các thao tác bị giới hạn.
+    </p>
+    <p>
+        Ví dụ, hãy xem xét bài toán tìm cho mỗi phần tử mảng <strong>phần tử nhỏ hơn gần nhất</strong> (nearest smaller element), tức là phần tử nhỏ hơn đầu tiên đứng trước phần tử hiện tại trong mảng.
+    </p>
+    <p>
+        Chúng ta có thể giải quyết bài toán này một cách hiệu quả bằng cách sử dụng cấu trúc ngăn xếp (stack). Chúng ta duyệt qua mảng từ trái sang phải và duy trì một ngăn xếp chứa các phần tử nhỏ hơn gần nhất. Tại mỗi vị trí mảng, chúng ta loại bỏ các phần tử khỏi ngăn xếp cho đến khi phần tử trên đỉnh nhỏ hơn phần tử hiện tại, hoặc ngăn xếp trống. Sau đó, phần tử trên đỉnh là kết quả, và ta đẩy phần tử hiện tại vào ngăn xếp.
+    </p>
+    
+    <div class="graphic-box">
+        <svg width="600" height="250" viewBox="0 0 600 250">
+            <g transform="translate(20, 30)">
+                <text x="0" y="0" class="title-text">Trạng thái xử lý:</text>
+                <text x="0" y="30">Phần tử hiện tại: <tspan font-weight="bold" fill="#2e7d32" font-size="18">2</tspan></text>
+                <text x="0" y="60" class="label-text">Stack (trước đó): [1, 3, 4]</text>
+            </g>
+
+            <g transform="translate(250, 200)">
+                <text x="0" y="30" text-anchor="middle" font-weight="bold">Ngăn xếp (Stack)</text>
+                
+                <rect x="-25" y="-40" width="50" height="40" class="stack-rect" fill="#bbdefb"/>
+                <text x="0" y="-15" text-anchor="middle" font-weight="bold">1</text>
+                <text x="-40" y="-15" text-anchor="end" font-size="12">Đáy</text>
+                
+                <g transform="translate(0, -50)" opacity="0.5">
+                    <rect x="-25" y="-40" width="50" height="40" class="popped-rect"/>
+                    <text x="0" y="-15" text-anchor="middle" fill="#999">3</text>
+                    <text x="40" y="-15" fill="#c62828" font-size="12">xóa (3&gt;2)</text>
+                    <line x1="-30" y1="-20" x2="30" y2="-20" stroke="#999" stroke-width="1"/>
+                </g>
+
+                <g transform="translate(0, -100)" opacity="0.5">
+                    <rect x="-25" y="-40" width="50" height="40" class="popped-rect"/>
+                    <text x="0" y="-15" text-anchor="middle" fill="#999">4</text>
+                    <text x="40" y="-15" fill="#c62828" font-size="12">xóa (4&gt;2)</text>
+                    <line x1="-30" y1="-20" x2="30" y2="-20" stroke="#999" stroke-width="1"/>
+                </g>
+                
+                <text x="100" y="-10" fill="#27ae60" font-weight="bold" font-size="14">Kết quả: 1</text>
+
+                <g transform="translate(0, -100)"> 
+                     <text x="-90" y="-20" text-anchor="end" fill="#2e7d32" font-size="12">Đẩy vào ➜</text>
+                     <rect x="-25" y="-40" width="50" height="40" class="stack-rect" fill="#c8e6c9" stroke="#2e7d32" stroke-dasharray="2,2"/>
+                     <text x="0" y="-15" text-anchor="middle" font-weight="bold" fill="#2e7d32">2</text>
+                </g>
+            </g>
+
+            <g transform="translate(450, 100)">
+                <text x="0" y="0" class="title-text" fill="#1565c0">Kết quả:</text>
+                <text x="0" y="30">Phần tử nhỏ hơn</text>
+                <text x="0" y="50">gần nhất là:</text>
+                <text x="40" y="90" font-size="30" font-weight="bold" fill="#1565c0" text-anchor="middle">1</text>
+                <text x="40" y="110" font-size="12" fill="#666" text-anchor="middle">(Đỉnh stack)</text>
+            </g>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 8.3: Quá trình xử lý ngăn xếp cho phần tử 2</div>
+    </div>
+
+    <p>
+        Hiệu quả của thuật toán này dựa trên thực tế là mỗi phần tử mảng được thêm vào ngăn xếp chính xác một lần và được loại bỏ khỏi ngăn xếp tối đa một lần. Do đó, tổng số thao tác ngăn xếp là \(O(n)\), và thuật toán hoạt động trong thời gian \(O(n)\).
+    </p>
+
+    <h2 id="sec8.3">8.3 Giá trị nhỏ nhất trong cửa sổ trượt (Sliding window minimum)</h2>
+    <p>
+        Một <strong>cửa sổ trượt</strong> (sliding window) là một mảng con có kích thước không đổi di chuyển từ trái sang phải qua mảng. Tại mỗi vị trí cửa sổ, chúng ta muốn tính toán một số thông tin về các phần tử bên trong cửa sổ.
+    </p>
+    <p>
+        Trong bài toán này, nhiệm vụ của chúng ta là tính toán <strong>giá trị nhỏ nhất</strong> bên trong cửa sổ trượt kích thước \(k\).
+    </p>
+
+    <div class="graphic-box">
+        <svg width="700" height="280" viewBox="0 0 700 280">
+            <defs>
+                <marker id="arrowGrey" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+                    <path d="M0,0 L10,5 L0,10 z" fill="#999" />
+                </marker>
+            </defs>
+
+            <g transform="translate(20, 20)">
+                <text x="0" y="0" class="title-text">Bước 1: Cửa sổ [2, 1, 4, 5]</text>
+                
+                <g transform="translate(0, 30)">
+                    <rect x="0" y="0" width="30" height="30" class="array-cell"/><text x="15" y="20" text-anchor="middle">2</text>
+                    <rect x="30" y="0" width="30" height="30" class="array-cell"/><text x="45" y="20" text-anchor="middle">1</text>
+                    <rect x="60" y="0" width="30" height="30" class="array-cell"/><text x="75" y="20" text-anchor="middle">4</text>
+                    <rect x="90" y="0" width="30" height="30" class="array-cell"/><text x="105" y="20" text-anchor="middle">5</text>
+                    <rect x="120" y="0" width="30" height="30" class="array-cell"/><text x="135" y="20" text-anchor="middle">3</text>
+                    <rect x="150" y="0" width="30" height="30" class="array-cell"/><text x="165" y="20" text-anchor="middle">4</text>
+                    
+                    <rect x="-2" y="-2" width="124" height="34" class="window-frame"/>
+                </g>
+
+                <g transform="translate(200, 30)">
+                    <text x="0" y="-10" font-weight="bold" font-size="12">Deque:</text>
+                    <rect x="0" y="0" width="30" height="30" class="deque-elem"/><text x="15" y="20" text-anchor="middle">1</text>
+                    <rect x="35" y="0" width="30" height="30" class="deque-elem"/><text x="50" y="20" text-anchor="middle">4</text>
+                    <rect x="70" y="0" width="30" height="30" class="deque-elem"/><text x="85" y="20" text-anchor="middle">5</text>
+                    
+                    <text x="50" y="55" text-anchor="middle" font-size="12" fill="#8e24aa">Min = 1</text>
+                </g>
+            </g>
+
+            <path d="M300,100 L300,130" stroke="#999" stroke-width="2" marker-end="url(#arrowGrey)"/>
+            <text x="310" y="120" font-size="12" fill="#666">Trượt sang phải, thêm 3</text>
+
+            <g transform="translate(20, 150)">
+                <text x="0" y="0" class="title-text">Bước 2: Cửa sổ 2, [1, 4, 5, 3]</text>
+
+                 <g transform="translate(0, 30)">
+                    <rect x="0" y="0" width="30" height="30" class="array-cell"/><text x="15" y="20" text-anchor="middle">2</text>
+                    <rect x="30" y="0" width="30" height="30" class="array-cell"/><text x="45" y="20" text-anchor="middle">1</text>
+                    <rect x="60" y="0" width="30" height="30" class="array-cell"/><text x="75" y="20" text-anchor="middle">4</text>
+                    <rect x="90" y="0" width="30" height="30" class="array-cell"/><text x="105" y="20" text-anchor="middle">5</text>
+                    <rect x="120" y="0" width="30" height="30" class="array-cell"/><text x="135" y="20" text-anchor="middle" font-weight="bold" fill="#2e7d32">3</text>
+                    <rect x="150" y="0" width="30" height="30" class="array-cell"/><text x="165" y="20" text-anchor="middle">4</text>
+                    
+                    <rect x="28" y="-2" width="124" height="34" class="window-frame" stroke="#2e7d32"/>
+                </g>
+
+                <g transform="translate(200, 30)">
+                    <text x="0" y="-10" font-weight="bold" font-size="12">Deque mới:</text>
+                    
+                    <rect x="0" y="0" width="30" height="30" class="deque-elem"/>
+                    <text x="15" y="20" text-anchor="middle">1</text>
+                    
+                    <rect x="35" y="0" width="30" height="30" fill="#c8e6c9" stroke="#2e7d32" stroke-width="2"/>
+                    <text x="50" y="20" text-anchor="middle" font-weight="bold">3</text>
+
+                    <g transform="translate(80, 0)">
+                        <text x="0" y="15" font-size="12" fill="#c62828">← Đã xóa 4, 5</text>
+                        <text x="0" y="30" font-size="12" fill="#c62828"> (vì > 3)</text>
+                    </g>
+                    
+                    <text x="35" y="55" text-anchor="middle" font-size="12" fill="#8e24aa">Min = 1</text>
+                </g>
+            </g>
+        </svg>
+        <div style="font-style: italic; margin-top: 5px;">Hình 8.4: Cập nhật Deque khi cửa sổ trượt</div>
+    </div>
+
+    <p>
+        Chúng ta có thể giải quyết bài toán này trong thời gian \(O(n)\) bằng cách sử dụng hàng đợi hai đầu (deque). Ý tưởng là duy trì một hàng đợi chứa các giá trị trong cửa sổ theo thứ tự tăng dần. Ngoài ra, chúng ta yêu cầu rằng giá trị ở đầu hàng đợi luôn là giá trị nhỏ nhất trong cửa sổ hiện tại.
+    </p>
+    <p>
+        Khi cửa sổ trượt sang phải, một phần tử mới được thêm vào và một phần tử cũ bị loại bỏ.
+    </p>
+    <ol>
+        <li>Chúng ta loại bỏ các phần tử từ cuối hàng đợi nếu chúng lớn hơn phần tử mới, vì chúng sẽ không bao giờ là giá trị nhỏ nhất trong cửa sổ nữa (phần tử mới nhỏ hơn và tồn tại lâu hơn).</li>
+        <li>Chúng ta thêm phần tử mới vào cuối hàng đợi.</li>
+        <li>Nếu phần tử đầu hàng đợi không còn nằm trong cửa sổ, chúng ta loại bỏ nó.</li>
+    </ol>
+    <p>
+        Phần tử nhỏ nhất trong cửa sổ luôn nằm ở đầu hàng đợi. Vì mỗi phần tử mảng được thêm vào hàng đợi chính xác một lần và loại bỏ khỏi hàng đợi tối đa một lần, thuật toán hoạt động trong thời gian \(O(n)\).
+    </p>
+
+</body>
+</html>
