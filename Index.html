@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPH Reader - Mobile Optimized</title>
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --bg-color: #f1f5f9;
+            --sidebar-bg: #ffffff;
+            --active-item: #f0f9ff;
+            --active-text: #0284c7;
+            --active-border: #0ea5e9;
+            --text-main: #334155;
+            --border-color: #e2e8f0;
+            --c1: #0ea5e9; --c2: #8b5cf6; --c3: #ec4899;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+
+        body {
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+        }
+
+        /* --- MOBILE HEADER --- */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 55px;
+            background: #fff;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            padding: 0 15px;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .menu-toggle {
+            background: var(--active-item);
+            border: 1px solid var(--active-border);
+            color: var(--active-text);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 200;
+        }
+
+        .sidebar-header {
+            padding: 20px 15px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+        }
+        .sidebar-header h2 { font-size: 1.1rem; font-weight: 800; color: #0f172a; letter-spacing: 1px; }
+
+        .home-btn {
+            display: block;
+            margin: 15px 10px;
+            padding: 12px;
+            text-align: center;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #64748b;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .menu-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 40px;
+        }
+
+        .grp-title {
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 20px 15px 8px 15px;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        a.row {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            text-decoration: none;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            border-left: 4px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        a.row:hover { background: #f8fafc; }
+
+        a.row.active {
+            background-color: var(--active-item);
+            color: var(--active-text);
+            border-left-color: var(--active-border);
+            font-weight: 600;
+        }
+
+        .idx { font-family: monospace; width: 35px; opacity: 0.5; font-size: 0.85rem; }
+
+        /* --- MAIN VIEW --- */
+        .main-view {
+            flex: 1;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .frame-box {
+            flex: 1;
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        iframe { width: 100%; height: 100%; border: none; }
+
+        /* Overlay khi mở menu trên mobile */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(2px);
+            z-index: 150;
+        }
+
+        /* --- RESPONSIVE LOGIC --- */
+        @media (max-width: 768px) {
+            .mobile-header { display: flex; }
+            
+            .sidebar {
+                position: fixed;
+                top: 0; bottom: 0; left: 0;
+                transform: translateX(-100%);
+                box-shadow: 10px 0 15px rgba(0,0,0,0.1);
+            }
+
+            .sidebar.open { transform: translateX(0); }
+            .sidebar.open + .overlay { display: block; }
+
+            .main-view {
+                padding: 65px 10px 10px 10px;
+            }
+            
+            .sidebar-header h2 { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-header">
+        <button class="menu-toggle" onclick="toggleMenu()">☰ DANH MỤC</button>
+        <span style="margin-left: auto; font-weight: 700; color: var(--active-text);">CPH</span>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>COMPETITIVE PROGRAMMER'S HANDBOOK</h2>
+            <div class="home-btn" onclick="loadPage(this, '00_intro.html')">
+                ℹ️ Thông tin & Tác giả
+            </div>
+        </div>
+
+        <div class="menu-list">
+            <div class="grp-title" style="color:var(--c1)">I. CƠ BẢN</div>
+            <a onclick="loadPage(this, '01.html')" class="row"><span class="idx">01</span>Giới thiệu</a>
+            <a onclick="loadPage(this, '02.html')" class="row"><span class="idx">02</span>Độ phức tạp thời gian</a>
+            <a onclick="loadPage(this, '03.html')" class="row"><span class="idx">03</span>Sắp xếp</a>
+            <a onclick="loadPage(this, '04.html')" class="row"><span class="idx">04</span>Cấu trúc dữ liệu</a>
+            <a onclick="loadPage(this, '05.html')" class="row"><span class="idx">05</span>Tìm kiếm toàn bộ</a>
+            <a onclick="loadPage(this, '06.html')" class="row"><span class="idx">06</span>Thuật toán tham lam</a>
+            <a onclick="loadPage(this, '07.html')" class="row"><span class="idx">07</span>Quy hoạch động</a>
+            <a onclick="loadPage(this, '08.html')" class="row"><span class="idx">08</span>Thuật toán khấu hao</a>
+            <a onclick="loadPage(this, '09.html')" class="row"><span class="idx">09</span>Truy vấn đoạn</a>
+            <a onclick="loadPage(this, '10.html')" class="row"><span class="idx">10</span>Thao tác bit</a>
+
+            <div class="grp-title" style="color:var(--c2)">II. ĐỒ THỊ</div>
+            <a onclick="loadPage(this, '11.html')" class="row"><span class="idx">11</span>Cơ bản về đồ thị</a>
+            <a onclick="loadPage(this, '12.html')" class="row"><span class="idx">12</span>Duyệt đồ thị</a>
+            <a onclick="loadPage(this, '13.html')" class="row"><span class="idx">13</span>Đường đi ngắn nhất</a>
+            <a onclick="loadPage(this, '14.html')" class="row"><span class="idx">14</span>Đồ thị có hướng không chu trình</a>
+            <a onclick="loadPage(this, '15.html')" class="row"><span class="idx">15</span>Đường đi Euler và Hamiltonian</a>
+            <a onclick="loadPage(this, '16.html')" class="row"><span class="idx">16</span>Luồng cực đại</a>
+            <a onclick="loadPage(this, '17.html')" class="row"><span class="idx">17</span>Cây bao trùm nhỏ nhất</a>
+            <a onclick="loadPage(this, '18.html')" class="row"><span class="idx">18</span>Thuật toán cây nâng cao</a>
+            <a onclick="loadPage(this, '19.html')" class="row"><span class="idx">19</span>Đồ thị nâng cao</a>
+
+            <div class="grp-title" style="color:var(--c3)">III. NÂNG CAO</div>
+            <a onclick="loadPage(this, '20.html')" class="row"><span class="idx">20</span>Lý thuyết số</a>
+            <a onclick="loadPage(this, '21.html')" class="row"><span class="idx">21</span>Tổ hợp</a>
+            <a onclick="loadPage(this, '22.html')" class="row"><span class="idx">22</span>Ma trận</a>
+            <a onclick="loadPage(this, '23.html')" class="row"><span class="idx">23</span>Xác suất</a>
+            <a onclick="loadPage(this, '24.html')" class="row"><span class="idx">24</span>Lý thuyết trò chơi</a>
+            <a onclick="loadPage(this, '25.html')" class="row"><span class="idx">25</span>Xử lý chuỗi</a>
+            <a onclick="loadPage(this, '26.html')" class="row"><span class="idx">26</span>Thuật toán căn bậc hai</a>
+            <a onclick="loadPage(this, '27.html')" class="row"><span class="idx">27</span>Cây phân đoạn nâng cao</a>
+            <a onclick="loadPage(this, '28.html')" class="row"><span class="idx">28</span>Hình học</a>
+            <a onclick="loadPage(this, '29.html')" class="row"><span class="idx">29</span>Thuật toán quét đường</a>
+            <a onclick="loadPage(this, '30.html')" class="row"><span class="idx">30</span>Các chủ đề bổ sung</a>
+        </div>
+    </div>
+
+    <div class="overlay" onclick="toggleMenu()"></div>
+
+    <div class="main-view">
+        <div class="frame-box">
+            <iframe id="contentFrame" src="CAC_CHUONG/00_intro.html"></iframe>
+        </div>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        function loadPage(el, file) {
+            document.getElementById('contentFrame').src = 'CAC_CHUONG/' + file;
+            
+            // Xử lý Active state
+            document.querySelectorAll('.row, .home-btn').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+
+            // Đóng menu trên mobile sau khi chọn
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('open');
+            }
+        }
+    </script>
+</body>
+</html>
